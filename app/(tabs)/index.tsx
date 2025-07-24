@@ -67,8 +67,13 @@ export default function TemplatesScreen() {
   };
 
   const createTemplate = async () => {
-    if (!newTemplate.name || !newTemplate.description || !newTemplate.fields?.length) {
-      Alert.alert('Error', 'Please fill in all fields and add at least one template field');
+    if (!newTemplate.name?.trim() || !newTemplate.description?.trim()) {
+      Alert.alert('Error', 'Please fill in template name and description');
+      return;
+    }
+
+    if (!newTemplate.fields || newTemplate.fields.length === 0) {
+      Alert.alert('Error', 'Please add at least one template field');
       return;
     }
 
