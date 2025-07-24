@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   },
   viewButtonText: {
     color: 'white',
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   editButton: {
@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     color: 'white',
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   deleteButton: {
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   modalOverlay: {
