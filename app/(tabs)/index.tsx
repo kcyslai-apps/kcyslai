@@ -567,7 +567,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     elevation: 4,
   },
   buttonText: {
@@ -584,7 +583,6 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
     borderRadius: 20,
-    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
     elevation: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
@@ -610,7 +608,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
-    boxShadow: '0 2px 4px rgba(0, 122, 255, 0.3)',
     elevation: 3,
   },
   useButtonText: {
@@ -623,7 +620,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
-    boxShadow: '0 2px 4px rgba(52, 199, 89, 0.3)',
     elevation: 3,
   },
   editButtonText: {
@@ -636,7 +632,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
-    boxShadow: '0 2px 4px rgba(255, 107, 107, 0.3)',
     elevation: 3,
   },
   deleteButtonText: {
@@ -727,7 +722,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
     fontSize: 16,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     elevation: 4,
     color: '#000000',
   },
@@ -747,7 +741,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     elevation: 4,
     color: '#000000',
   },
@@ -773,7 +766,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     elevation: 4,
   },
   dropdownText: {
@@ -795,7 +787,6 @@ const styles = StyleSheet.create({
     borderColor: '#e9ecef',
     borderRadius: 16,
     marginTop: 4,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     elevation: 8,
     zIndex: 1001,
   },
@@ -823,7 +814,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     elevation: 4,
   },
   addFieldText: {
@@ -839,7 +829,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: 16,
     marginBottom: 12,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     elevation: 4,
   },
   fieldDetails: {
