@@ -32,6 +32,7 @@ export default function TemplatesScreen() {
   const [showFieldModal, setShowFieldModal] = useState(false);
   const [currentField, setCurrentField] = useState<Partial<TemplateField>>({});
   const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null);
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
 
@@ -87,6 +88,7 @@ export default function TemplatesScreen() {
     setNewTemplateName('');
     setNewTemplateDescription('');
     setTemplateFields([]);
+    setEditingTemplateId(null);
     setShowTemplateModal(true);
   };
 
@@ -152,23 +154,57 @@ export default function TemplatesScreen() {
       return;
     }
 
-    const newTemplate: Template = {
-      id: Date.now().toString(),
-      name: newTemplateName.trim(),
-      description: newTemplateDescription.trim(),
-      fields: templateFields,
-      createdAt: new Date()
-    };
+    let updatedTemplates;
+    if (editingTemplateId) {
+      // Edit existing template
+      updatedTemplates = templates.map(template => 
+        template.id === editingTemplateId 
+          ? {
+              ...template,
+              name: newTemplateName.trim(),
+              description: newTemplateDescription.trim(),
+              fields: templateFields,
+            }
+          : template
+      );
+      Alert.alert('Success', 'Template updated successfully!');
+    } else {
+      // Create new template
+      const newTemplate: Template = {
+        id: Date.now().toString(),
+        name: newTemplateName.trim(),
+        description: newTemplateDescription.trim(),
+        fields: templateFields,
+        createdAt: new Date()
+      };
+      updatedTemplates = [...templates, newTemplate];
+      Alert.alert('Success', 'Template created successfully!');
+    }
 
-    const updatedTemplates = [...templates, newTemplate];
     setTemplates(updatedTemplates);
     saveTemplates(updatedTemplates);
 
     setNewTemplateName('');
     setNewTemplateDescription('');
     setTemplateFields([]);
+    setEditingTemplateId(null);
     setShowTemplateModal(false);
-    Alert.alert('Success', 'Template created successfully!');
+  };
+
+  const viewTemplate = (template: Template) => {
+    Alert.alert(
+      template.name,
+      `Description: ${template.description || 'No description'}\n\nFields (${template.fields.length}):\n${template.fields.map(f => `• ${f.name} (${fieldTypes.find(t => t.value === f.type)?.label})`).join('\n')}`,
+      [{ text: 'Close', style: 'cancel' }]
+    );
+  };
+
+  const editTemplate = (template: Template) => {
+    setNewTemplateName(template.name);
+    setNewTemplateDescription(template.description);
+    setTemplateFields([...template.fields]);
+    setEditingTemplateId(template.id);
+    setShowTemplateModal(true);
   };
 
   const deleteTemplate = (templateId: string) => {
@@ -217,12 +253,26 @@ export default function TemplatesScreen() {
           Created: {item.createdAt.toLocaleDateString()}
         </Text>
       </View>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => deleteTemplate(item.id)}
-      >
-        <Text style={styles.deleteButtonText}>Delete</Text>
-      </TouchableOpacity>
+      <View style={styles.templateActions}>
+        <TouchableOpacity
+          style={styles.viewButton}
+          onPress={() => viewTemplate(item)}
+        >
+          <Text style={styles.viewButtonText}>👁️ View</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => editTemplate(item)}
+        >
+          <Text style={styles.editButtonText}>✏️ Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => deleteTemplate(item.id)}
+        >
+          <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -281,7 +331,9 @@ export default function TemplatesScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.largeModalContent}>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.modalTitle}>Create Template</Text>
+              <Text style={styles.modalTitle}>
+                {editingTemplateId ? 'Edit Template' : 'Create Template'}
+              </Text>
               
               <TextInput
                 style={styles.input}
@@ -322,6 +374,7 @@ export default function TemplatesScreen() {
                     setNewTemplateName('');
                     setNewTemplateDescription('');
                     setTemplateFields([]);
+                    setEditingTemplateId(null);
                     setShowTemplateModal(false);
                   }}
                 >
@@ -331,7 +384,9 @@ export default function TemplatesScreen() {
                   style={styles.saveButton}
                   onPress={saveTemplate}
                 >
-                  <Text style={styles.saveButtonText}>Save Template</Text>
+                  <Text style={styles.saveButtonText}>
+                    {editingTemplateId ? 'Update Template' : 'Save Template'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -479,60 +534,120 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   templateButton: {
-    backgroundColor: '#48bb78',
-    paddingVertical: 15,
-    borderRadius: 8,
+    backgroundColor: '#68d391',
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: 'center',
+    shadowColor: '#68d391',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: '#9ae6b4',
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   templatesList: {
     flex: 1,
   },
   templateItem: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     backgroundColor: 'white',
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 8,
+    padding: 20,
+    marginBottom: 15,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
   },
   templateInfo: {
-    flex: 1,
+    marginBottom: 15,
   },
   templateName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8,
     color: '#2d3748',
   },
   templateDescription: {
     fontSize: 14,
-    marginBottom: 5,
+    marginBottom: 8,
     color: '#4a5568',
+    fontStyle: 'italic',
   },
   templateFields: {
-    fontSize: 12,
+    fontSize: 13,
     marginBottom: 5,
     color: '#718096',
+    fontWeight: '600',
   },
   templateDate: {
     fontSize: 12,
-    color: '#718096',
+    color: '#a0aec0',
+  },
+  templateActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  viewButton: {
+    flex: 1,
+    backgroundColor: '#63b3ed',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#63b3ed',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  viewButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  editButton: {
+    flex: 1,
+    backgroundColor: '#f6ad55',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#f6ad55',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  editButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   deleteButton: {
-    backgroundColor: '#e53e3e',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 5,
-    justifyContent: 'center',
+    flex: 1,
+    backgroundColor: '#fc8181',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#fc8181',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   deleteButtonText: {
     color: 'white',
