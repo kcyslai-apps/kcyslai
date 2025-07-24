@@ -1,240 +1,244 @@
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList } from 'react-native';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
-interface ScannedItem {
+interface Template {
   id: string;
-  data: string;
-  type: string;
-  timestamp: string;
+  name: string;
+  description: string;
+  fields: TemplateField[];
+  createdAt: string;
 }
 
-export default function TabOneScreen() {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [scanned, setScanned] = useState(false);
-  const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
-  const [isScanning, setIsScanning] = useState(false);
+interface TemplateField {
+  id: string;
+  name: string;
+  type: 'text' | 'number' | 'date' | 'select';
+  required: boolean;
+  options?: string[]; // for select type
+}
+
+export default function TemplatesScreen() {
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newTemplate, setNewTemplate] = useState<Partial<Template>>({
+    name: '',
+    description: '',
+    fields: []
+  });
+  const [newField, setNewField] = useState<Partial<TemplateField>>({
+    name: '',
+    type: 'text',
+    required: false
+  });
 
   useEffect(() => {
-    const getBarCodeScannerPermissions = async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    };
-
-    getBarCodeScannerPermissions();
-    loadScannedData();
+    loadTemplates();
   }, []);
 
-  const loadScannedData = async () => {
+  const loadTemplates = async () => {
     try {
-      const fileUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
+      const fileUri = FileSystem.documentDirectory + 'templates.json';
       const fileExists = await FileSystem.getInfoAsync(fileUri);
       
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(fileUri);
-        const lines = content.split('\n').filter(line => line.trim());
-        const items: ScannedItem[] = [];
-        
-        // Skip header line if it exists
-        for (let i = 1; i < lines.length; i++) {
-          const [id, data, type, timestamp] = lines[i].split(',');
-          if (id && data && type && timestamp) {
-            items.push({ id, data, type, timestamp });
-          }
-        }
-        setScannedItems(items);
+        const templatesData = JSON.parse(content);
+        setTemplates(templatesData);
       }
     } catch (error) {
-      console.error('Error loading scanned data:', error);
+      console.error('Error loading templates:', error);
     }
   };
 
-  const saveToCSV = async (newItem: ScannedItem) => {
+  const saveTemplates = async (templatesData: Template[]) => {
     try {
-      const fileUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
-      const fileExists = await FileSystem.getInfoAsync(fileUri);
-      
-      let csvContent = '';
-      
-      if (!fileExists.exists) {
-        // Create header if file doesn't exist
-        csvContent = 'ID,Data,Type,Timestamp\n';
-      } else {
-        csvContent = await FileSystem.readAsStringAsync(fileUri);
-      }
-      
-      // Append new item
-      csvContent += `${newItem.id},${newItem.data},${newItem.type},${newItem.timestamp}\n`;
-      
-      await FileSystem.writeAsStringAsync(fileUri, csvContent);
+      const fileUri = FileSystem.documentDirectory + 'templates.json';
+      await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(templatesData, null, 2));
     } catch (error) {
-      console.error('Error saving to CSV:', error);
-      Alert.alert('Error', 'Failed to save barcode data');
+      console.error('Error saving templates:', error);
+      Alert.alert('Error', 'Failed to save templates');
     }
   };
 
-  const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
-    setScanned(true);
-    setIsScanning(false);
-    
-    const newItem: ScannedItem = {
+  const createTemplate = async () => {
+    if (!newTemplate.name || !newTemplate.description || !newTemplate.fields?.length) {
+      Alert.alert('Error', 'Please fill in all fields and add at least one template field');
+      return;
+    }
+
+    const template: Template = {
       id: Date.now().toString(),
-      data,
-      type,
-      timestamp: new Date().toISOString()
+      name: newTemplate.name,
+      description: newTemplate.description,
+      fields: newTemplate.fields as TemplateField[],
+      createdAt: new Date().toISOString()
     };
+
+    const updatedTemplates = [...templates, template];
+    setTemplates(updatedTemplates);
+    await saveTemplates(updatedTemplates);
     
-    await saveToCSV(newItem);
-    setScannedItems(prev => [newItem, ...prev]);
-    
-    Alert.alert(
-      'Barcode Scanned',
-      `Type: ${type}\nData: ${data}`,
-      [{ text: 'OK', onPress: () => setScanned(false) }]
-    );
+    setNewTemplate({ name: '', description: '', fields: [] });
+    setShowCreateModal(false);
+    Alert.alert('Success', 'Template created successfully');
   };
 
-  const shareCSVFile = async () => {
-    try {
-      const fileUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
-      const fileExists = await FileSystem.getInfoAsync(fileUri);
-      
-      if (!fileExists.exists) {
-        Alert.alert('No Data', 'No scanned data to share');
-        return;
-      }
-      
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (!isAvailable) {
-        Alert.alert('Error', 'Sharing is not available on this device');
-        return;
-      }
-      
-      await Sharing.shareAsync(fileUri, {
-        mimeType: 'text/csv',
-        dialogTitle: 'Share Scanned Barcodes'
-      });
-    } catch (error) {
-      console.error('Error sharing file:', error);
-      Alert.alert('Error', 'Failed to share file');
+  const addField = () => {
+    if (!newField.name) {
+      Alert.alert('Error', 'Please enter a field name');
+      return;
     }
+
+    const field: TemplateField = {
+      id: Date.now().toString(),
+      name: newField.name,
+      type: newField.type || 'text',
+      required: newField.required || false,
+      options: newField.options
+    };
+
+    setNewTemplate(prev => ({
+      ...prev,
+      fields: [...(prev.fields || []), field]
+    }));
+
+    setNewField({ name: '', type: 'text', required: false });
   };
 
-  const clearData = async () => {
+  const removeField = (fieldId: string) => {
+    setNewTemplate(prev => ({
+      ...prev,
+      fields: prev.fields?.filter(field => field.id !== fieldId) || []
+    }));
+  };
+
+  const deleteTemplate = async (templateId: string) => {
     Alert.alert(
-      'Clear Data',
-      'Are you sure you want to clear all scanned data?',
+      'Delete Template',
+      'Are you sure you want to delete this template?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Clear',
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            try {
-              const fileUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
-              await FileSystem.deleteAsync(fileUri, { idempotent: true });
-              setScannedItems([]);
-            } catch (error) {
-              console.error('Error clearing data:', error);
-            }
+            const updatedTemplates = templates.filter(t => t.id !== templateId);
+            setTemplates(updatedTemplates);
+            await saveTemplates(updatedTemplates);
           }
         }
       ]
     );
   };
 
-  if (hasPermission === null) {
-    return (
-      <ThemedView style={styles.container}>
-        <ThemedText>Requesting camera permission...</ThemedText>
-      </ThemedView>
-    );
-  }
-
-  if (hasPermission === false) {
-    return (
-      <ThemedView style={styles.container}>
-        <ThemedText>No access to camera</ThemedText>
-      </ThemedView>
-    );
-  }
+  const renderTemplate = ({ item }: { item: Template }) => (
+    <View style={styles.templateItem}>
+      <View style={styles.templateHeader}>
+        <ThemedText style={styles.templateName}>{item.name}</ThemedText>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => deleteTemplate(item.id)}
+        >
+          <Text style={styles.deleteButtonText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+      <ThemedText style={styles.templateDescription}>{item.description}</ThemedText>
+      <ThemedText style={styles.templateFields}>
+        Fields: {item.fields.map(f => f.name).join(', ')}
+      </ThemedText>
+      <ThemedText style={styles.templateDate}>
+        Created: {new Date(item.createdAt).toLocaleDateString()}
+      </ThemedText>
+    </View>
+  );
 
   return (
     <ThemedView style={styles.container}>
-      {isScanning ? (
-        <View style={styles.scannerContainer}>
-          <BarCodeScanner
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-            style={styles.scanner}
-          />
-          <View style={styles.overlay}>
-            <View style={styles.scanArea} />
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => {
-                setIsScanning(false);
-                setScanned(false);
-              }}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+      <View style={styles.header}>
+        <ThemedText type="title" style={styles.title}>Templates</ThemedText>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={() => setShowCreateModal(true)}
+        >
+          <Text style={styles.buttonText}>Create Template</Text>
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={templates}
+        keyExtractor={(item) => item.id}
+        renderItem={renderTemplate}
+        style={styles.list}
+        ListEmptyComponent={
+          <ThemedText style={styles.emptyText}>No templates created yet</ThemedText>
+        }
+      />
+
+      <Modal
+        visible={showCreateModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowCreateModal(false)}>
+              <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.mainContent}>
-          <ThemedText type="title" style={styles.title}>Barcode Scanner</ThemedText>
-          
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.scanButton}
-              onPress={() => setIsScanning(true)}
-            >
-              <Text style={styles.buttonText}>Start Scanning</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.shareButton}
-              onPress={shareCSVFile}
-            >
-              <Text style={styles.buttonText}>Share CSV File</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={clearData}
-            >
-              <Text style={styles.buttonText}>Clear Data</Text>
+            <ThemedText type="subtitle">Create Template</ThemedText>
+            <TouchableOpacity onPress={createTemplate}>
+              <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>
 
-          <ThemedText type="subtitle" style={styles.historyTitle}>
-            Scanned Items ({scannedItems.length})
-          </ThemedText>
-          
-          <FlatList
-            data={scannedItems}
-            keyExtractor={(item) => item.id}
-            style={styles.list}
-            renderItem={({ item }) => (
-              <View style={styles.listItem}>
-                <ThemedText style={styles.itemData}>{item.data}</ThemedText>
-                <ThemedText style={styles.itemType}>{item.type}</ThemedText>
-                <ThemedText style={styles.itemTimestamp}>
-                  {new Date(item.timestamp).toLocaleString()}
-                </ThemedText>
-              </View>
-            )}
-            ListEmptyComponent={
-              <ThemedText style={styles.emptyText}>No items scanned yet</ThemedText>
-            }
-          />
+          <View style={styles.modalContent}>
+            <TextInput
+              style={styles.input}
+              placeholder="Template Name"
+              value={newTemplate.name}
+              onChangeText={(text) => setNewTemplate(prev => ({ ...prev, name: text }))}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Template Description"
+              value={newTemplate.description}
+              onChangeText={(text) => setNewTemplate(prev => ({ ...prev, description: text }))}
+              multiline
+            />
+
+            <ThemedText style={styles.sectionTitle}>Fields</ThemedText>
+            
+            <View style={styles.fieldInputContainer}>
+              <TextInput
+                style={styles.fieldInput}
+                placeholder="Field Name"
+                value={newField.name}
+                onChangeText={(text) => setNewField(prev => ({ ...prev, name: text }))}
+              />
+              <TouchableOpacity style={styles.addFieldButton} onPress={addField}>
+                <Text style={styles.addFieldText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={newTemplate.fields}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.fieldItem}>
+                  <Text style={styles.fieldName}>{item.name} ({item.type})</Text>
+                  <TouchableOpacity onPress={() => removeField(item.id)}>
+                    <Text style={styles.removeFieldText}>Remove</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+          </View>
         </View>
-      )}
+      </Modal>
     </ThemedView>
   );
 }
@@ -242,99 +246,67 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  scannerContainer: {
-    flex: 1,
-  },
-  scanner: {
-    flex: 1,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scanArea: {
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: 'white',
-    backgroundColor: 'transparent',
-  },
-  cancelButton: {
-    position: 'absolute',
-    bottom: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  cancelButtonText: {
-    color: 'black',
-    fontWeight: 'bold',
-  },
-  mainContent: {
-    flex: 1,
     padding: 20,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
-    textAlign: 'center',
-    marginBottom: 30,
+    flex: 1,
   },
-  buttonContainer: {
-    gap: 15,
-    marginBottom: 30,
-  },
-  scanButton: {
+  createButton: {
     backgroundColor: '#007AFF',
-    paddingVertical: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
     borderRadius: 8,
-    alignItems: 'center',
-  },
-  shareButton: {
-    backgroundColor: '#34C759',
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  clearButton: {
-    backgroundColor: '#FF3B30',
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
     fontWeight: 'bold',
-  },
-  historyTitle: {
-    marginBottom: 15,
   },
   list: {
     flex: 1,
   },
-  listItem: {
+  templateItem: {
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,
   },
-  itemData: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  templateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 5,
   },
-  itemType: {
+  templateName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  deleteButton: {
+    backgroundColor: '#FF3B30',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 12,
+  },
+  templateDescription: {
     fontSize: 14,
+    marginBottom: 5,
+  },
+  templateFields: {
+    fontSize: 12,
     opacity: 0.7,
     marginBottom: 5,
   },
-  itemTimestamp: {
+  templateDate: {
     fontSize: 12,
     opacity: 0.5,
   },
@@ -342,5 +314,81 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 50,
     opacity: 0.5,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  cancelText: {
+    color: '#007AFF',
+    fontSize: 16,
+  },
+  saveText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  fieldInputContainer: {
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
+  fieldInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    marginRight: 10,
+  },
+  addFieldButton: {
+    backgroundColor: '#34C759',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  addFieldText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  fieldItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  fieldName: {
+    flex: 1,
+  },
+  removeFieldText: {
+    color: '#FF3B30',
   },
 });

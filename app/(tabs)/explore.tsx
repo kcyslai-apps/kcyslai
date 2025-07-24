@@ -7,109 +7,85 @@ import * as DocumentPicker from 'expo-document-picker';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
-interface ScannedItem {
-  id: string;
-  data: string;
+interface DataFile {
+  name: string;
+  uri: string;
+  size: number;
+  modificationTime: number;
   type: string;
-  timestamp: string;
 }
 
-export default function DataManagement() {
-  const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
-  const [stats, setStats] = useState({ total: 0, types: {} as Record<string, number> });
+export default function DataFilesScreen() {
+  const [dataFiles, setDataFiles] = useState<DataFile[]>([]);
+  const [totalSize, setTotalSize] = useState(0);
 
   useEffect(() => {
-    loadScannedData();
+    loadDataFiles();
   }, []);
 
-  const loadScannedData = async () => {
+  const loadDataFiles = async () => {
     try {
-      const fileUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
-      const fileExists = await FileSystem.getInfoAsync(fileUri);
-      
-      if (fileExists.exists) {
-        const content = await FileSystem.readAsStringAsync(fileUri);
-        const lines = content.split('\n').filter(line => line.trim());
-        const items: ScannedItem[] = [];
-        const typeCount: Record<string, number> = {};
+      const documentsDir = FileSystem.documentDirectory;
+      if (!documentsDir) return;
+
+      const files = await FileSystem.readDirectoryAsync(documentsDir);
+      const dataFileList: DataFile[] = [];
+      let size = 0;
+
+      for (const fileName of files) {
+        const fileUri = documentsDir + fileName;
+        const fileInfo = await FileSystem.getInfoAsync(fileUri);
         
-        for (let i = 1; i < lines.length; i++) {
-          const [id, data, type, timestamp] = lines[i].split(',');
-          if (id && data && type && timestamp) {
-            items.push({ id, data, type, timestamp });
-            typeCount[type] = (typeCount[type] || 0) + 1;
-          }
+        if (fileInfo.exists && !fileInfo.isDirectory) {
+          const fileType = fileName.split('.').pop()?.toLowerCase() || 'unknown';
+          dataFileList.push({
+            name: fileName,
+            uri: fileUri,
+            size: fileInfo.size || 0,
+            modificationTime: fileInfo.modificationTime || 0,
+            type: fileType
+          });
+          size += fileInfo.size || 0;
         }
-        
-        setScannedItems(items);
-        setStats({ total: items.length, types: typeCount });
       }
+
+      dataFileList.sort((a, b) => b.modificationTime - a.modificationTime);
+      setDataFiles(dataFileList);
+      setTotalSize(size);
     } catch (error) {
-      console.error('Error loading scanned data:', error);
+      console.error('Error loading data files:', error);
     }
   };
 
-  const exportData = async (format: 'csv' | 'json') => {
-    try {
-      const fileName = `scanned_barcodes.${format}`;
-      const fileUri = FileSystem.documentDirectory + fileName;
-      
-      if (format === 'csv') {
-        const csvFileUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
-        const fileExists = await FileSystem.getInfoAsync(csvFileUri);
-        
-        if (!fileExists.exists) {
-          Alert.alert('No Data', 'No data to export');
-          return;
-        }
-        
-        await Sharing.shareAsync(csvFileUri, {
-          mimeType: 'text/csv',
-          dialogTitle: 'Export CSV Data'
-        });
-      } else {
-        const jsonData = JSON.stringify(scannedItems, null, 2);
-        await FileSystem.writeAsStringAsync(fileUri, jsonData);
-        
-        await Sharing.shareAsync(fileUri, {
-          mimeType: 'application/json',
-          dialogTitle: 'Export JSON Data'
-        });
-      }
-    } catch (error) {
-      console.error('Error exporting data:', error);
-      Alert.alert('Error', 'Failed to export data');
-    }
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const importData = async () => {
+  const shareFile = async (file: DataFile) => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'text/csv',
-        copyToCacheDirectory: true,
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert('Error', 'Sharing is not available on this device');
+        return;
+      }
+      
+      await Sharing.shareAsync(file.uri, {
+        dialogTitle: `Share ${file.name}`
       });
-
-      if (!result.canceled && result.assets[0]) {
-        const fileUri = result.assets[0].uri;
-        const content = await FileSystem.readAsStringAsync(fileUri);
-        
-        // Save imported data
-        const targetUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
-        await FileSystem.writeAsStringAsync(targetUri, content);
-        
-        Alert.alert('Success', 'Data imported successfully');
-        loadScannedData();
-      }
     } catch (error) {
-      console.error('Error importing data:', error);
-      Alert.alert('Error', 'Failed to import data');
+      console.error('Error sharing file:', error);
+      Alert.alert('Error', 'Failed to share file');
     }
   };
 
-  const deleteItem = async (itemId: string) => {
+  const deleteFile = async (file: DataFile) => {
     Alert.alert(
-      'Delete Item',
-      'Are you sure you want to delete this item?',
+      'Delete File',
+      `Are you sure you want to delete ${file.name}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -117,21 +93,11 @@ export default function DataManagement() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const updatedItems = scannedItems.filter(item => item.id !== itemId);
-              
-              // Recreate CSV file
-              let csvContent = 'ID,Data,Type,Timestamp\n';
-              updatedItems.forEach(item => {
-                csvContent += `${item.id},${item.data},${item.type},${item.timestamp}\n`;
-              });
-              
-              const fileUri = FileSystem.documentDirectory + 'scanned_barcodes.csv';
-              await FileSystem.writeAsStringAsync(fileUri, csvContent);
-              
-              loadScannedData();
+              await FileSystem.deleteAsync(file.uri);
+              loadDataFiles(); // Refresh the list
             } catch (error) {
-              console.error('Error deleting item:', error);
-              Alert.alert('Error', 'Failed to delete item');
+              console.error('Error deleting file:', error);
+              Alert.alert('Error', 'Failed to delete file');
             }
           }
         }
@@ -139,68 +105,166 @@ export default function DataManagement() {
     );
   };
 
+  const importFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*',
+        copyToCacheDirectory: false
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        const documentsDir = FileSystem.documentDirectory;
+        if (!documentsDir) return;
+
+        const newFileUri = documentsDir + asset.name;
+        await FileSystem.copyAsync({
+          from: asset.uri,
+          to: newFileUri
+        });
+
+        Alert.alert('Success', `${asset.name} has been imported successfully`);
+        loadDataFiles(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error importing file:', error);
+      Alert.alert('Error', 'Failed to import file');
+    }
+  };
+
+  const exportAllFiles = async () => {
+    if (dataFiles.length === 0) {
+      Alert.alert('No Files', 'No data files to export');
+      return;
+    }
+
+    try {
+      const fileList = dataFiles.map(file => ({
+        name: file.name,
+        size: formatFileSize(file.size),
+        type: file.type,
+        lastModified: new Date(file.modificationTime).toISOString()
+      }));
+
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        totalFiles: dataFiles.length,
+        totalSize: formatFileSize(totalSize),
+        files: fileList
+      };
+
+      const exportUri = FileSystem.documentDirectory + 'data_files_export.json';
+      await FileSystem.writeAsStringAsync(exportUri, JSON.stringify(exportData, null, 2));
+
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(exportUri, {
+          mimeType: 'application/json',
+          dialogTitle: 'Export Data Files List'
+        });
+      } else {
+        Alert.alert('Success', 'Export file created successfully');
+      }
+    } catch (error) {
+      console.error('Error exporting files list:', error);
+      Alert.alert('Error', 'Failed to export files list');
+    }
+  };
+
+  const clearAllFiles = async () => {
+    Alert.alert(
+      'Clear All Files',
+      'Are you sure you want to delete all data files? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              for (const file of dataFiles) {
+                await FileSystem.deleteAsync(file.uri, { idempotent: true });
+              }
+              loadDataFiles(); // Refresh the list
+              Alert.alert('Success', 'All data files have been deleted');
+            } catch (error) {
+              console.error('Error clearing files:', error);
+              Alert.alert('Error', 'Failed to delete some files');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const renderFile = ({ item }: { item: DataFile }) => (
+    <ThemedView style={styles.fileItem}>
+      <ThemedView style={styles.fileInfo}>
+        <ThemedText style={styles.fileName}>{item.name}</ThemedText>
+        <ThemedText style={styles.fileDetails}>
+          {formatFileSize(item.size)} • {item.type.toUpperCase()}
+        </ThemedText>
+        <ThemedText style={styles.fileDate}>
+          Modified: {new Date(item.modificationTime).toLocaleString()}
+        </ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.fileActions}>
+        <TouchableOpacity
+          style={styles.shareButton}
+          onPress={() => shareFile(item)}
+        >
+          <Text style={styles.actionButtonText}>Share</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => deleteFile(item)}
+        >
+          <Text style={styles.actionButtonText}>Delete</Text>
+        </TouchableOpacity>
+      </ThemedView>
+    </ThemedView>
+  );
+
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Data Management</ThemedText>
+      <ThemedText type="title" style={styles.title}>Data Files</ThemedText>
       
       <ThemedView style={styles.statsContainer}>
-        <ThemedText type="subtitle">Statistics</ThemedText>
-        <ThemedText>Total Items: {stats.total}</ThemedText>
-        {Object.entries(stats.types).map(([type, count]) => (
-          <ThemedText key={type}>
-            {type}: {count} items
-          </ThemedText>
-        ))}
+        <ThemedText type="subtitle">Storage Overview</ThemedText>
+        <ThemedText>Total Files: {dataFiles.length}</ThemedText>
+        <ThemedText>Total Size: {formatFileSize(totalSize)}</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.actionContainer}>
         <TouchableOpacity
-          style={styles.exportButton}
-          onPress={() => exportData('csv')}
+          style={styles.primaryButton}
+          onPress={importFile}
         >
-          <Text style={styles.buttonText}>Export CSV</Text>
+          <Text style={styles.buttonText}>Import File</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={styles.exportButton}
-          onPress={() => exportData('json')}
+          style={styles.secondaryButton}
+          onPress={exportAllFiles}
         >
-          <Text style={styles.buttonText}>Export JSON</Text>
+          <Text style={styles.buttonText}>Export File List</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={styles.importButton}
-          onPress={importData}
+          style={styles.dangerButton}
+          onPress={clearAllFiles}
         >
-          <Text style={styles.buttonText}>Import CSV</Text>
+          <Text style={styles.buttonText}>Clear All Files</Text>
         </TouchableOpacity>
       </ThemedView>
 
-      <ThemedText type="subtitle" style={styles.listTitle}>All Scanned Items</ThemedText>
-      
       <FlatList
-        data={scannedItems}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-        renderItem={({ item }) => (
-          <ThemedView style={styles.listItem}>
-            <ThemedView style={styles.itemContent}>
-              <ThemedText style={styles.itemData}>{item.data}</ThemedText>
-              <ThemedText style={styles.itemType}>{item.type}</ThemedText>
-              <ThemedText style={styles.itemTimestamp}>
-                {new Date(item.timestamp).toLocaleString()}
-              </ThemedText>
-            </ThemedView>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => deleteItem(item.id)}
-            >
-              <Text style={styles.deleteButtonText}>×</Text>
-            </TouchableOpacity>
-          </ThemedView>
-        )}
+        data={dataFiles}
+        keyExtractor={(item) => item.uri}
+        renderItem={renderFile}
+        style={styles.filesList}
         ListEmptyComponent={
-          <ThemedText style={styles.emptyText}>No items found</ThemedText>
+          <ThemedText style={styles.emptyText}>No data files found</ThemedText>
         }
       />
     </ThemedView>
@@ -217,78 +281,84 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   statsContainer: {
-    padding: 15,
-    marginBottom: 20,
-    borderRadius: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20,
   },
   actionContainer: {
-    flexDirection: 'row',
     gap: 10,
     marginBottom: 20,
   },
-  exportButton: {
-    flex: 1,
+  primaryButton: {
     backgroundColor: '#007AFF',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  importButton: {
-    flex: 1,
+  secondaryButton: {
     backgroundColor: '#34C759',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  dangerButton: {
+    backgroundColor: '#FF3B30',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
   },
-  listTitle: {
-    marginBottom: 15,
-  },
-  list: {
+  filesList: {
     flex: 1,
   },
-  listItem: {
+  fileItem: {
     flexDirection: 'row',
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,
-    alignItems: 'center',
   },
-  itemContent: {
+  fileInfo: {
     flex: 1,
   },
-  itemData: {
+  fileName: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  itemType: {
+  fileDetails: {
     fontSize: 14,
     opacity: 0.7,
     marginBottom: 5,
   },
-  itemTimestamp: {
+  fileDate: {
     fontSize: 12,
     opacity: 0.5,
   },
+  fileActions: {
+    gap: 5,
+    justifyContent: 'center',
+  },
+  shareButton: {
+    backgroundColor: '#34C759',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 5,
+  },
   deleteButton: {
     backgroundColor: '#FF3B30',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 5,
   },
-  deleteButtonText: {
+  actionButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   emptyText: {
