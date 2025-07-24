@@ -45,7 +45,7 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <IconSymbol size={24} name="house.fill" color={color} />
+              <IconSymbol size={24} name="home" color={color} />
             </View>
           ),
         }}
