@@ -306,12 +306,13 @@ export default function TemplatesScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <FlatList
-                  data={templateFields}
-                  renderItem={renderField}
-                  keyExtractor={(item, index) => `${item.id}-${index}`}
-                  style={styles.fieldsList}
-                />
+                <View style={styles.fieldsList}>
+                  {templateFields.map((item, index) => (
+                    <View key={`${item.id}-${index}`}>
+                      {renderField({ item, index })}
+                    </View>
+                  ))}
+                </View>
               </View>
 
               <View style={styles.modalButtons}>
