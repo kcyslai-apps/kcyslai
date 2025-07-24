@@ -304,13 +304,14 @@ export default function DataEntryScreen() {
       <Modal visible={showCamera} transparent animationType="fade">
         <View style={styles.cameraContainer}>
           {permission?.granted ? (
-            <CameraView
-              style={styles.camera}
-              onBarcodeScanned={handleBarcodeScanned}
-              barcodeScannerSettings={{
-                barcodeTypes: ['qr', 'pdf417', 'code128', 'code39', 'ean13', 'ean8'],
-              }}
-            >
+            <>
+              <CameraView
+                style={styles.camera}
+                onBarcodeScanned={handleBarcodeScanned}
+                barcodeScannerSettings={{
+                  barcodeTypes: ['qr', 'pdf417', 'code128', 'code39', 'ean13', 'ean8'],
+                }}
+              />
               <View style={styles.cameraOverlay}>
                 <Text style={styles.cameraText}>Scan a barcode</Text>
                 <TouchableOpacity
@@ -320,7 +321,7 @@ export default function DataEntryScreen() {
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
-            </CameraView>
+            </>
           ) : (
             <View style={styles.permissionContainer}>
               <Text style={styles.permissionText}>Camera permission required</Text>
