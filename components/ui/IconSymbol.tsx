@@ -17,14 +17,14 @@ const MAPPING = {
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
-  'chevron.right': 'chevron-right',
-  'camera.fill': 'camera-alt',
+  'chevron.right': 'keyboard-arrow-right',
+  'camera.fill': 'camera',
   'folder.fill': 'folder',
-  'doc.text.fill': 'article',
-  'square.grid.2x2': 'apps',
-  'paintbrush.fill': 'palette',
-  'photo.fill': 'photo',
-  'rectangle.stack.fill': 'layers',
+  'doc.text.fill': 'description',
+  'square.grid.2x2': 'grid-view',
+  'paintbrush.fill': 'brush',
+  'photo.fill': 'image',
+  'rectangle.stack.fill': 'copy-all',
 } as IconMapping;
 
 /**
