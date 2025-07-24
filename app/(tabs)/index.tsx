@@ -216,6 +216,8 @@ export default function TemplatesScreen() {
         showsVerticalScrollIndicator={false}
       />
 
+      <Text style={styles.poweredByText}>Powered by Smart Alliance</Text>
+
       <Modal visible={showCamera} animationType="slide">
         <View style={styles.cameraContainer}>
           <CameraView
@@ -467,5 +469,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  poweredByText: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#718096',
+    marginTop: 10,
+    marginBottom: 20,
   },
 });

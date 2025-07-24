@@ -10,9 +10,9 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#f8f9fa',
           borderTopWidth: 0,
-          height: 120,
-          paddingBottom: 20,
-          paddingTop: 20,
+          height: 100,
+          paddingBottom: 15,
+          paddingTop: 15,
           paddingHorizontal: 20,
         },
         tabBarActiveTintColor: '#ffffff',
@@ -35,6 +35,8 @@ export default function TabLayout() {
           shadowOpacity: 0.1,
           shadowRadius: 4,
           elevation: 3,
+          justifyContent: 'center',
+          alignItems: 'center',
         },
         tabBarActiveBackgroundColor: '#007AFF',
         tabBarInactiveBackgroundColor: '#ffffff',
@@ -42,7 +44,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Templates',
+          title: 'Main',
           tabBarIcon: () => null,
         }}
       />
