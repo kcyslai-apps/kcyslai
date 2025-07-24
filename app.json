@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "statusBarHidden": true
     },
     "android": {
       "adaptiveIcon": {
@@ -17,6 +18,9 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "statusBarHidden": true,
+      "navigationBarHidden": true,
+      "fullScreen": true,
       "permissions": [
         "CAMERA"
       ]
