@@ -20,10 +20,10 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'camera.fill': 'camera-alt',
   'folder.fill': 'folder',
-  'doc.text.fill': 'insert-drive-file',
-  'square.grid.2x2': 'dashboard',
-  'paintbrush.fill': 'brush',
-  'photo.fill': 'image',
+  'doc.text.fill': 'article',
+  'square.grid.2x2': 'apps',
+  'paintbrush.fill': 'palette',
+  'photo.fill': 'photo',
   'rectangle.stack.fill': 'layers',
 } as IconMapping;
 
