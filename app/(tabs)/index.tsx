@@ -19,7 +19,7 @@ interface TemplateField {
   options?: string[]; // for fixeddata type
 }
 
-export default function TemplatesScreen() {
+function TemplatesScreenComponent() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTemplate, setNewTemplate] = useState<Partial<Template>>({
@@ -1038,4 +1038,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TemplatesScreen;
+// Ensure proper default export
+export default function TemplatesScreen() {
+  return TemplatesScreenComponent();
+}
