@@ -474,6 +474,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     color: '#718096',
-    marginBottom: 20,
+    marginBottom: 10,
   },
 });
