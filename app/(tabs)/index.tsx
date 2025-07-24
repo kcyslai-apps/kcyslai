@@ -53,14 +53,25 @@ export default function TemplatesScreen() {
       const fileExists = await FileSystem.getInfoAsync(TEMPLATES_FILE);
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
-        const loadedTemplates = JSON.parse(content).map((template: any) => ({
-          ...template,
-          createdAt: new Date(template.createdAt)
-        }));
-        setTemplates(loadedTemplates);
+        const parsedData = JSON.parse(content);
+        
+        // Ensure we have an array and handle legacy format
+        if (Array.isArray(parsedData)) {
+          const loadedTemplates = parsedData.map((template: any) => ({
+            id: template.id,
+            name: template.name,
+            description: template.description || '',
+            fields: template.fields || [],
+            createdAt: new Date(template.createdAt)
+          }));
+          setTemplates(loadedTemplates);
+        } else {
+          setTemplates([]);
+        }
       }
     } catch (error) {
       console.log('Error loading templates:', error);
+      setTemplates([]);
     }
   };
 
