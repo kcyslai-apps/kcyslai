@@ -14,7 +14,7 @@ interface ScannedItem {
   timestamp: string;
 }
 
-export default function BarcodeScanner() {
+export default function TabOneScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
