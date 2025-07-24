@@ -34,6 +34,7 @@ export default function TemplatesScreen() {
     options: []
   });
   const [fieldOptions, setFieldOptions] = useState<string>('');
+  const [showFieldTypeDropdown, setShowFieldTypeDropdown] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -65,8 +66,8 @@ export default function TemplatesScreen() {
   };
 
   const createTemplate = async () => {
-    if (!newTemplate.name?.trim() || !newTemplate.description?.trim()) {
-      Alert.alert('Error', 'Please fill in template name and description');
+    if (!newTemplate.name?.trim()) {
+      Alert.alert('Error', 'Please fill in template name');
       return;
     }
 
@@ -78,7 +79,7 @@ export default function TemplatesScreen() {
     const template: Template = {
       id: Date.now().toString(),
       name: newTemplate.name,
-      description: newTemplate.description,
+      description: '', // Set empty description since we removed the field
       fields: newTemplate.fields as TemplateField[],
       createdAt: new Date().toISOString()
     };
@@ -212,14 +213,6 @@ export default function TemplatesScreen() {
               value={newTemplate.name}
               onChangeText={(text) => setNewTemplate(prev => ({ ...prev, name: text }))}
             />
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Template Description"
-              value={newTemplate.description}
-              onChangeText={(text) => setNewTemplate(prev => ({ ...prev, description: text }))}
-              multiline
-            />
 
             <Text style={styles.sectionTitle}>Fields</Text>
             
@@ -234,31 +227,45 @@ export default function TemplatesScreen() {
 
             <View style={styles.fieldTypeContainer}>
               <Text style={styles.fieldTypeLabel}>Field Type:</Text>
-              <View style={styles.fieldTypeButtons}>
-                {[
-                  { key: 'freetext', label: 'Free Text' },
-                  { key: 'number', label: 'Number' },
-                  { key: 'date', label: 'Date' },
-                  { key: 'fixeddata', label: 'Fixed Data' },
-                  { key: 'fixeddate', label: 'Fixed Date' },
-                  { key: 'barcode', label: 'Barcode' }
-                ].map((typeOption) => (
-                  <TouchableOpacity
-                    key={typeOption.key}
-                    style={[
-                      styles.typeButton,
-                      newField.type === typeOption.key && styles.typeButtonSelected
-                    ]}
-                    onPress={() => setNewField(prev => ({ ...prev, type: typeOption.key as any }))}
-                  >
-                    <Text style={[
-                      styles.typeButtonText,
-                      newField.type === typeOption.key && styles.typeButtonTextSelected
-                    ]}>
-                      {typeOption.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.dropdownContainer}>
+                <TouchableOpacity 
+                  style={styles.dropdown}
+                  onPress={() => setShowFieldTypeDropdown(!showFieldTypeDropdown)}
+                >
+                  <Text style={styles.dropdownText}>
+                    {newField.type === 'freetext' ? 'Free Text' :
+                     newField.type === 'number' ? 'Number' :
+                     newField.type === 'date' ? 'Date' :
+                     newField.type === 'fixeddata' ? 'Fixed Data' :
+                     newField.type === 'fixeddate' ? 'Fixed Date' :
+                     newField.type === 'barcode' ? 'Barcode' : 'Select Type'}
+                  </Text>
+                  <Text style={styles.dropdownArrow}>▼</Text>
+                </TouchableOpacity>
+                
+                {showFieldTypeDropdown && (
+                  <View style={styles.dropdownOptions}>
+                    {[
+                      { key: 'freetext', label: 'Free Text' },
+                      { key: 'number', label: 'Number' },
+                      { key: 'date', label: 'Date' },
+                      { key: 'fixeddata', label: 'Fixed Data' },
+                      { key: 'fixeddate', label: 'Fixed Date' },
+                      { key: 'barcode', label: 'Barcode' }
+                    ].map((typeOption) => (
+                      <TouchableOpacity
+                        key={typeOption.key}
+                        style={styles.dropdownOption}
+                        onPress={() => {
+                          setNewField(prev => ({ ...prev, type: typeOption.key as any }));
+                          setShowFieldTypeDropdown(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownOptionText}>{typeOption.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
             </View>
 
@@ -486,31 +493,60 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: '#2D3748',
   },
-  fieldTypeButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+  dropdownContainer: {
+    position: 'relative',
+    zIndex: 1000,
   },
-  typeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+  dropdown: {
     borderWidth: 1,
     borderColor: '#e9ecef',
     backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  typeButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  typeButtonText: {
-    fontSize: 14,
+  dropdownText: {
+    fontSize: 16,
     color: '#000000',
     fontWeight: '600',
   },
-  typeButtonTextSelected: {
-    color: '#ffffff',
-    fontWeight: '700',
+  dropdownArrow: {
+    fontSize: 12,
+    color: '#718096',
+  },
+  dropdownOptions: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    borderRadius: 16,
+    marginTop: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1001,
+  },
+  dropdownOption: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f3f4',
+  },
+  dropdownOptionText: {
+    fontSize: 16,
+    color: '#000000',
+    fontWeight: '600',
   },
   addFieldButton: {
     backgroundColor: '#007AFF',
