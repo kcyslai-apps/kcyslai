@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
@@ -93,7 +92,7 @@ export default function TemplatesScreen() {
     try {
       const fileUri = FileSystem.documentDirectory + 'templates.json';
       const fileExists = await FileSystem.getInfoAsync(fileUri);
-      
+
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(fileUri);
         const templatesData = JSON.parse(content);
@@ -138,7 +137,7 @@ export default function TemplatesScreen() {
       );
       setTemplates(updatedTemplates);
       await saveTemplates(updatedTemplates);
-      
+
       setEditingTemplate(null);
       Alert.alert('Success', 'Template updated successfully');
     } else {
@@ -156,7 +155,7 @@ export default function TemplatesScreen() {
       await saveTemplates(updatedTemplates);
       Alert.alert('Success', 'Template created successfully');
     }
-    
+
     setNewTemplate({ name: '', description: '', fields: [] });
     setShowCreateModal(false);
   };
@@ -235,7 +234,7 @@ export default function TemplatesScreen() {
 
       const fileUri = FileSystem.documentDirectory + 'data_entries.json';
       const fileExists = await FileSystem.getInfoAsync(fileUri);
-      
+
       let existingEntries = [];
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(fileUri);
@@ -357,7 +356,7 @@ export default function TemplatesScreen() {
             />
 
             <Text style={styles.sectionTitle}>Fields</Text>
-            
+
             <View style={styles.fieldInputContainer}>
               <TextInput
                 style={styles.fieldInput}
@@ -384,7 +383,7 @@ export default function TemplatesScreen() {
                   </Text>
                   <Text style={styles.dropdownArrow}>▼</Text>
                 </TouchableOpacity>
-                
+
                 {showFieldTypeDropdown && (
                   <View style={styles.dropdownOptions}>
                     {[
@@ -493,7 +492,7 @@ export default function TemplatesScreen() {
                 <Text style={styles.dataFieldLabel}>
                   {field.name} {field.required && <Text style={styles.requiredAsterisk}>*</Text>}
                 </Text>
-                
+
                 {field.type === 'fixeddata' && field.options ? (
                   <View style={styles.dropdownContainer}>
                     <TouchableOpacity 
@@ -596,7 +595,7 @@ export default function TemplatesScreen() {
             <Text style={styles.scannerTitle}>Scan Barcode</Text>
             <View style={{ width: 60 }} />
           </View>
-          
+
           {hasCameraPermission === null ? (
             <View style={styles.scannerMessage}>
               <Text style={styles.scannerMessageText}>Requesting camera permission...</Text>
@@ -1038,3 +1037,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+export default TemplatesScreen;
