@@ -501,6 +501,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingBottom: 130, // Add extra bottom padding to account for tab bar
     backgroundColor: '#ffffff',
   },
   title: {
