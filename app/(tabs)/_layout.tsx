@@ -11,31 +11,36 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: '#ffffff',
-          borderTopWidth: 1,
-          borderTopColor: '#e2e8f0',
-          paddingBottom: 15,
-          paddingTop: 15,
+          borderTopWidth: 0,
+          borderTopColor: 'transparent',
+          paddingBottom: 20,
+          paddingTop: 20,
           position: 'absolute',
-          bottom: 70,
-          left: 20,
-          right: 20,
-          borderRadius: 20,
+          bottom: 30,
+          left: 15,
+          right: 15,
+          borderRadius: 25,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          elevation: 8,
-          height: 80,
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.25,
+          shadowRadius: 20,
+          elevation: 15,
+          height: 90,
+          borderWidth: 2,
+          borderColor: '#f0f8ff',
         },
-        tabBarActiveTintColor: '#4299e1',
+        tabBarActiveTintColor: '#ffffff',
         tabBarInactiveTintColor: '#718096',
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-          marginTop: 4,
+          fontSize: 11,
+          fontWeight: 'bold',
+          marginTop: 6,
+          textShadowColor: 'rgba(0,0,0,0.3)',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 2,
         },
         tabBarIconStyle: {
-          marginBottom: -2,
+          marginBottom: -4,
         },
       }}
     >
@@ -44,8 +49,15 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <IconSymbol size={24} name="home" color={color} />
+            <View style={[
+              styles.iconContainer, 
+              focused ? styles.iconContainerActiveHome : styles.iconContainerInactive
+            ]}>
+              <IconSymbol 
+                size={focused ? 28 : 24} 
+                name="home" 
+                color={focused ? '#ffffff' : color} 
+              />
             </View>
           ),
         }}
@@ -55,8 +67,15 @@ export default function TabLayout() {
         options={{
           title: 'Data Files',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <IconSymbol size={24} name="doc.text.fill" color={color} />
+            <View style={[
+              styles.iconContainer, 
+              focused ? styles.iconContainerActiveFiles : styles.iconContainerInactive
+            ]}>
+              <IconSymbol 
+                size={focused ? 28 : 24} 
+                name="doc.text.fill" 
+                color={focused ? '#ffffff' : color} 
+              />
             </View>
           ),
         }}
@@ -67,15 +86,43 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
-  iconContainerActive: {
-    backgroundColor: '#e6f3ff',
-    transform: [{ scale: 1.1 }],
+  iconContainerInactive: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  iconContainerActiveHome: {
+    backgroundColor: '#68d391',
+    borderWidth: 3,
+    borderColor: '#9ae6b4',
+    transform: [{ scale: 1.15 }],
+    shadowColor: '#68d391',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  iconContainerActiveFiles: {
+    backgroundColor: '#4299e1',
+    borderWidth: 3,
+    borderColor: '#63b3ed',
+    transform: [{ scale: 1.15 }],
+    shadowColor: '#4299e1',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
 });
