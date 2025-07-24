@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 
 interface Template {
   id: string;
@@ -151,7 +149,7 @@ export default function TemplatesScreen() {
   const renderTemplate = ({ item }: { item: Template }) => (
     <View style={styles.templateItem}>
       <View style={styles.templateHeader}>
-        <ThemedText style={styles.templateName}>{item.name}</ThemedText>
+        <Text style={styles.templateName}>{item.name}</Text>
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => deleteTemplate(item.id)}
@@ -159,20 +157,20 @@ export default function TemplatesScreen() {
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
-      <ThemedText style={styles.templateDescription}>{item.description}</ThemedText>
-      <ThemedText style={styles.templateFields}>
+      <Text style={styles.templateDescription}>{item.description}</Text>
+      <Text style={styles.templateFields}>
         Fields: {item.fields.map(f => f.name).join(', ')}
-      </ThemedText>
-      <ThemedText style={styles.templateDate}>
+      </Text>
+      <Text style={styles.templateDate}>
         Created: {new Date(item.createdAt).toLocaleDateString()}
-      </ThemedText>
+      </Text>
     </View>
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="title" style={styles.title}>Templates</ThemedText>
+        <Text style={styles.title}>Templates</Text>
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => setShowCreateModal(true)}
@@ -187,7 +185,7 @@ export default function TemplatesScreen() {
         renderItem={renderTemplate}
         style={styles.list}
         ListEmptyComponent={
-          <ThemedText style={styles.emptyText}>No templates created yet</ThemedText>
+          <Text style={styles.emptyText}>No templates created yet</Text>
         }
       />
 
@@ -201,7 +199,7 @@ export default function TemplatesScreen() {
             <TouchableOpacity onPress={() => setShowCreateModal(false)}>
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
-            <ThemedText type="subtitle">Create Template</ThemedText>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '700' }}>Create Template</Text>
             <TouchableOpacity onPress={createTemplate}>
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
@@ -223,7 +221,7 @@ export default function TemplatesScreen() {
               multiline
             />
 
-            <ThemedText style={styles.sectionTitle}>Fields</ThemedText>
+            <Text style={styles.sectionTitle}>Fields</Text>
             
             <View style={styles.fieldInputContainer}>
               <TextInput
@@ -235,7 +233,7 @@ export default function TemplatesScreen() {
             </View>
 
             <View style={styles.fieldTypeContainer}>
-              <ThemedText style={styles.fieldTypeLabel}>Field Type:</ThemedText>
+              <Text style={styles.fieldTypeLabel}>Field Type:</Text>
               <View style={styles.fieldTypeButtons}>
                 {[
                   { key: 'freetext', label: 'Free Text' },
@@ -306,204 +304,272 @@ export default function TemplatesScreen() {
           </View>
         </View>
       </Modal>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    paddingTop: 60,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
+    paddingHorizontal: 24,
   },
   title: {
     flex: 1,
+    color: 'white',
+    fontSize: 32,
+    fontWeight: '700',
   },
   createButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '600',
+    fontSize: 16,
   },
   list: {
     flex: 1,
+    paddingHorizontal: 24,
   },
   templateItem: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: 20,
+    marginBottom: 16,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   templateHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   templateName: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     flex: 1,
+    color: '#2D3748',
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 5,
+    backgroundColor: '#FF6B6B',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    shadowColor: '#FF6B6B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   deleteButtonText: {
     color: 'white',
     fontSize: 12,
+    fontWeight: '600',
   },
   templateDescription: {
-    fontSize: 14,
-    marginBottom: 5,
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#4A5568',
+    lineHeight: 22,
   },
   templateFields: {
-    fontSize: 12,
-    opacity: 0.7,
-    marginBottom: 5,
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 8,
+    fontWeight: '500',
   },
   templateDate: {
     fontSize: 12,
-    opacity: 0.5,
+    color: '#A0AEC0',
+    fontWeight: '500',
   },
   emptyText: {
     textAlign: 'center',
-    marginTop: 50,
-    opacity: 0.5,
+    marginTop: 80,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 18,
+    fontWeight: '500',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
+    paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
   },
   cancelText: {
-    color: '#007AFF',
-    fontSize: 16,
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
   },
   saveText: {
-    color: '#007AFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
   },
   modalContent: {
     flex: 1,
-    padding: 20,
+    padding: 24,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
+    borderWidth: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
     fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    color: '#2D3748',
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 16,
+    color: 'white',
   },
   fieldInputContainer: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   fieldInput: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    padding: 12,
+    borderWidth: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    padding: 16,
     fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    color: '#2D3748',
   },
   fieldTypeContainer: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   fieldTypeLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: 'white',
   },
   fieldTypeButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   typeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#F8F8F8',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   typeButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: 'rgba(255, 255, 255, 0.9)',
   },
   typeButtonText: {
     fontSize: 14,
-    color: '#333',
+    color: 'white',
+    fontWeight: '600',
   },
   typeButtonTextSelected: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: '#2D3748',
+    fontWeight: '700',
   },
   addFieldButton: {
-    backgroundColor: '#34C759',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   addFieldText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '700',
+    fontSize: 16,
   },
   fieldItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    padding: 12,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 8,
-    marginBottom: 8,
+    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   fieldDetails: {
     flex: 1,
   },
   fieldName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 2,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+    color: '#2D3748',
   },
   fieldType: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 2,
+    color: '#4A5568',
+    marginBottom: 4,
+    fontWeight: '600',
   },
   fieldOptions: {
     fontSize: 12,
-    color: '#888',
+    color: '#718096',
     fontStyle: 'italic',
+    fontWeight: '500',
   },
   removeFieldText: {
-    color: '#FF3B30',
+    color: '#FF6B6B',
+    fontWeight: '600',
   },
 });
