@@ -1,7 +1,6 @@
 
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function TabLayout() {
   return (
@@ -19,9 +18,10 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#8E8E93',
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 18,
           fontWeight: '600',
         },
+        tabBarShowIcon: false,
       }}>
       <Tabs.Screen
         name="index"
