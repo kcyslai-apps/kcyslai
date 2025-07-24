@@ -27,26 +27,12 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Templates',
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol 
-              size={focused ? 26 : 22} 
-              name="doc.text.fill" 
-              color={color} 
-            />
-          ),
         }}
       />
       <Tabs.Screen
         name="data-files"
         options={{
           title: 'Data Files',
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol 
-              size={focused ? 26 : 22} 
-              name="folder.fill" 
-              color={color} 
-            />
-          ),
         }}
       />
     </Tabs>
