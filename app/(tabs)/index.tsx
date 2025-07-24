@@ -311,7 +311,7 @@ export default function TemplatesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundColor: '#ffffff',
     paddingTop: 60,
   },
   header: {
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: 'white',
+    color: '#2D3748',
     fontSize: 32,
     fontWeight: '700',
   },
@@ -410,13 +410,13 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     marginTop: 80,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#718096',
     fontSize: 18,
     fontWeight: '500',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    backgroundColor: '#ffffff',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -428,12 +428,12 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.2)',
   },
   cancelText: {
-    color: 'white',
+    color: '#667eea',
     fontSize: 18,
     fontWeight: '600',
   },
   saveText: {
-    color: 'white',
+    color: '#667eea',
     fontSize: 18,
     fontWeight: '700',
   },
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     marginBottom: 16,
-    color: 'white',
+    color: '#2D3748',
   },
   fieldInputContainer: {
     marginBottom: 20,
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
-    color: 'white',
+    color: '#2D3748',
   },
   fieldTypeButtons: {
     flexDirection: 'row',
