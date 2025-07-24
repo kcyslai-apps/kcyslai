@@ -19,7 +19,7 @@ const MAPPING = {
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'keyboard-arrow-right',
   'camera.fill': 'camera',
-  'folder.fill': 'folder',
+  'folder.fill': 'storage',
   'doc.text.fill': 'description',
   'square.grid.2x2': 'grid-view',
   'paintbrush.fill': 'brush',

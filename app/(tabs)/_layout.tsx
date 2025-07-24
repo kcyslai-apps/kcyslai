@@ -56,7 +56,7 @@ export default function TabLayout() {
           title: 'Data Files',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <IconSymbol size={24} name="folder.fill" color={color} />
+              <IconSymbol size={24} name="doc.text.fill" color={color} />
             </View>
           ),
         }}
