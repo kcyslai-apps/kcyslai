@@ -16,9 +16,9 @@ interface Template {
 interface TemplateField {
   id: string;
   name: string;
-  type: 'text' | 'number' | 'date' | 'select';
+  type: 'freetext' | 'number' | 'date' | 'fixeddata' | 'fixeddate' | 'barcode';
   required: boolean;
-  options?: string[]; // for select type
+  options?: string[]; // for fixeddata type
 }
 
 export default function TemplatesScreen() {
@@ -31,9 +31,11 @@ export default function TemplatesScreen() {
   });
   const [newField, setNewField] = useState<Partial<TemplateField>>({
     name: '',
-    type: 'text',
-    required: false
+    type: 'freetext',
+    required: false,
+    options: []
   });
+  const [fieldOptions, setFieldOptions] = useState<string>('');
 
   useEffect(() => {
     loadTemplates();
@@ -93,12 +95,17 @@ export default function TemplatesScreen() {
       return;
     }
 
+    if (newField.type === 'fixeddata' && !fieldOptions.trim()) {
+      Alert.alert('Error', 'Please enter options for Fixed Data field (comma-separated)');
+      return;
+    }
+
     const field: TemplateField = {
       id: Date.now().toString(),
       name: newField.name,
-      type: newField.type || 'text',
+      type: newField.type || 'freetext',
       required: newField.required || false,
-      options: newField.options
+      options: newField.type === 'fixeddata' ? fieldOptions.split(',').map(opt => opt.trim()) : undefined
     };
 
     setNewTemplate(prev => ({
@@ -106,7 +113,8 @@ export default function TemplatesScreen() {
       fields: [...(prev.fields || []), field]
     }));
 
-    setNewField({ name: '', type: 'text', required: false });
+    setNewField({ name: '', type: 'freetext', required: false, options: [] });
+    setFieldOptions('');
   };
 
   const removeField = (fieldId: string) => {
@@ -219,17 +227,71 @@ export default function TemplatesScreen() {
                 value={newField.name}
                 onChangeText={(text) => setNewField(prev => ({ ...prev, name: text }))}
               />
-              <TouchableOpacity style={styles.addFieldButton} onPress={addField}>
-                <Text style={styles.addFieldText}>Add</Text>
-              </TouchableOpacity>
             </View>
+
+            <View style={styles.fieldTypeContainer}>
+              <ThemedText style={styles.fieldTypeLabel}>Field Type:</ThemedText>
+              <View style={styles.fieldTypeButtons}>
+                {[
+                  { key: 'freetext', label: 'Free Text' },
+                  { key: 'number', label: 'Number' },
+                  { key: 'date', label: 'Date' },
+                  { key: 'fixeddata', label: 'Fixed Data' },
+                  { key: 'fixeddate', label: 'Fixed Date' },
+                  { key: 'barcode', label: 'Barcode' }
+                ].map((typeOption) => (
+                  <TouchableOpacity
+                    key={typeOption.key}
+                    style={[
+                      styles.typeButton,
+                      newField.type === typeOption.key && styles.typeButtonSelected
+                    ]}
+                    onPress={() => setNewField(prev => ({ ...prev, type: typeOption.key as any }))}
+                  >
+                    <Text style={[
+                      styles.typeButtonText,
+                      newField.type === typeOption.key && styles.typeButtonTextSelected
+                    ]}>
+                      {typeOption.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {newField.type === 'fixeddata' && (
+              <TextInput
+                style={styles.input}
+                placeholder="Enter options (comma-separated)"
+                value={fieldOptions}
+                onChangeText={setFieldOptions}
+                multiline
+              />
+            )}
+
+            <TouchableOpacity style={styles.addFieldButton} onPress={addField}>
+              <Text style={styles.addFieldText}>Add Field</Text>
+            </TouchableOpacity>
 
             <FlatList
               data={newTemplate.fields}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <View style={styles.fieldItem}>
-                  <Text style={styles.fieldName}>{item.name} ({item.type})</Text>
+                  <View style={styles.fieldDetails}>
+                    <Text style={styles.fieldName}>{item.name}</Text>
+                    <Text style={styles.fieldType}>
+                      {item.type === 'freetext' ? 'Free Text' :
+                       item.type === 'number' ? 'Number' :
+                       item.type === 'date' ? 'Date' :
+                       item.type === 'fixeddata' ? 'Fixed Data' :
+                       item.type === 'fixeddate' ? 'Fixed Date' :
+                       item.type === 'barcode' ? 'Barcode' : item.type}
+                    </Text>
+                    {item.options && (
+                      <Text style={styles.fieldOptions}>Options: {item.options.join(', ')}</Text>
+                    )}
+                  </View>
                   <TouchableOpacity onPress={() => removeField(item.id)}>
                     <Text style={styles.removeFieldText}>Remove</Text>
                   </TouchableOpacity>
@@ -354,16 +416,47 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   fieldInputContainer: {
-    flexDirection: 'row',
     marginBottom: 15,
   },
   fieldInput: {
-    flex: 1,
     borderWidth: 1,
     borderColor: '#E0E0E0',
     borderRadius: 8,
     padding: 12,
-    marginRight: 10,
+    fontSize: 16,
+  },
+  fieldTypeContainer: {
+    marginBottom: 15,
+  },
+  fieldTypeLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  fieldTypeButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  typeButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#F8F8F8',
+  },
+  typeButtonSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  typeButtonText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  typeButtonTextSelected: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   addFieldButton: {
     backgroundColor: '#34C759',
@@ -371,6 +464,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   addFieldText: {
     color: 'white',
@@ -379,14 +474,29 @@ const styles = StyleSheet.create({
   fieldItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
+    alignItems: 'flex-start',
+    padding: 12,
     backgroundColor: '#F0F0F0',
-    borderRadius: 5,
-    marginBottom: 5,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  fieldDetails: {
+    flex: 1,
   },
   fieldName: {
-    flex: 1,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  fieldType: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  fieldOptions: {
+    fontSize: 12,
+    color: '#888',
+    fontStyle: 'italic',
   },
   removeFieldText: {
     color: '#FF3B30',
