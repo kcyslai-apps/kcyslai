@@ -1,3 +1,4 @@
+
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
@@ -21,6 +22,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+        tabBarShowLabel: false,
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
@@ -49,10 +51,6 @@ export default function TabLayout() {
             elevation: 15,
           },
         }),
-        tabBarLabelStyle: {
-          display: 'none',
-        },
-        tabBarShowLabel: false,
         tabBarIconStyle: {
           marginBottom: 0,
           marginTop: 0,
@@ -61,10 +59,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Templates',
+          title: '',
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol 
-              size={focused ? 28 : 26} 
+              size={focused ? 32 : 28} 
               name="doc.text.fill" 
               color={color} 
             />
@@ -74,10 +72,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Files',
+          title: '',
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol 
-              size={focused ? 28 : 26} 
+              size={focused ? 32 : 28} 
               name="folder.fill" 
               color={color} 
             />

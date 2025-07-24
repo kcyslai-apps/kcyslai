@@ -20,6 +20,7 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'camera.fill': 'camera-alt',
   'folder.fill': 'folder',
+  'doc.text.fill': 'description',
 } as IconMapping;
 
 /**
