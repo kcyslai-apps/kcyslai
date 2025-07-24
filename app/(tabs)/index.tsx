@@ -279,20 +279,6 @@ export default function TemplatesScreen() {
         <Text style={styles.fieldType}>Type: {fieldTypes.find(t => t.value === item.type)?.label}</Text>
         <Text style={styles.fieldRequired}>Required: {item.required ? 'Yes' : 'No'}</Text>
       </View>
-      <View style={styles.fieldActions}>
-        <TouchableOpacity
-          style={styles.editFieldButton}
-          onPress={() => editField(index)}
-        >
-          <Text style={styles.editFieldButtonText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.removeFieldButton}
-          onPress={() => removeField(index)}
-        >
-          <Text style={styles.removeFieldButtonText}>Remove</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 
@@ -765,52 +751,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#718096',
   },
-  fieldActions: {
-    flexDirection: 'row',
-    gap: 5,
-  },
-  editFieldButton: {
-    backgroundColor: '#f6ad55',
-    paddingVertical: 3,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-    shadowColor: '#f6ad55',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#fbd38d',
-  },
-  editFieldButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  removeFieldButton: {
-    backgroundColor: '#fc8181',
-    paddingVertical: 3,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-    shadowColor: '#fc8181',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#feb2b2',
-  },
-  removeFieldButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
+  
   fixedDataSection: {
     marginBottom: 15,
   },
