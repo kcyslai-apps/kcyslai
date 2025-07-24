@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
 interface Template {
   id: string;
@@ -40,6 +41,9 @@ export default function TemplatesScreen() {
   const [showDataInputModal, setShowDataInputModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [dataInputValues, setDataInputValues] = useState<{[key: string]: string}>({});
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [scanningFieldId, setScanningFieldId] = useState<string | null>(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
   const handleTouchMove = (event: any, index: number) => {
     const { locationY } = event.nativeEvent;
@@ -51,7 +55,39 @@ export default function TemplatesScreen() {
 
   useEffect(() => {
     loadTemplates();
+    getCameraPermissions();
   }, []);
+
+  const getCameraPermissions = async () => {
+    const { status } = await BarCodeScanner.requestPermissionsAsync();
+    setHasCameraPermission(status === 'granted');
+  };
+
+  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+    if (scanningFieldId) {
+      setDataInputValues(prev => ({
+        ...prev,
+        [scanningFieldId]: data
+      }));
+      setShowBarcodeScanner(false);
+      setScanningFieldId(null);
+      Alert.alert('Scanned Successfully', `Barcode: ${data}`);
+    }
+  };
+
+  const startBarcodeScanning = (fieldId: string) => {
+    if (hasCameraPermission === null) {
+      Alert.alert('Permission Required', 'Requesting camera permission...');
+      getCameraPermissions();
+      return;
+    }
+    if (hasCameraPermission === false) {
+      Alert.alert('No Camera Access', 'Please enable camera access in your device settings to scan barcodes.');
+      return;
+    }
+    setScanningFieldId(fieldId);
+    setShowBarcodeScanner(true);
+  };
 
   const loadTemplates = async () => {
     try {
@@ -517,9 +553,9 @@ export default function TemplatesScreen() {
                     />
                     <TouchableOpacity 
                       style={styles.scanButton}
-                      onPress={() => Alert.alert('Scanner', 'Barcode scanner functionality would be implemented here')}
+                      onPress={() => startBarcodeScanning(field.id)}
                     >
-                      <Text style={styles.scanButtonText}>Scan Barcode</Text>
+                      <Text style={styles.scanButtonText}>📷 Scan Barcode</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -537,6 +573,58 @@ export default function TemplatesScreen() {
               </View>
             ))}
           </View>
+        </View>
+      </Modal>
+
+      {/* Barcode Scanner Modal */}
+      <Modal
+        visible={showBarcodeScanner}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        <View style={styles.scannerContainer}>
+          <View style={styles.scannerHeader}>
+            <TouchableOpacity
+              style={styles.scannerCloseButton}
+              onPress={() => {
+                setShowBarcodeScanner(false);
+                setScanningFieldId(null);
+              }}
+            >
+              <Text style={styles.scannerCloseText}>✕ Close</Text>
+            </TouchableOpacity>
+            <Text style={styles.scannerTitle}>Scan Barcode</Text>
+            <View style={{ width: 60 }} />
+          </View>
+          
+          {hasCameraPermission === null ? (
+            <View style={styles.scannerMessage}>
+              <Text style={styles.scannerMessageText}>Requesting camera permission...</Text>
+            </View>
+          ) : hasCameraPermission === false ? (
+            <View style={styles.scannerMessage}>
+              <Text style={styles.scannerMessageText}>No access to camera</Text>
+              <TouchableOpacity
+                style={styles.permissionButton}
+                onPress={getCameraPermissions}
+              >
+                <Text style={styles.permissionButtonText}>Grant Permission</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.scannerCameraContainer}>
+              <BarCodeScanner
+                onBarCodeScanned={showBarcodeScanner ? handleBarCodeScanned : undefined}
+                style={styles.scanner}
+              />
+              <View style={styles.scannerOverlay}>
+                <View style={styles.scannerFrame} />
+                <Text style={styles.scannerInstructions}>
+                  Point your camera at a barcode to scan
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
       </Modal>
     </View>
@@ -865,6 +953,88 @@ const styles = StyleSheet.create({
   },
   removeFieldText: {
     color: '#FF6B6B',
+    fontWeight: '600',
+  },
+  scannerContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  scannerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#000000',
+  },
+  scannerCloseButton: {
+    padding: 10,
+  },
+  scannerCloseText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scannerTitle: {
+    color: '#ffffff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  scannerCameraContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  scanner: {
+    flex: 1,
+  },
+  scannerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scannerFrame: {
+    width: 250,
+    height: 250,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    borderRadius: 12,
+    backgroundColor: 'transparent',
+  },
+  scannerInstructions: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 30,
+    paddingHorizontal: 40,
+  },
+  scannerMessage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  scannerMessageText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  permissionButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  permissionButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '600',
   },
 });
