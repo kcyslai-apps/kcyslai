@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   fieldItem: {
     flexDirection: 'row',
     backgroundColor: '#f7fafc',
-    padding: 8,
+    padding: 6,
     marginBottom: 5,
     borderRadius: 5,
     borderLeftWidth: 3,
