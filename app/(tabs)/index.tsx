@@ -474,7 +474,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     color: '#718096',
-    marginTop: 10,
-    marginBottom: 20,
+    position: 'absolute',
+    bottom: 100,
+    left: 0,
+    right: 0,
   },
 });
