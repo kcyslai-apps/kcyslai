@@ -299,10 +299,7 @@ export default function TemplatesScreen() {
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>Data Collector</ThemedText>
 
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Templates: {templates.length}</Text>
-        <Text style={styles.statsText}>Total Fields: {templates.reduce((sum, t) => sum + t.fields.length, 0)}</Text>
-      </View>
+      
 
       <View style={styles.actionContainer}>
         <TouchableOpacity 
