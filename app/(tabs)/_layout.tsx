@@ -30,7 +30,9 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 16,
           fontWeight: '600',
-          marginTop: 8,
+          marginTop: 0,
+          textAlign: 'center',
+          width: '100%',
         },
         tabBarShowIcon: false,
         tabBarItemStyle: {
@@ -47,6 +49,7 @@ export default function TabLayout() {
           elevation: 3,
           justifyContent: 'center',
           alignItems: 'center',
+          display: 'flex',
         },
         tabBarActiveBackgroundColor: '#007AFF',
         tabBarInactiveBackgroundColor: '#ffffff',
