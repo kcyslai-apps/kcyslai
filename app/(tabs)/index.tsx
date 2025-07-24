@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   fieldItem: {
     flexDirection: 'row',
     backgroundColor: '#f7fafc',
-    padding: 10,
+    padding: 8,
     marginBottom: 5,
     borderRadius: 5,
     borderLeftWidth: 3,
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
   },
   editFieldButtonText: {
     color: 'white',
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: 'bold',
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 1, height: 1 },
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
   },
   removeFieldButtonText: {
     color: 'white',
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: 'bold',
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 1, height: 1 },
