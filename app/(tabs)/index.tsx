@@ -183,7 +183,7 @@ export default function TemplatesScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Templates</ThemedText>
+      <ThemedText type="title" style={styles.title}>Data Collector</ThemedText>
       
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Templates: {templates.length}</Text>
