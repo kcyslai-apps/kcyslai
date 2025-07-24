@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, Modal, TextInput, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -55,7 +54,7 @@ export default function TemplatesScreen() {
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
         const parsedData = JSON.parse(content);
-        
+
         // Ensure we have an array and handle legacy format
         if (Array.isArray(parsedData)) {
           const loadedTemplates = parsedData.map((template: any) => ({
@@ -330,7 +329,7 @@ export default function TemplatesScreen() {
               <Text style={styles.modalTitle}>
                 {editingTemplateId ? 'Edit Template' : 'Create Template'}
               </Text>
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Template name"
@@ -396,7 +395,7 @@ export default function TemplatesScreen() {
               <Text style={styles.modalTitle}>
                 {editingFieldIndex !== null ? 'Edit Field' : 'Add Field'}
               </Text>
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Field name"
