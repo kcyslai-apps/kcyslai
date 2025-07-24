@@ -187,7 +187,7 @@ export default function TemplatesScreen() {
       
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Templates: {templates.length}</Text>
-        <Text style={styles.statsText}>Scanned Items: {scannedData.length}</Text>
+        <Text style={styles.statsText}>Total Files: {templates.length}</Text>
       </View>
 
       <View style={styles.actionContainer}>
