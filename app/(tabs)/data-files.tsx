@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity, Alert, FlatList, Text } from 'react-nativ
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
+import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -225,6 +226,10 @@ export default function DataFilesScreen() {
       </ThemedView>
 
       <ThemedView style={styles.actionContainer}>
+        <TouchableOpacity style={styles.recordsButton} onPress={() => router.push('/data-records')}>
+          <Text style={styles.buttonText}>View Data Records</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.primaryButton} onPress={importFile}>
           <Text style={styles.buttonText}>Import File</Text>
         </TouchableOpacity>
@@ -280,6 +285,13 @@ const styles = StyleSheet.create({
   actionContainer: {
     gap: 10,
     marginBottom: 20,
+  },
+  recordsButton: {
+    backgroundColor: '#38a169',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   primaryButton: {
     backgroundColor: '#4299e1',

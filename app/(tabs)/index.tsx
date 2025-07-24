@@ -332,12 +332,6 @@ export default function TemplatesScreen() {
         >
           <Text style={styles.buttonText}>Create Template</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.recordsButton} 
-          onPress={() => router.push('/data-records')}
-        >
-          <Text style={styles.buttonText}>View Data Records</Text>
-        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -567,16 +561,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#9ae6b4',
   },
-  recordsButton: {
-    backgroundColor: '#4299e1',
-    paddingVertical: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    boxShadow: '0px 4px 8px rgba(66, 153, 225, 0.3)',
-    elevation: 6,
-    borderWidth: 2,
-    borderColor: '#63b3ed',
-  },
+  
   buttonText: {
     color: 'white',
     fontSize: 18,
