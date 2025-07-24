@@ -360,9 +360,11 @@ export default function TemplatesScreen() {
 
                 <ScrollView 
                   style={styles.fieldsScrollView}
-                  contentContainerStyle={styles.fieldsList}
+                  contentContainerStyle={styles.fieldsScrollContent}
                   showsVerticalScrollIndicator={true}
                   persistentScrollbar={true}
+                  scrollIndicatorInsets={{ right: 1 }}
+                  indicatorStyle="black"
                 >
                   {templateFields.map((item, index) => (
                     <View key={`${item.id}-${index}`}>
@@ -738,16 +740,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
-  fieldsList: {
+  fieldsScrollView: {
     maxHeight: 300,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     borderRadius: 8,
     backgroundColor: '#f8fafc',
-    paddingVertical: 8,
   },
-  fieldsScrollView: {
-    maxHeight: 300,
+  fieldsScrollContent: {
+    paddingVertical: 8,
+    paddingHorizontal: 5,
   },
   fieldItem: {
     flexDirection: 'row',
