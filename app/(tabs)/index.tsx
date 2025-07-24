@@ -318,7 +318,10 @@ export default function TemplatesScreen() {
         renderItem={renderTemplate}
         keyExtractor={(item) => item.id}
         style={styles.templatesList}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
+        scrollIndicatorInsets={{ right: 2 }}
+        persistentScrollbar={true}
+        indicatorStyle="black"
       />
 
       {/* Template Creation Modal */}
