@@ -1,13 +1,25 @@
+
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, Modal, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, Modal, TextInput, ScrollView } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import * as FileSystem from 'expo-file-system';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
+interface TemplateField {
+  id: string;
+  name: string;
+  type: 'free_text' | 'date' | 'number' | 'fixed_data' | 'fixed_date' | 'barcode';
+  required: boolean;
+  defaultValue?: string;
+  options?: string[]; // For fixed_data type
+}
+
 interface Template {
   id: string;
   name: string;
-  data: any;
+  description: string;
+  fields: TemplateField[];
   createdAt: Date;
 }
 
@@ -15,8 +27,22 @@ export default function TemplatesScreen() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
+  const [newTemplateDescription, setNewTemplateDescription] = useState('');
+  const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
+  const [showFieldModal, setShowFieldModal] = useState(false);
+  const [currentField, setCurrentField] = useState<Partial<TemplateField>>({});
+  const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
+
+  const fieldTypes = [
+    { label: 'Free Text', value: 'free_text' },
+    { label: 'Date', value: 'date' },
+    { label: 'Number', value: 'number' },
+    { label: 'Fixed Data', value: 'fixed_data' },
+    { label: 'Fixed Date', value: 'fixed_date' },
+    { label: 'Barcode Scanning', value: 'barcode' },
+  ];
 
   useEffect(() => {
     loadTemplates();
@@ -47,7 +73,61 @@ export default function TemplatesScreen() {
   };
 
   const createTemplate = () => {
+    setNewTemplateName('');
+    setNewTemplateDescription('');
+    setTemplateFields([]);
     setShowTemplateModal(true);
+  };
+
+  const addField = () => {
+    setCurrentField({
+      name: '',
+      type: 'free_text',
+      required: false,
+      defaultValue: '',
+      options: []
+    });
+    setEditingFieldIndex(null);
+    setShowFieldModal(true);
+  };
+
+  const editField = (index: number) => {
+    setCurrentField({ ...templateFields[index] });
+    setEditingFieldIndex(index);
+    setShowFieldModal(true);
+  };
+
+  const saveField = () => {
+    if (!currentField.name?.trim()) {
+      Alert.alert('Invalid Input', 'Please enter a field name.');
+      return;
+    }
+
+    const newField: TemplateField = {
+      id: currentField.id || Date.now().toString(),
+      name: currentField.name.trim(),
+      type: currentField.type || 'free_text',
+      required: currentField.required || false,
+      defaultValue: currentField.defaultValue || '',
+      options: currentField.options || []
+    };
+
+    let updatedFields = [...templateFields];
+    if (editingFieldIndex !== null) {
+      updatedFields[editingFieldIndex] = newField;
+    } else {
+      updatedFields.push(newField);
+    }
+
+    setTemplateFields(updatedFields);
+    setShowFieldModal(false);
+    setCurrentField({});
+    setEditingFieldIndex(null);
+  };
+
+  const removeField = (index: number) => {
+    const updatedFields = templateFields.filter((_, i) => i !== index);
+    setTemplateFields(updatedFields);
   };
 
   const saveTemplate = () => {
@@ -56,10 +136,16 @@ export default function TemplatesScreen() {
       return;
     }
 
+    if (templateFields.length === 0) {
+      Alert.alert('Invalid Input', 'Please add at least one field to the template.');
+      return;
+    }
+
     const newTemplate: Template = {
       id: Date.now().toString(),
       name: newTemplateName.trim(),
-      data: { type: 'manual', data: 'Manual entry' },
+      description: newTemplateDescription.trim(),
+      fields: templateFields,
       createdAt: new Date()
     };
 
@@ -68,8 +154,10 @@ export default function TemplatesScreen() {
     saveTemplates(updatedTemplates);
 
     setNewTemplateName('');
+    setNewTemplateDescription('');
+    setTemplateFields([]);
     setShowTemplateModal(false);
-    Alert.alert('Success', 'Template saved successfully!');
+    Alert.alert('Success', 'Template created successfully!');
   };
 
   const deleteTemplate = (templateId: string) => {
@@ -91,11 +179,29 @@ export default function TemplatesScreen() {
     );
   };
 
+  const addFixedDataOption = () => {
+    const options = currentField.options || [];
+    options.push('');
+    setCurrentField({ ...currentField, options });
+  };
+
+  const updateFixedDataOption = (index: number, value: string) => {
+    const options = [...(currentField.options || [])];
+    options[index] = value;
+    setCurrentField({ ...currentField, options });
+  };
+
+  const removeFixedDataOption = (index: number) => {
+    const options = (currentField.options || []).filter((_, i) => i !== index);
+    setCurrentField({ ...currentField, options });
+  };
+
   const renderTemplate = ({ item }: { item: Template }) => (
     <View style={styles.templateItem}>
       <View style={styles.templateInfo}>
         <Text style={styles.templateName}>{item.name}</Text>
-        <Text style={styles.templateData}>Data: {item.data.data}</Text>
+        <Text style={styles.templateDescription}>{item.description}</Text>
+        <Text style={styles.templateFields}>Fields: {item.fields.length}</Text>
         <Text style={styles.templateDate}>
           Created: {item.createdAt.toLocaleDateString()}
         </Text>
@@ -109,13 +215,37 @@ export default function TemplatesScreen() {
     </View>
   );
 
+  const renderField = ({ item, index }: { item: TemplateField; index: number }) => (
+    <View style={styles.fieldItem}>
+      <View style={styles.fieldInfo}>
+        <Text style={styles.fieldName}>{item.name}</Text>
+        <Text style={styles.fieldType}>Type: {fieldTypes.find(t => t.value === item.type)?.label}</Text>
+        <Text style={styles.fieldRequired}>Required: {item.required ? 'Yes' : 'No'}</Text>
+      </View>
+      <View style={styles.fieldActions}>
+        <TouchableOpacity
+          style={styles.editFieldButton}
+          onPress={() => editField(index)}
+        >
+          <Text style={styles.editFieldButtonText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.removeFieldButton}
+          onPress={() => removeField(index)}
+        >
+          <Text style={styles.removeFieldButtonText}>Remove</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>Data Collector</ThemedText>
 
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Templates: {templates.length}</Text>
-        <Text style={styles.statsText}>Total Files: {templates.length}</Text>
+        <Text style={styles.statsText}>Total Fields: {templates.reduce((sum, t) => sum + t.fields.length, 0)}</Text>
       </View>
 
       <View style={styles.actionContainer}>
@@ -135,33 +265,171 @@ export default function TemplatesScreen() {
         showsVerticalScrollIndicator={false}
       />
 
+      {/* Template Creation Modal */}
       <Modal visible={showTemplateModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create Template</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter template name"
-              value={newTemplateName}
-              onChangeText={setNewTemplateName}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => {
-                  setNewTemplateName('');
-                  setShowTemplateModal(false);
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={saveTemplate}
-              >
-                <Text style={styles.saveButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.largeModalContent}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalTitle}>Create Template</Text>
+              
+              <TextInput
+                style={styles.input}
+                placeholder="Template name"
+                value={newTemplateName}
+                onChangeText={setNewTemplateName}
+              />
+              
+              <TextInput
+                style={styles.input}
+                placeholder="Template description (optional)"
+                value={newTemplateDescription}
+                onChangeText={setNewTemplateDescription}
+                multiline
+              />
+
+              <View style={styles.fieldsSection}>
+                <View style={styles.fieldsSectionHeader}>
+                  <Text style={styles.fieldsSectionTitle}>Fields ({templateFields.length})</Text>
+                  <TouchableOpacity style={styles.addFieldButton} onPress={addField}>
+                    <Text style={styles.addFieldButtonText}>Add Field</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <FlatList
+                  data={templateFields}
+                  renderItem={renderField}
+                  keyExtractor={(item, index) => `${item.id}-${index}`}
+                  style={styles.fieldsList}
+                />
+              </View>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setNewTemplateName('');
+                    setNewTemplateDescription('');
+                    setTemplateFields([]);
+                    setShowTemplateModal(false);
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={saveTemplate}
+                >
+                  <Text style={styles.saveButtonText}>Save Template</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Field Creation/Edit Modal */}
+      <Modal visible={showFieldModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.largeModalContent}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalTitle}>
+                {editingFieldIndex !== null ? 'Edit Field' : 'Add Field'}
+              </Text>
+              
+              <TextInput
+                style={styles.input}
+                placeholder="Field name"
+                value={currentField.name || ''}
+                onChangeText={(text) => setCurrentField({ ...currentField, name: text })}
+              />
+
+              <Text style={styles.label}>Field Type:</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={currentField.type}
+                  onValueChange={(value) => setCurrentField({ ...currentField, type: value })}
+                  style={styles.picker}
+                >
+                  {fieldTypes.map((type) => (
+                    <Picker.Item key={type.value} label={type.label} value={type.value} />
+                  ))}
+                </Picker>
+              </View>
+
+              <View style={styles.checkboxContainer}>
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={() => setCurrentField({ ...currentField, required: !currentField.required })}
+                >
+                  <Text style={styles.checkboxText}>
+                    {currentField.required ? '☑' : '☐'} Required Field
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {(currentField.type === 'free_text' || currentField.type === 'number') && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Default value (optional)"
+                  value={currentField.defaultValue || ''}
+                  onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
+                  keyboardType={currentField.type === 'number' ? 'numeric' : 'default'}
+                />
+              )}
+
+              {currentField.type === 'fixed_date' && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Fixed date (YYYY-MM-DD)"
+                  value={currentField.defaultValue || ''}
+                  onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
+                />
+              )}
+
+              {currentField.type === 'fixed_data' && (
+                <View style={styles.fixedDataSection}>
+                  <Text style={styles.label}>Options:</Text>
+                  {(currentField.options || []).map((option, index) => (
+                    <View key={index} style={styles.optionRow}>
+                      <TextInput
+                        style={[styles.input, styles.optionInput]}
+                        placeholder={`Option ${index + 1}`}
+                        value={option}
+                        onChangeText={(text) => updateFixedDataOption(index, text)}
+                      />
+                      <TouchableOpacity
+                        style={styles.removeOptionButton}
+                        onPress={() => removeFixedDataOption(index)}
+                      >
+                        <Text style={styles.removeOptionButtonText}>×</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                  <TouchableOpacity style={styles.addOptionButton} onPress={addFixedDataOption}>
+                    <Text style={styles.addOptionButtonText}>+ Add Option</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setCurrentField({});
+                    setEditingFieldIndex(null);
+                    setShowFieldModal(false);
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={saveField}
+                >
+                  <Text style={styles.saveButtonText}>Save Field</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -209,7 +477,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
   templatesList: {
     flex: 1,
   },
@@ -234,10 +501,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#2d3748',
   },
-  templateData: {
+  templateDescription: {
     fontSize: 14,
     marginBottom: 5,
     color: '#4a5568',
+  },
+  templateFields: {
+    fontSize: 12,
+    marginBottom: 5,
+    color: '#718096',
   },
   templateDate: {
     fontSize: 12,
@@ -255,18 +527,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContent: {
+  largeModalContent: {
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: '80%',
+    width: '90%',
+    maxHeight: '80%',
   },
   modalTitle: {
     fontSize: 18,
@@ -282,6 +554,151 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     fontSize: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#2d3748',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  picker: {
+    height: 50,
+  },
+  checkboxContainer: {
+    marginBottom: 15,
+  },
+  checkbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkboxText: {
+    fontSize: 16,
+    color: '#2d3748',
+  },
+  fieldsSection: {
+    marginBottom: 20,
+  },
+  fieldsSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  fieldsSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d3748',
+  },
+  addFieldButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+  },
+  addFieldButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  fieldsList: {
+    maxHeight: 200,
+  },
+  fieldItem: {
+    flexDirection: 'row',
+    backgroundColor: '#f7fafc',
+    padding: 10,
+    marginBottom: 5,
+    borderRadius: 5,
+    borderLeftWidth: 3,
+    borderLeftColor: '#4299e1',
+  },
+  fieldInfo: {
+    flex: 1,
+  },
+  fieldName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 2,
+    color: '#2d3748',
+  },
+  fieldType: {
+    fontSize: 12,
+    marginBottom: 2,
+    color: '#4a5568',
+  },
+  fieldRequired: {
+    fontSize: 12,
+    color: '#718096',
+  },
+  fieldActions: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  editFieldButton: {
+    backgroundColor: '#ed8936',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 3,
+  },
+  editFieldButtonText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  removeFieldButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 3,
+  },
+  removeFieldButtonText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  fixedDataSection: {
+    marginBottom: 15,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  optionInput: {
+    flex: 1,
+    marginRight: 10,
+    marginBottom: 0,
+  },
+  removeOptionButton: {
+    backgroundColor: '#e53e3e',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeOptionButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  addOptionButton: {
+    backgroundColor: '#48bb78',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  addOptionButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   modalButtons: {
     flexDirection: 'row',
@@ -311,5 +728,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
 });
