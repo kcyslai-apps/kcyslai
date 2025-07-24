@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#718096',
     position: 'absolute',
-    bottom: 75,
+    bottom: 40,
     left: 0,
     right: 0,
   },
