@@ -547,11 +547,12 @@ const styles = StyleSheet.create({
   },
   templatesContainer: {
     flex: 1,
+    minHeight: 500,
     backgroundColor: '#f8fafc',
     borderRadius: 12,
     padding: 24,
     marginHorizontal: 4,
-    marginVertical: 8,
+    marginVertical: 4,
     boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
     elevation: 4,
     borderWidth: 1,
