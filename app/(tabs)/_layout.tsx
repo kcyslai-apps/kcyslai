@@ -25,7 +25,7 @@ export default function TabLayout() {
           shadowRadius: 0,
           elevation: 0,
         },
-        tabBarActiveTintColor: '#ffffff',
+        tabBarActiveTintColor: '#6c757d',
         tabBarInactiveTintColor: '#6c757d',
         tabBarLabelStyle: {
           fontSize: 16,
