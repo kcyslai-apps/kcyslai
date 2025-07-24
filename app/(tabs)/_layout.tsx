@@ -1,4 +1,3 @@
-
 import { Tabs } from 'expo-router';
 import React from 'react';
 
@@ -10,12 +9,11 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: 'transparent',
           borderTopWidth: 0,
-          height: 100,
+          height: 80,
           paddingBottom: 15,
           paddingTop: 15,
-          paddingHorizontal: 20,
           position: 'absolute',
-          top: '40%',
+          bottom: 50,
           left: 20,
           right: 20,
           borderRadius: 0,
