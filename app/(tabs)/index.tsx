@@ -358,13 +358,18 @@ export default function TemplatesScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.fieldsList}>
+                <ScrollView 
+                  style={styles.fieldsScrollView}
+                  contentContainerStyle={styles.fieldsList}
+                  showsVerticalScrollIndicator={true}
+                  persistentScrollbar={true}
+                >
                   {templateFields.map((item, index) => (
                     <View key={`${item.id}-${index}`}>
                       {renderField({ item, index })}
                     </View>
                   ))}
-                </View>
+                </ScrollView>
               </View>
 
               <View style={styles.modalButtons}>
@@ -664,8 +669,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: '90%',
-    maxHeight: '80%',
+    width: '95%',
+    maxHeight: '90%',
   },
   modalTitle: {
     fontSize: 18,
@@ -734,7 +739,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   fieldsList: {
-    maxHeight: 200,
+    maxHeight: 300,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    backgroundColor: '#f8fafc',
+    paddingVertical: 8,
+  },
+  fieldsScrollView: {
+    maxHeight: 300,
   },
   fieldItem: {
     flexDirection: 'row',
@@ -768,26 +781,46 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   editFieldButton: {
-    backgroundColor: '#ed8936',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 3,
+    backgroundColor: '#f6ad55',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    shadowColor: '#f6ad55',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#fbd38d',
   },
   editFieldButtonText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 'bold',
+    textShadowColor: 'rgba(0,0,0,0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   removeFieldButton: {
-    backgroundColor: '#e53e3e',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 3,
+    backgroundColor: '#fc8181',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    shadowColor: '#fc8181',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#feb2b2',
   },
   removeFieldButtonText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 'bold',
+    textShadowColor: 'rgba(0,0,0,0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   fixedDataSection: {
     marginBottom: 15,
