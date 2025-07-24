@@ -28,9 +28,9 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
     marginTop: 40,
-    color: '#2d3748',
+    color: '#000000',
   },
   actionContainer: {
     width: '100%',
