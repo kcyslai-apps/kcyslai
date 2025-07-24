@@ -27,12 +27,14 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Templates',
+          tabBarIcon: () => null,
         }}
       />
       <Tabs.Screen
         name="data-files"
         options={{
           title: 'Data Files',
+          tabBarIcon: () => null,
         }}
       />
     </Tabs>
