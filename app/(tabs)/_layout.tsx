@@ -26,9 +26,13 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 16,
           fontWeight: 'bold',
-          marginTop: 10,
+          marginTop: 0,
+          marginBottom: 0,
         },
         tabBarShowIcon: false,
+        tabBarIconStyle: {
+          display: 'none',
+        },
       }}
     >
       <Tabs.Screen
