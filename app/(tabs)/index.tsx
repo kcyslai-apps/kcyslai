@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, Modal, TextInput } from 'react-native';
 import { Camera, CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
@@ -92,11 +91,11 @@ export default function TemplatesScreen() {
       type,
       timestamp: new Date()
     };
-    
+
     const updatedScannedData = [...scannedData, newScannedData];
     setScannedData(updatedScannedData);
     saveScannedData(updatedScannedData);
-    
+
     setSelectedData(newScannedData);
     setShowCamera(false);
     Alert.alert('QR Code Scanned', `Type: ${type}\nData: ${data}`);
@@ -138,7 +137,7 @@ export default function TemplatesScreen() {
     const updatedTemplates = [...templates, newTemplate];
     setTemplates(updatedTemplates);
     saveTemplates(updatedTemplates);
-    
+
     setNewTemplateName('');
     setShowTemplateModal(false);
     Alert.alert('Success', 'Template saved successfully!');
@@ -184,7 +183,7 @@ export default function TemplatesScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>Data Collector</ThemedText>
-      
+
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Templates: {templates.length}</Text>
         <Text style={styles.statsText}>Total Files: {templates.length}</Text>
@@ -474,6 +473,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     color: '#718096',
-    marginBottom: 5,
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
   },
 });
