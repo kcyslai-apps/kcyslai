@@ -202,6 +202,23 @@ export default function TemplatesScreen() {
     setShowTemplateModal(true);
   };
 
+  const useTemplate = (template: Template) => {
+    Alert.alert(
+      'Use Template',
+      `Start data collection using "${template.name}" template?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Start Collection',
+          onPress: () => {
+            // Navigate to data collection screen with this template
+            Alert.alert('Data Collection', `Starting data collection with template: ${template.name}\n\nThis will open the data collection interface with the template fields ready for input.`);
+          }
+        }
+      ]
+    );
+  };
+
   const deleteTemplate = (templateId: string) => {
     Alert.alert(
       'Delete Template',
@@ -249,6 +266,12 @@ export default function TemplatesScreen() {
         </Text>
       </View>
       <View style={styles.templateActions}>
+        <TouchableOpacity
+          style={styles.useButton}
+          onPress={() => useTemplate(item)}
+        >
+          <Text style={styles.useButtonText}>▶️ Use</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.viewButton}
           onPress={() => viewTemplate(item)}
@@ -599,7 +622,22 @@ const styles = StyleSheet.create({
   },
   templateActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
+  },
+  useButton: {
+    flex: 1,
+    backgroundColor: '#38a169',
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    alignItems: 'center',
+    boxShadow: '0px 1px 2px rgba(56, 161, 105, 0.2)',
+    elevation: 2,
+  },
+  useButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   viewButton: {
     flex: 1,
