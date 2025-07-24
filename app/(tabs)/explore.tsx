@@ -275,13 +275,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#ffffff',
   },
   title: {
     textAlign: 'center',
     marginBottom: 20,
+    color: '#000000',
   },
   statsContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#f8f9fa',
     padding: 15,
     borderRadius: 8,
     marginBottom: 20,
@@ -318,7 +320,7 @@ const styles = StyleSheet.create({
   },
   fileItem: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#f8f9fa',
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,
@@ -330,15 +332,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#000000',
   },
   fileDetails: {
     fontSize: 14,
-    opacity: 0.7,
+    color: '#333333',
     marginBottom: 5,
   },
   fileDate: {
     fontSize: 12,
-    opacity: 0.5,
+    color: '#666666',
   },
   fileActions: {
     gap: 5,
@@ -364,6 +367,6 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     marginTop: 50,
-    opacity: 0.5,
+    color: '#666666',
   },
 });
