@@ -775,6 +775,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 6,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#f6ad55',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -785,6 +786,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 10,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   removeFieldButton: {
     backgroundColor: '#fc8181',
@@ -792,6 +794,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 6,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#fc8181',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -802,6 +805,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 10,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   fixedDataSection: {
     marginBottom: 15,
