@@ -200,6 +200,8 @@ export default function TemplatesScreen() {
         </TouchableOpacity>
       </View>
 
+      <Text style={styles.poweredByText}>Powered by Smart Alliance</Text>
+
       {selectedData && (
         <View style={styles.selectedDataContainer}>
           <Text style={styles.selectedDataTitle}>Last Scanned:</Text>
@@ -267,8 +269,6 @@ export default function TemplatesScreen() {
           </View>
         </View>
       </Modal>
-      
-      <Text style={styles.poweredByText}>Powered by Smart Alliance</Text>
     </ThemedView>
   );
 }
