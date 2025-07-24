@@ -37,18 +37,19 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
   recordsButton: {
-    backgroundColor: '#38a169',
+    backgroundColor: '#68d391',
     paddingVertical: 18,
     borderRadius: 16,
     alignItems: 'center',
-    boxShadow: '0px 4px 8px rgba(56, 161, 105, 0.3)',
+    boxShadow: '0px 4px 8px rgba(104, 211, 145, 0.3)',
     elevation: 6,
     borderWidth: 2,
-    borderColor: '#48bb78',
+    borderColor: '#9ae6b4',
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
   },
 });
