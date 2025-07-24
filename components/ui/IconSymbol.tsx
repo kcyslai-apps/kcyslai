@@ -20,7 +20,7 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'camera.fill': 'camera-alt',
   'folder.fill': 'folder',
-  'doc.text.fill': 'description',
+  'doc.text.fill': 'insert-drive-file',
   'square.grid.2x2': 'dashboard',
   'paintbrush.fill': 'brush',
   'photo.fill': 'image',
