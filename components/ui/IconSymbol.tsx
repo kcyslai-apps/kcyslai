@@ -21,6 +21,10 @@ const MAPPING = {
   'camera.fill': 'camera-alt',
   'folder.fill': 'folder',
   'doc.text.fill': 'description',
+  'square.grid.2x2': 'dashboard',
+  'paintbrush.fill': 'brush',
+  'photo.fill': 'image',
+  'rectangle.stack.fill': 'layers',
 } as IconMapping;
 
 /**

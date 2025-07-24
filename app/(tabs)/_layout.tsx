@@ -8,16 +8,27 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          display: 'none',
+          backgroundColor: '#ffffff',
+          borderTopWidth: 1,
+          borderTopColor: '#e0e0e0',
+          height: 60,
+          paddingBottom: 5,
+          paddingTop: 5,
+        },
+        tabBarActiveTintColor: '#007AFF',
+        tabBarInactiveTintColor: '#8E8E93',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
         },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: '',
+          title: 'Templates',
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol 
-              size={focused ? 32 : 28} 
+              size={focused ? 26 : 22} 
               name="doc.text.fill" 
               color={color} 
             />
@@ -27,10 +38,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: '',
+          title: 'Data Files',
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol 
-              size={focused ? 32 : 28} 
+              size={focused ? 26 : 22} 
               name="folder.fill" 
               color={color} 
             />
