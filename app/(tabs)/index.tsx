@@ -636,7 +636,7 @@ export default function TemplatesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#404040',
     paddingTop: 60,
   },
   header: {
@@ -982,8 +982,7 @@ const styles = StyleSheet.create({
   },
   fieldOptions: {
     fontSize: 12,
-    color: '#718096',
-    fontStyle: 'italic',
+    color: '#718096',    fontStyle: 'italic',
     fontWeight: '500',
   },
   removeFieldText: {
