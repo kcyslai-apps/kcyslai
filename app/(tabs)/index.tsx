@@ -35,6 +35,7 @@ export default function TemplatesScreen() {
   });
   const [fieldOptions, setFieldOptions] = useState<string>('');
   const [showFieldTypeDropdown, setShowFieldTypeDropdown] = useState(false);
+  const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number>(-1);
 
   useEffect(() => {
     loadTemplates();
@@ -252,16 +253,27 @@ export default function TemplatesScreen() {
                       { key: 'fixeddata', label: 'Fixed Data' },
                       { key: 'fixeddate', label: 'Fixed Date' },
                       { key: 'barcode', label: 'Barcode' }
-                    ].map((typeOption) => (
+                    ].map((typeOption, index) => (
                       <TouchableOpacity
                         key={typeOption.key}
-                        style={styles.dropdownOption}
+                        style={[
+                          styles.dropdownOption,
+                          hoveredOptionIndex === index && styles.dropdownOptionHovered
+                        ]}
                         onPress={() => {
                           setNewField(prev => ({ ...prev, type: typeOption.key as any }));
                           setShowFieldTypeDropdown(false);
+                          setHoveredOptionIndex(-1);
                         }}
+                        onPressIn={() => setHoveredOptionIndex(index)}
+                        onPressOut={() => setHoveredOptionIndex(-1)}
                       >
-                        <Text style={styles.dropdownOptionText}>{typeOption.label}</Text>
+                        <Text style={[
+                          styles.dropdownOptionText,
+                          hoveredOptionIndex === index && styles.dropdownOptionTextHovered
+                        ]}>
+                          {typeOption.label}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -522,10 +534,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f1f3f4',
   },
+  dropdownOptionHovered: {
+    backgroundColor: '#007AFF',
+  },
   dropdownOptionText: {
     fontSize: 16,
     color: '#000000',
     fontWeight: '600',
+  },
+  dropdownOptionTextHovered: {
+    color: '#ffffff',
   },
   addFieldButton: {
     backgroundColor: '#007AFF',
