@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     marginTop: 40,
+    color: '#000000',
   },
   statsContainer: {
     flexDirection: 'row',
