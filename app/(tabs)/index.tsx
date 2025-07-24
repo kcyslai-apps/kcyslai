@@ -190,6 +190,10 @@ export default function TemplatesScreen() {
       </View>
 
       <View style={styles.actionContainer}>
+        <TouchableOpacity style={styles.scanButton} onPress={startScanning}>
+          <Text style={styles.buttonText}>Start Scanning</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity 
           style={[styles.templateButton, !selectedData && styles.disabledButton]} 
           onPress={createTemplate}
@@ -300,6 +304,12 @@ const styles = StyleSheet.create({
   actionContainer: {
     gap: 10,
     marginBottom: 20,
+  },
+  scanButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   templateButton: {
     backgroundColor: '#48bb78',
