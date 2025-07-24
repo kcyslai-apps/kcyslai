@@ -216,8 +216,6 @@ export default function TemplatesScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      <Text style={styles.poweredByText}>Powered by Smart Alliance</Text>
-
       <Modal visible={showCamera} animationType="slide">
         <View style={styles.cameraContainer}>
           <CameraView
@@ -269,6 +267,8 @@ export default function TemplatesScreen() {
           </View>
         </View>
       </Modal>
+      
+      <Text style={styles.poweredByText}>Powered by Smart Alliance</Text>
     </ThemedView>
   );
 }
