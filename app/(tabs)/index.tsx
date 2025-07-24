@@ -279,6 +279,20 @@ export default function TemplatesScreen() {
         <Text style={styles.fieldType}>Type: {fieldTypes.find(t => t.value === item.type)?.label}</Text>
         <Text style={styles.fieldRequired}>Required: {item.required ? 'Yes' : 'No'}</Text>
       </View>
+      <View style={styles.fieldActions}>
+        <TouchableOpacity
+          style={styles.editFieldButton}
+          onPress={() => editField(index)}
+        >
+          <Text style={styles.editFieldButtonText}>✏️ Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.removeFieldButton}
+          onPress={() => removeField(index)}
+        >
+          <Text style={styles.removeFieldButtonText}>🗑️ Delete</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -751,7 +765,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#718096',
   },
-  
+  fieldActions: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  editFieldButton: {
+    flex: 1,
+    backgroundColor: '#f6ad55',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#f6ad55',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  editFieldButtonText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  removeFieldButton: {
+    flex: 1,
+    backgroundColor: '#fc8181',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#fc8181',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  removeFieldButtonText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
   fixedDataSection: {
     marginBottom: 15,
   },
