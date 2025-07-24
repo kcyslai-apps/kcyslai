@@ -37,6 +37,14 @@ export default function TemplatesScreen() {
   const [showFieldTypeDropdown, setShowFieldTypeDropdown] = useState(false);
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number>(-1);
 
+  const handleTouchMove = (event: any, index: number) => {
+    const { locationY } = event.nativeEvent;
+    // Check if finger is still within the option bounds
+    if (locationY >= 0 && locationY <= 50) { // Assuming each option is ~50 points tall
+      setHoveredOptionIndex(index);
+    }
+  };
+
   useEffect(() => {
     loadTemplates();
   }, []);
@@ -265,8 +273,11 @@ export default function TemplatesScreen() {
                           setShowFieldTypeDropdown(false);
                           setHoveredOptionIndex(-1);
                         }}
-                        onPressIn={() => setHoveredOptionIndex(index)}
-                        onPressOut={() => setHoveredOptionIndex(-1)}
+                        onTouchStart={() => setHoveredOptionIndex(index)}
+                        onTouchMove={(event) => handleTouchMove(event, index)}
+                        onTouchEnd={() => setHoveredOptionIndex(-1)}
+                        onTouchCancel={() => setHoveredOptionIndex(-1)}
+                        activeOpacity={0.7}
                       >
                         <Text style={[
                           styles.dropdownOptionText,
