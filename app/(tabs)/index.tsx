@@ -333,18 +333,16 @@ export default function TemplatesScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.templatesContainer}>
-        <FlatList
-          data={templates}
-          renderItem={renderTemplate}
-          keyExtractor={(item) => item.id}
-          style={styles.templatesList}
-          showsVerticalScrollIndicator={true}
-          scrollIndicatorInsets={{ right: 2 }}
-          persistentScrollbar={true}
-          indicatorStyle="black"
-        />
-      </View>
+      <FlatList
+        data={templates}
+        renderItem={renderTemplate}
+        keyExtractor={(item) => item.id}
+        style={styles.templatesList}
+        showsVerticalScrollIndicator={true}
+        scrollIndicatorInsets={{ right: 2 }}
+        persistentScrollbar={true}
+        indicatorStyle="black"
+      />
 
       {/* Template Creation Modal */}
       <Modal visible={showTemplateModal} transparent animationType="fade">
@@ -567,19 +565,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
-  },
-  templatesContainer: {
-    flex: 1,
-    minHeight: 500,
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    padding: 20,
-    marginHorizontal: 0,
-    marginVertical: 4,
-    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   templatesList: {
     flex: 1,
