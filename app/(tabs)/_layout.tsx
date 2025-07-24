@@ -22,14 +22,14 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
-            height: 85,
-            paddingBottom: 20,
-            paddingTop: 10,
+            height: 90,
+            paddingBottom: 25,
+            paddingTop: 12,
           },
           default: {
-            height: 70,
-            paddingBottom: 10,
-            paddingTop: 10,
+            height: 80,
+            paddingBottom: 15,
+            paddingTop: 12,
             backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
             borderTopWidth: 1,
             borderTopColor: colorScheme === 'dark' ? '#333' : '#e0e0e0',
@@ -44,12 +44,15 @@ export default function TabLayout() {
           },
         }),
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600',
-          marginTop: 2,
+          marginTop: 4,
+          lineHeight: 12,
+          textAlign: 'center',
         },
         tabBarIconStyle: {
-          marginBottom: -2,
+          marginBottom: 0,
+          marginTop: 2,
         },
       }}>
       <Tabs.Screen
