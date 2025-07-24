@@ -276,6 +276,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#ffffff',
+    zIndex: 1,
   },
   title: {
     textAlign: 'center',
@@ -324,6 +325,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,
+    zIndex: 2,
   },
   fileInfo: {
     flex: 1,

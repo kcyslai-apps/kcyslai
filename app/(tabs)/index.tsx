@@ -958,8 +958,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scannerContainer: {
-    flex: 1,
-    backgroundColor: '#000000',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+    elevation: 1000,
   },
   scannerHeader: {
     flexDirection: 'row',
@@ -996,8 +1004,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 100,
+    paddingHorizontal: 50,
+    zIndex: 1001,
+    elevation: 1001,
   },
   scannerFrame: {
     width: 250,
@@ -1040,4 +1051,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
