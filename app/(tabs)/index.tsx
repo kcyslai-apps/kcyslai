@@ -86,7 +86,6 @@ export default function TemplatesScreen() {
 
   const createTemplate = () => {
     setNewTemplateName('');
-    setNewTemplateDescription('');
     setTemplateFields([]);
     setEditingTemplateId(null);
     setShowTemplateModal(true);
@@ -162,7 +161,6 @@ export default function TemplatesScreen() {
           ? {
               ...template,
               name: newTemplateName.trim(),
-              description: newTemplateDescription.trim(),
               fields: templateFields,
             }
           : template
@@ -173,7 +171,7 @@ export default function TemplatesScreen() {
       const newTemplate: Template = {
         id: Date.now().toString(),
         name: newTemplateName.trim(),
-        description: newTemplateDescription.trim(),
+        description: '',
         fields: templateFields,
         createdAt: new Date()
       };
@@ -185,7 +183,6 @@ export default function TemplatesScreen() {
     saveTemplates(updatedTemplates);
 
     setNewTemplateName('');
-    setNewTemplateDescription('');
     setTemplateFields([]);
     setEditingTemplateId(null);
     setShowTemplateModal(false);
@@ -201,7 +198,6 @@ export default function TemplatesScreen() {
 
   const editTemplate = (template: Template) => {
     setNewTemplateName(template.name);
-    setNewTemplateDescription(template.description);
     setTemplateFields([...template.fields]);
     setEditingTemplateId(template.id);
     setShowTemplateModal(true);
@@ -341,14 +337,6 @@ export default function TemplatesScreen() {
                 value={newTemplateName}
                 onChangeText={setNewTemplateName}
               />
-              
-              <TextInput
-                style={styles.input}
-                placeholder="Template description (optional)"
-                value={newTemplateDescription}
-                onChangeText={setNewTemplateDescription}
-                multiline
-              />
 
               <View style={styles.fieldsSection}>
                 <View style={styles.fieldsSectionHeader}>
@@ -379,7 +367,6 @@ export default function TemplatesScreen() {
                   style={styles.cancelButton}
                   onPress={() => {
                     setNewTemplateName('');
-                    setNewTemplateDescription('');
                     setTemplateFields([]);
                     setEditingTemplateId(null);
                     setShowTemplateModal(false);
