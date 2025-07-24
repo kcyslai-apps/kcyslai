@@ -36,6 +36,10 @@ export default function TemplatesScreen() {
   const [fieldOptions, setFieldOptions] = useState<string>('');
   const [showFieldTypeDropdown, setShowFieldTypeDropdown] = useState(false);
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number>(-1);
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [showDataInputModal, setShowDataInputModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [dataInputValues, setDataInputValues] = useState<{[key: string]: string}>({});
 
   const handleTouchMove = (event: any, index: number) => {
     const { locationY } = event.nativeEvent;
@@ -85,21 +89,40 @@ export default function TemplatesScreen() {
       return;
     }
 
-    const template: Template = {
-      id: Date.now().toString(),
-      name: newTemplate.name,
-      description: '', // Set empty description since we removed the field
-      fields: newTemplate.fields as TemplateField[],
-      createdAt: new Date().toISOString()
-    };
+    if (editingTemplate) {
+      // Update existing template
+      const updatedTemplate: Template = {
+        ...editingTemplate,
+        name: newTemplate.name,
+        fields: newTemplate.fields as TemplateField[],
+      };
 
-    const updatedTemplates = [...templates, template];
-    setTemplates(updatedTemplates);
-    await saveTemplates(updatedTemplates);
+      const updatedTemplates = templates.map(t => 
+        t.id === editingTemplate.id ? updatedTemplate : t
+      );
+      setTemplates(updatedTemplates);
+      await saveTemplates(updatedTemplates);
+      
+      setEditingTemplate(null);
+      Alert.alert('Success', 'Template updated successfully');
+    } else {
+      // Create new template
+      const template: Template = {
+        id: Date.now().toString(),
+        name: newTemplate.name,
+        description: '',
+        fields: newTemplate.fields as TemplateField[],
+        createdAt: new Date().toISOString()
+      };
+
+      const updatedTemplates = [...templates, template];
+      setTemplates(updatedTemplates);
+      await saveTemplates(updatedTemplates);
+      Alert.alert('Success', 'Template created successfully');
+    }
     
     setNewTemplate({ name: '', description: '', fields: [] });
     setShowCreateModal(false);
-    Alert.alert('Success', 'Template created successfully');
   };
 
   const addField = () => {
@@ -137,6 +160,64 @@ export default function TemplatesScreen() {
     }));
   };
 
+  const editTemplate = (template: Template) => {
+    setEditingTemplate(template);
+    setNewTemplate({
+      name: template.name,
+      description: template.description,
+      fields: template.fields
+    });
+    setShowCreateModal(true);
+  };
+
+  const useTemplate = (template: Template) => {
+    setSelectedTemplate(template);
+    setDataInputValues({});
+    setShowDataInputModal(true);
+  };
+
+  const saveDataEntry = async () => {
+    if (!selectedTemplate) return;
+
+    // Validate required fields
+    for (const field of selectedTemplate.fields) {
+      if (field.required && !dataInputValues[field.id]?.trim()) {
+        Alert.alert('Error', `${field.name} is required`);
+        return;
+      }
+    }
+
+    // Save data entry to file
+    try {
+      const dataEntry = {
+        id: Date.now().toString(),
+        templateId: selectedTemplate.id,
+        templateName: selectedTemplate.name,
+        data: dataInputValues,
+        createdAt: new Date().toISOString()
+      };
+
+      const fileUri = FileSystem.documentDirectory + 'data_entries.json';
+      const fileExists = await FileSystem.getInfoAsync(fileUri);
+      
+      let existingEntries = [];
+      if (fileExists.exists) {
+        const content = await FileSystem.readAsStringAsync(fileUri);
+        existingEntries = JSON.parse(content);
+      }
+
+      existingEntries.push(dataEntry);
+      await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(existingEntries, null, 2));
+
+      setShowDataInputModal(false);
+      setDataInputValues({});
+      Alert.alert('Success', 'Data entry saved successfully');
+    } catch (error) {
+      console.error('Error saving data entry:', error);
+      Alert.alert('Error', 'Failed to save data entry');
+    }
+  };
+
   const deleteTemplate = async (templateId: string) => {
     Alert.alert(
       'Delete Template',
@@ -160,12 +241,26 @@ export default function TemplatesScreen() {
     <View style={styles.templateItem}>
       <View style={styles.templateHeader}>
         <Text style={styles.templateName}>{item.name}</Text>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => deleteTemplate(item.id)}
-        >
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+        <View style={styles.templateActions}>
+          <TouchableOpacity
+            style={styles.useButton}
+            onPress={() => useTemplate(item)}
+          >
+            <Text style={styles.useButtonText}>Use</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => editTemplate(item)}
+          >
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => deleteTemplate(item.id)}
+          >
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <Text style={styles.templateDescription}>{item.description}</Text>
       <Text style={styles.templateFields}>
@@ -209,7 +304,9 @@ export default function TemplatesScreen() {
             <TouchableOpacity onPress={() => setShowCreateModal(false)}>
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: '700' }}>Create Template</Text>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '700' }}>
+              {editingTemplate ? 'Edit Template' : 'Create Template'}
+            </Text>
             <TouchableOpacity onPress={createTemplate}>
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
@@ -334,6 +431,114 @@ export default function TemplatesScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Data Input Modal */}
+      <Modal
+        visible={showDataInputModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowDataInputModal(false)}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '700' }}>
+              Enter Data: {selectedTemplate?.name}
+            </Text>
+            <TouchableOpacity onPress={saveDataEntry}>
+              <Text style={styles.saveText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalContent}>
+            {selectedTemplate?.fields.map((field) => (
+              <View key={field.id} style={styles.dataFieldContainer}>
+                <Text style={styles.dataFieldLabel}>
+                  {field.name} {field.required && <Text style={styles.requiredAsterisk}>*</Text>}
+                </Text>
+                
+                {field.type === 'fixeddata' && field.options ? (
+                  <View style={styles.dropdownContainer}>
+                    <TouchableOpacity 
+                      style={styles.dropdown}
+                      onPress={() => {
+                        // Could implement dropdown for fixed data options
+                        Alert.alert(
+                          'Select Option',
+                          'Choose an option:',
+                          field.options?.map(option => ({
+                            text: option,
+                            onPress: () => setDataInputValues(prev => ({
+                              ...prev,
+                              [field.id]: option
+                            }))
+                          })) || []
+                        );
+                      }}
+                    >
+                      <Text style={styles.dropdownText}>
+                        {dataInputValues[field.id] || 'Select an option'}
+                      </Text>
+                      <Text style={styles.dropdownArrow}>▼</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : field.type === 'date' ? (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="YYYY-MM-DD"
+                    value={dataInputValues[field.id] || ''}
+                    onChangeText={(text) => setDataInputValues(prev => ({
+                      ...prev,
+                      [field.id]: text
+                    }))}
+                  />
+                ) : field.type === 'number' ? (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter number"
+                    keyboardType="numeric"
+                    value={dataInputValues[field.id] || ''}
+                    onChangeText={(text) => setDataInputValues(prev => ({
+                      ...prev,
+                      [field.id]: text
+                    }))}
+                  />
+                ) : field.type === 'barcode' ? (
+                  <View>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Scan or enter barcode"
+                      value={dataInputValues[field.id] || ''}
+                      onChangeText={(text) => setDataInputValues(prev => ({
+                        ...prev,
+                        [field.id]: text
+                      }))}
+                    />
+                    <TouchableOpacity 
+                      style={styles.scanButton}
+                      onPress={() => Alert.alert('Scanner', 'Barcode scanner functionality would be implemented here')}
+                    >
+                      <Text style={styles.scanButtonText}>Scan Barcode</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TextInput
+                    style={styles.input}
+                    placeholder={`Enter ${field.name.toLowerCase()}`}
+                    value={dataInputValues[field.id] || ''}
+                    onChangeText={(text) => setDataInputValues(prev => ({
+                      ...prev,
+                      [field.id]: text
+                    }))}
+                    multiline={field.type === 'freetext'}
+                  />
+                )}
+              </View>
+            ))}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -396,6 +601,36 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#2D3748',
   },
+  templateActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  useButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    boxShadow: '0 2px 4px rgba(0, 122, 255, 0.3)',
+    elevation: 3,
+  },
+  useButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  editButton: {
+    backgroundColor: '#34C759',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    boxShadow: '0 2px 4px rgba(52, 199, 89, 0.3)',
+    elevation: 3,
+  },
+  editButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
   deleteButton: {
     backgroundColor: '#FF6B6B',
     paddingHorizontal: 12,
@@ -407,6 +642,30 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: 'white',
     fontSize: 12,
+    fontWeight: '600',
+  },
+  dataFieldContainer: {
+    marginBottom: 20,
+  },
+  dataFieldLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#2D3748',
+  },
+  requiredAsterisk: {
+    color: '#FF6B6B',
+  },
+  scanButton: {
+    backgroundColor: '#FF9500',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  scanButtonText: {
+    color: 'white',
     fontWeight: '600',
   },
   templateDescription: {
