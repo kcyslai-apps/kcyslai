@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, Modal, TextInput, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as FileSystem from 'expo-file-system';
+import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -211,8 +212,8 @@ export default function TemplatesScreen() {
         {
           text: 'Start Collection',
           onPress: () => {
-            // Navigate to data collection screen with this template
-            Alert.alert('Data Collection', `Starting data collection with template: ${template.name}\n\nThis will open the data collection interface with the template fields ready for input.`);
+            // Navigate to data entry screen with this template
+            router.push(`/data-entry?templateId=${template.id}`);
           }
         }
       ]
@@ -330,6 +331,12 @@ export default function TemplatesScreen() {
           onPress={createTemplate}
         >
           <Text style={styles.buttonText}>Create Template</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.recordsButton} 
+          onPress={() => router.push('/data-records')}
+        >
+          <Text style={styles.buttonText}>View Data Records</Text>
         </TouchableOpacity>
       </View>
 
@@ -559,6 +566,16 @@ const styles = StyleSheet.create({
     elevation: 6,
     borderWidth: 2,
     borderColor: '#9ae6b4',
+  },
+  recordsButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    boxShadow: '0px 4px 8px rgba(66, 153, 225, 0.3)',
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: '#63b3ed',
   },
   buttonText: {
     color: 'white',
