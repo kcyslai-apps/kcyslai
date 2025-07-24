@@ -24,43 +24,38 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
-            height: 80 + insets.bottom,
-            paddingBottom: insets.bottom + 12,
-            paddingTop: 16,
+            height: 70 + insets.bottom,
+            paddingBottom: insets.bottom + 8,
+            paddingTop: 12,
             backgroundColor: colorScheme === 'dark' ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
-            borderTopWidth: 0.5,
-            borderTopColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-            borderRadius: 20,
-            marginHorizontal: 16,
-            marginBottom: 20,
+            borderTopWidth: 0,
+            borderRadius: 25,
+            marginHorizontal: 20,
+            marginBottom: 25,
           },
           default: {
-            height: 80 + Math.max(insets.bottom, 20),
-            paddingBottom: Math.max(insets.bottom, 20),
-            paddingTop: 16,
+            height: 70 + Math.max(insets.bottom, 20),
+            paddingBottom: Math.max(insets.bottom, 15),
+            paddingTop: 12,
             backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
             borderTopWidth: 0,
-            borderRadius: 20,
-            marginHorizontal: 16,
-            marginBottom: 20,
+            borderRadius: 25,
+            marginHorizontal: 20,
+            marginBottom: 25,
             boxShadow: colorScheme === 'dark' 
-              ? '0 -8px 32px rgba(0, 0, 0, 0.4)' 
-              : '0 -8px 32px rgba(0, 0, 0, 0.08)',
-            elevation: 12,
+              ? '0 -10px 40px rgba(0, 0, 0, 0.5)' 
+              : '0 -10px 40px rgba(0, 0, 0, 0.1)',
+            elevation: 15,
           },
         }),
         tabBarLabelStyle: {
-          fontSize: 13,
-          fontWeight: '600',
-          marginTop: 6,
-          lineHeight: 16,
-          textAlign: 'center',
-          letterSpacing: 0.5,
+          display: 'none',
         },
+        tabBarShowLabel: false,
         tabBarIconStyle: {
-          marginBottom: 2,
-          marginTop: 4,
+          marginBottom: 0,
+          marginTop: 0,
         },
       }}>
       <Tabs.Screen
@@ -69,7 +64,7 @@ export default function TabLayout() {
           title: 'Templates',
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol 
-              size={focused ? 26 : 24} 
+              size={focused ? 28 : 26} 
               name="doc.text.fill" 
               color={color} 
             />
@@ -82,7 +77,7 @@ export default function TabLayout() {
           title: 'Files',
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol 
-              size={focused ? 26 : 24} 
+              size={focused ? 28 : 26} 
               name="folder.fill" 
               color={color} 
             />
