@@ -1,6 +1,7 @@
 
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Text } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -21,14 +22,14 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#4299e1',
         tabBarInactiveTintColor: '#718096',
         tabBarLabelStyle: {
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: 'bold',
-          marginTop: -15,
+          marginTop: 2,
           marginBottom: 0,
         },
-        tabBarShowIcon: false,
+        tabBarShowIcon: true,
         tabBarIconStyle: {
-          display: 'none',
+          marginBottom: -3,
         },
       }}
     >
@@ -36,12 +37,24 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ 
+              fontSize: 20,
+              color: focused ? '#4299e1' : '#718096',
+            }}>🏠</Text>
+          ),
         }}
       />
       <Tabs.Screen
         name="data-files"
         options={{
           title: 'Data Files',
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ 
+              fontSize: 20,
+              color: focused ? '#4299e1' : '#718096',
+            }}>📁</Text>
+          ),
         }}
       />
     </Tabs>
