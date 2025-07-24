@@ -474,8 +474,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#718096',
     position: 'absolute',
-    top: 50,
+    top: '50%',
     left: 0,
     right: 0,
+    transform: [{ translateY: -6 }],
   },
 });
