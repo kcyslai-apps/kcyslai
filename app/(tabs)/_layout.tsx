@@ -15,7 +15,7 @@ export default function TabLayout() {
           paddingTop: 15,
           height: 70,
           position: 'absolute',
-          bottom: 20,
+          bottom: 40,
           left: 0,
           right: 0,
         },
