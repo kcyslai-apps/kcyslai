@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { CameraView, Camera } from 'expo-camera';
 
 interface Template {
   id: string;
@@ -19,7 +19,7 @@ interface TemplateField {
   options?: string[]; // for fixeddata type
 }
 
-function TemplatesScreenComponent() {
+export default function TemplatesScreen() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTemplate, setNewTemplate] = useState<Partial<Template>>({
@@ -58,7 +58,7 @@ function TemplatesScreenComponent() {
   }, []);
 
   const getCameraPermissions = async () => {
-    const { status } = await BarCodeScanner.requestPermissionsAsync();
+    const { status } = await Camera.requestCameraPermissionsAsync();
     setHasCameraPermission(status === 'granted');
   };
 
@@ -612,8 +612,11 @@ function TemplatesScreenComponent() {
             </View>
           ) : (
             <View style={styles.scannerCameraContainer}>
-              <BarCodeScanner
-                onBarCodeScanned={showBarcodeScanner ? handleBarCodeScanned : undefined}
+              <CameraView
+                onBarcodeScanned={showBarcodeScanner ? handleBarCodeScanned : undefined}
+                barcodeScannerSettings={{
+                  barcodeTypes: ["qr", "pdf417", "code128", "code39", "code93", "codabar", "ean13", "ean8", "upc_e", "datamatrix", "aztec"],
+                }}
                 style={styles.scanner}
               />
               <View style={styles.scannerOverlay}>
@@ -1038,7 +1041,3 @@ const styles = StyleSheet.create({
   },
 });
 
-// Ensure proper default export
-export default function TemplatesScreen() {
-  return TemplatesScreenComponent();
-}
