@@ -209,6 +209,8 @@ export default function TemplatesScreen() {
   const [selectedTemplateForUse, setSelectedTemplateForUse] = useState<Template | null>(null);
   const [showViewTemplateModal, setShowViewTemplateModal] = useState(false);
   const [selectedTemplateForView, setSelectedTemplateForView] = useState<Template | null>(null);
+  const [showDeleteTemplateModal, setShowDeleteTemplateModal] = useState(false);
+  const [selectedTemplateForDelete, setSelectedTemplateForDelete] = useState<Template | null>(null);
 
   const useTemplate = (template: Template) => {
     setSelectedTemplateForUse(template);
@@ -229,22 +231,26 @@ export default function TemplatesScreen() {
   };
 
   const deleteTemplate = (templateId: string) => {
-    Alert.alert(
-      'Delete Template',
-      'Are you sure you want to delete this template?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            const updatedTemplates = templates.filter(t => t.id !== templateId);
-            setTemplates(updatedTemplates);
-            saveTemplates(updatedTemplates);
-          }
-        }
-      ]
-    );
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setSelectedTemplateForDelete(template);
+      setShowDeleteTemplateModal(true);
+    }
+  };
+
+  const confirmDeleteTemplate = () => {
+    if (selectedTemplateForDelete) {
+      const updatedTemplates = templates.filter(t => t.id !== selectedTemplateForDelete.id);
+      setTemplates(updatedTemplates);
+      saveTemplates(updatedTemplates);
+      setShowDeleteTemplateModal(false);
+      setSelectedTemplateForDelete(null);
+    }
+  };
+
+  const cancelDeleteTemplate = () => {
+    setShowDeleteTemplateModal(false);
+    setSelectedTemplateForDelete(null);
   };
 
   const addFixedDataOption = () => {
@@ -593,6 +599,40 @@ export default function TemplatesScreen() {
                 onPress={closeViewTemplate}
               >
                 <Text style={styles.viewTemplateCloseButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete Template Modal */}
+      <Modal visible={showDeleteTemplateModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteTemplateModalContent}>
+            <Text style={styles.deleteTemplateModalTitle}>🗑️ Delete Template</Text>
+            
+            <View style={styles.deleteTemplateInfo}>
+              <Text style={styles.deleteTemplateNameText}>
+                "{selectedTemplateForDelete?.name}"
+              </Text>
+              
+              <Text style={styles.deleteTemplateWarningText}>
+                Are you sure you want to delete this template? This action cannot be undone.
+              </Text>
+            </View>
+
+            <View style={styles.deleteTemplateButtons}>
+              <TouchableOpacity
+                style={styles.deleteTemplateCancelButton}
+                onPress={cancelDeleteTemplate}
+              >
+                <Text style={styles.deleteTemplateCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteTemplateConfirmButton}
+                onPress={confirmDeleteTemplate}
+              >
+                <Text style={styles.deleteTemplateConfirmButtonText}>Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1127,6 +1167,86 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   viewTemplateCloseButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  deleteTemplateModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 340,
+    alignItems: 'center',
+    boxShadow: '0px 8px 32px rgba(0, 0, 0, 0.12)',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+  },
+  deleteTemplateModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  deleteTemplateInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  deleteTemplateNameText: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#fc8181',
+    minWidth: '80%',
+    boxShadow: '0px 2px 8px rgba(252, 129, 129, 0.15)',
+    elevation: 3,
+  },
+  deleteTemplateWarningText: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  deleteTemplateButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  deleteTemplateCancelButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    minWidth: 80,
+  },
+  deleteTemplateCancelButtonText: {
+    color: '#718096',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  deleteTemplateConfirmButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  deleteTemplateConfirmButtonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
