@@ -592,7 +592,7 @@ export default function TemplatesScreen() {
                     <TextInput
                       style={styles.compactInput}
                       placeholder="csv"
-                      value={csvExportSettings.fileExtension || 'csv'}
+                      value={csvExportSettings.fileExtension || ''}
                       onChangeText={(text) => setCsvExportSettings(prev => ({
                         ...prev,
                         fileExtension: text.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
