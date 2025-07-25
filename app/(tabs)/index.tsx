@@ -672,31 +672,40 @@ export default function TemplatesScreen() {
               </View>
 
               {(currentField.type === 'free_text' || currentField.type === 'number') && (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Default value (optional)"
-                  value={currentField.defaultValue || ''}
-                  onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
-                  keyboardType={currentField.type === 'number' ? 'numeric' : 'default'}
-                />
+                <View style={styles.defaultValueSection}>
+                  <Text style={styles.defaultValueLabel}>Default Value (Optional):</Text>
+                  <TextInput
+                    style={[styles.input, styles.defaultValueInput]}
+                    placeholder={`Enter default ${currentField.type === 'number' ? 'number' : 'text'}`}
+                    value={currentField.defaultValue || ''}
+                    onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
+                    keyboardType={currentField.type === 'number' ? 'numeric' : 'default'}
+                  />
+                </View>
               )}
 
               {currentField.type === 'fixed_date' && (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Fixed date (YYYY-MM-DD)"
-                  value={currentField.defaultValue || ''}
-                  onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
-                />
+                <View style={styles.defaultValueSection}>
+                  <Text style={styles.defaultValueLabel}>Fixed Date Value:</Text>
+                  <TextInput
+                    style={[styles.input, styles.defaultValueInput]}
+                    placeholder="YYYY-MM-DD"
+                    value={currentField.defaultValue || ''}
+                    onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
+                  />
+                </View>
               )}
 
               {currentField.type === 'fixed_data' && (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Default value (optional)"
-                  value={currentField.defaultValue || ''}
-                  onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
-                />
+                <View style={styles.defaultValueSection}>
+                  <Text style={styles.defaultValueLabel}>Default Value (Optional):</Text>
+                  <TextInput
+                    style={[styles.input, styles.defaultValueInput]}
+                    placeholder="Enter default selection"
+                    value={currentField.defaultValue || ''}
+                    onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
+                  />
+                </View>
               )}
 
               {currentField.type === 'fixed_data' && (
@@ -1623,5 +1632,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     padding: 16,
+  },
+  defaultValueSection: {
+    marginBottom: 15,
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  defaultValueLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 8,
+  },
+  defaultValueInput: {
+    backgroundColor: '#ffffff',
+    borderWidth: 2,
+    borderColor: '#cbd5e0',
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#2d3748',
   },
 });
