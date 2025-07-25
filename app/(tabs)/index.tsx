@@ -508,18 +508,19 @@ export default function TemplatesScreen() {
                   {/* Header Option - Vertical Layout */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Header Option</Text>
-                    <TouchableOpacity
-                      style={styles.compactCheckbox}
-                      onPress={() => setCsvExportSettings(prev => ({
-                        ...prev,
-                        includeHeader: !prev.includeHeader
-                      }))}
-                    >
-                      <Text style={styles.compactCheckboxIcon}>
-                        {csvExportSettings.includeHeader ? '✅' : '🚫'}
-                      </Text>
-                      <Text style={styles.compactCheckboxText}>Include Header</Text>
-                    </TouchableOpacity>
+                    <View style={styles.compactPickerContainer}>
+                      <Picker
+                        selectedValue={csvExportSettings.includeHeader ? 'with' : 'without'}
+                        onValueChange={(value) => setCsvExportSettings(prev => ({
+                          ...prev,
+                          includeHeader: value === 'with'
+                        }))}
+                        style={styles.compactPicker}
+                      >
+                        <Picker.Item label="With Header" value="with" />
+                        <Picker.Item label="Without Header" value="without" />
+                      </Picker>
+                    </View>
                   </View>
 
                   {/* Delimiter Selection - Vertical Layout */}
