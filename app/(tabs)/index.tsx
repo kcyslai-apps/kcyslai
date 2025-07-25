@@ -790,9 +790,6 @@ export default function TemplatesScreen() {
               
               <View style={styles.viewTemplateDetails}>
                 <Text style={styles.viewTemplateDetailText}>
-                  Description: {selectedTemplateForView?.description || 'No description'}
-                </Text>
-                <Text style={styles.viewTemplateDetailText}>
                   Fields: {selectedTemplateForView?.fields.length || 0}
                 </Text>
                 
