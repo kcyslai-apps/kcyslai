@@ -197,6 +197,11 @@ export default function TemplatesScreen() {
       return;
     }
 
+    if (!validateColumnPositions()) {
+      Alert.alert('Invalid CSV Settings', 'Please fix duplicate column positions before saving the template.');
+      return;
+    }
+
     let updatedTemplates;
     if (editingTemplateId) {
       // Edit existing template
