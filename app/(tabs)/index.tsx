@@ -1569,16 +1569,19 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     borderRadius: 6,
     backgroundColor: 'white',
-    height: 40,
+    height: 50,
+    justifyContent: 'center',
   },
   compactPicker: {
-    height: 40,
-    fontSize: 14,
+    height: 50,
+    fontSize: 16,
     color: '#2d3748',
+    textAlign: 'center',
   },
   pickerItem: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#2d3748',
+    height: 50,
   },
   customDelimiterContainer: {
     marginBottom: 16,
