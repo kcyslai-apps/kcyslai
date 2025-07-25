@@ -20,6 +20,7 @@ interface CSVExportSettings {
   delimiter: 'comma' | 'semicolon' | 'pipe' | 'custom';
   customDelimiter?: string;
   fieldPositions: { [fieldId: string]: number };
+  fileExtension: string;
 }
 
 interface Template {
@@ -107,7 +108,8 @@ export default function TemplatesScreen() {
       includeHeader: false,
       delimiter: 'comma',
       customDelimiter: '',
-      fieldPositions: {}
+      fieldPositions: {},
+      fileExtension: 'csv'
     });
     setShowTemplateModal(true);
   };
@@ -258,7 +260,8 @@ export default function TemplatesScreen() {
       includeHeader: false,
       delimiter: 'comma',
       customDelimiter: '',
-      fieldPositions: {}
+      fieldPositions: {},
+      fileExtension: 'csv'
     });
     setShowTemplateModal(true);
   };
@@ -583,6 +586,21 @@ export default function TemplatesScreen() {
                     </View>
                   )}
 
+                  {/* File Extension - Vertical Layout */}
+                  <View style={styles.csvSettingGroup}>
+                    <Text style={styles.csvSettingTitle}>File Extension</Text>
+                    <TextInput
+                      style={styles.compactInput}
+                      placeholder="csv"
+                      value={csvExportSettings.fileExtension || 'csv'}
+                      onChangeText={(text) => setCsvExportSettings(prev => ({
+                        ...prev,
+                        fileExtension: text.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
+                      }))}
+                      maxLength={10}
+                    />
+                  </View>
+
                   {/* Column Positioning - Optimized */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
@@ -662,7 +680,8 @@ export default function TemplatesScreen() {
                       includeHeader: false,
                       delimiter: 'comma',
                       customDelimiter: '',
-                      fieldPositions: {}
+                      fieldPositions: {},
+                      fileExtension: 'csv'
                     });
                     setShowTemplateModal(false);
                   }}
