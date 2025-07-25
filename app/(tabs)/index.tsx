@@ -516,7 +516,7 @@ export default function TemplatesScreen() {
                       }))}
                     >
                       <Text style={styles.checkboxText}>
-                        {csvExportSettings.includeHeader ? '✅' : '🚫'} Export with header
+                        {csvExportSettings.includeHeader ? '✅' : '🚫'} Include Header in CSV
                       </Text>
                     </TouchableOpacity>
                   </View>
