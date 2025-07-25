@@ -566,7 +566,13 @@ export default function TemplatesScreen() {
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
                     
                     {templateFields.length > 0 ? (
-                      <View style={styles.positionContainer}>
+                      <ScrollView 
+                        style={styles.positionContainer}
+                        contentContainerStyle={styles.positionScrollContent}
+                        showsVerticalScrollIndicator={true}
+                        persistentScrollbar={true}
+                        nestedScrollEnabled={true}
+                      >
                         {templateFields.map((field, index) => (
                           <View key={field.id} style={styles.compactPositionRow}>
                             <Text style={styles.compactFieldName} numberOfLines={1}>
@@ -587,7 +593,7 @@ export default function TemplatesScreen() {
                             </View>
                           </View>
                         ))}
-                      </View>
+                      </ScrollView>
                     ) : (
                       <Text style={styles.noFieldsText}>
                         Add fields in the Fields tab to configure positions
@@ -1604,16 +1610,18 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    maxHeight: 160,
+  },
+  positionScrollContent: {
     padding: 8,
-    maxHeight: 180,
   },
   compactPositionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    marginBottom: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    marginBottom: 6,
     backgroundColor: '#f8fafc',
     borderRadius: 4,
   },
