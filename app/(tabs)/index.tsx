@@ -72,7 +72,7 @@ export default function TemplatesScreen() {
             description: template.description || '',
             fields: template.fields || [],
             csvExportSettings: template.csvExportSettings || {
-              includeHeader: true,
+              includeHeader: false,
               delimiter: 'comma',
               customDelimiter: '',
               fieldPositions: {}
@@ -104,7 +104,7 @@ export default function TemplatesScreen() {
     setEditingTemplateId(null);
     setActiveTab('fields');
     setCsvExportSettings({
-      includeHeader: true,
+      includeHeader: false,
       delimiter: 'comma',
       customDelimiter: '',
       fieldPositions: {}
@@ -250,7 +250,7 @@ export default function TemplatesScreen() {
     setEditingTemplateId(template.id);
     setActiveTab('fields');
     setCsvExportSettings(template.csvExportSettings || {
-      includeHeader: true,
+      includeHeader: false,
       delimiter: 'comma',
       customDelimiter: '',
       fieldPositions: {}
@@ -266,7 +266,7 @@ export default function TemplatesScreen() {
   const [selectedTemplateForDelete, setSelectedTemplateForDelete] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState<'fields' | 'csv'>('fields');
   const [csvExportSettings, setCsvExportSettings] = useState<CSVExportSettings>({
-    includeHeader: true,
+    includeHeader: false,
     delimiter: 'comma',
     customDelimiter: '',
     fieldPositions: {}
@@ -604,7 +604,7 @@ export default function TemplatesScreen() {
                     setEditingTemplateId(null);
                     setActiveTab('fields');
                     setCsvExportSettings({
-                      includeHeader: true,
+                      includeHeader: false,
                       delimiter: 'comma',
                       customDelimiter: '',
                       fieldPositions: {}
