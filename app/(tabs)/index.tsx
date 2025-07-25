@@ -505,45 +505,50 @@ export default function TemplatesScreen() {
               {/* CSV Export Settings Tab */}
               {activeTab === 'csv' && (
                 <View style={styles.csvSettingsSection}>
-                  {/* Header Option */}
-                  <View style={styles.csvSettingGroup}>
-                    <Text style={styles.csvSettingTitle}>Header Option</Text>
-                    <TouchableOpacity
-                      style={styles.checkbox}
-                      onPress={() => setCsvExportSettings(prev => ({
-                        ...prev,
-                        includeHeader: !prev.includeHeader
-                      }))}
-                    >
-                      <Text style={styles.checkboxText}>
-                        {csvExportSettings.includeHeader ? '✅' : '🚫'} Include Header in CSV
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Delimiter Selection */}
-                  <View style={styles.csvSettingGroup}>
-                    <Text style={styles.csvSettingTitle}>Delimiter Selection</Text>
-                    <View style={styles.pickerContainer}>
-                      <Picker
-                        selectedValue={csvExportSettings.delimiter}
-                        onValueChange={(value) => setCsvExportSettings(prev => ({
+                  {/* Header Option & Delimiter Selection - Combined Row */}
+                  <View style={styles.csvSettingRow}>
+                    <View style={styles.csvSettingHalf}>
+                      <Text style={styles.csvSettingTitle}>Header Option</Text>
+                      <TouchableOpacity
+                        style={styles.compactCheckbox}
+                        onPress={() => setCsvExportSettings(prev => ({
                           ...prev,
-                          delimiter: value
+                          includeHeader: !prev.includeHeader
                         }))}
-                        style={styles.picker}
                       >
-                        <Picker.Item label="Comma ," value="comma" />
-                        <Picker.Item label="Semicolon ;" value="semicolon" />
-                        <Picker.Item label="Pipe |" value="pipe" />
-                        <Picker.Item label="Custom Delimiter" value="custom" />
-                      </Picker>
+                        <Text style={styles.compactCheckboxIcon}>
+                          {csvExportSettings.includeHeader ? '✅' : '🚫'}
+                        </Text>
+                        <Text style={styles.compactCheckboxText}>Include Header</Text>
+                      </TouchableOpacity>
                     </View>
-                    
-                    {csvExportSettings.delimiter === 'custom' && (
+
+                    <View style={styles.csvSettingHalf}>
+                      <Text style={styles.csvSettingTitle}>Delimiter</Text>
+                      <View style={styles.compactPickerContainer}>
+                        <Picker
+                          selectedValue={csvExportSettings.delimiter}
+                          onValueChange={(value) => setCsvExportSettings(prev => ({
+                            ...prev,
+                            delimiter: value
+                          }))}
+                          style={styles.compactPicker}
+                        >
+                          <Picker.Item label="Comma ," value="comma" />
+                          <Picker.Item label="Semicolon ;" value="semicolon" />
+                          <Picker.Item label="Pipe |" value="pipe" />
+                          <Picker.Item label="Custom" value="custom" />
+                        </Picker>
+                      </View>
+                    </View>
+                  </View>
+                  
+                  {csvExportSettings.delimiter === 'custom' && (
+                    <View style={styles.customDelimiterContainer}>
+                      <Text style={styles.csvSettingTitle}>Custom Delimiter</Text>
                       <TextInput
-                        style={styles.input}
-                        placeholder="Enter custom delimiter (e.g. #, ~, etc.)"
+                        style={styles.compactInput}
+                        placeholder="Enter symbol (e.g. #, ~)"
                         value={csvExportSettings.customDelimiter || ''}
                         onChangeText={(text) => setCsvExportSettings(prev => ({
                           ...prev,
@@ -551,44 +556,39 @@ export default function TemplatesScreen() {
                         }))}
                         maxLength={3}
                       />
-                    )}
-                  </View>
+                    </View>
+                  )}
 
-                  {/* Column Positioning */}
+                  {/* Column Positioning - Optimized */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
-                    <Text style={styles.csvSettingDescription}>
-                      Set the CSV column position for each field
-                    </Text>
                     
-                    <ScrollView 
-                      style={styles.positionScrollView}
-                      contentContainerStyle={styles.positionScrollContent}
-                      showsVerticalScrollIndicator={true}
-                    >
-                      {templateFields.map((field, index) => (
-                        <View key={field.id} style={styles.positionRow}>
-                          <Text style={styles.positionFieldName}>{field.name}</Text>
-                          <View style={styles.positionInputContainer}>
-                            <Text style={styles.positionLabel}>Position:</Text>
-                            <TextInput
-                              style={styles.positionInput}
-                              value={String(csvExportSettings.fieldPositions[field.id] || index + 1)}
-                              onChangeText={(text) => {
-                                const position = parseInt(text) || 1;
-                                updateFieldPosition(field.id, position);
-                              }}
-                              keyboardType="numeric"
-                              placeholder="1"
-                            />
+                    {templateFields.length > 0 ? (
+                      <View style={styles.positionContainer}>
+                        {templateFields.map((field, index) => (
+                          <View key={field.id} style={styles.compactPositionRow}>
+                            <Text style={styles.compactFieldName} numberOfLines={1}>
+                              {field.name}
+                            </Text>
+                            <View style={styles.compactPositionInput}>
+                              <TextInput
+                                style={styles.positionNumberInput}
+                                value={String(csvExportSettings.fieldPositions[field.id] || index + 1)}
+                                onChangeText={(text) => {
+                                  const position = parseInt(text) || 1;
+                                  updateFieldPosition(field.id, position);
+                                }}
+                                keyboardType="numeric"
+                                placeholder="1"
+                                textAlign="center"
+                              />
+                            </View>
                           </View>
-                        </View>
-                      ))}
-                    </ScrollView>
-
-                    {templateFields.length === 0 && (
+                        ))}
+                      </View>
+                    ) : (
                       <Text style={styles.noFieldsText}>
-                        Add fields in the Fields tab to configure column positions
+                        Add fields in the Fields tab to configure positions
                       </Text>
                     )}
                   </View>
@@ -1506,76 +1506,122 @@ const styles = StyleSheet.create({
   csvSettingsSection: {
     marginBottom: 20,
   },
+  csvSettingRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  csvSettingHalf: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
   csvSettingGroup: {
-    marginBottom: 25,
-    padding: 16,
+    marginBottom: 16,
+    padding: 12,
     backgroundColor: '#f8fafc',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
   csvSettingTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  csvSettingDescription: {
-    fontSize: 14,
-    color: '#4a5568',
-    marginBottom: 12,
-    fontStyle: 'italic',
+  compactCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
-  positionScrollView: {
-    maxHeight: 200,
+  compactCheckboxIcon: {
+    fontSize: 16,
+    marginRight: 6,
+    color: '#4299e1',
+  },
+  compactCheckboxText: {
+    fontSize: 13,
+    color: '#2d3748',
+    fontWeight: '500',
+  },
+  compactPickerContainer: {
     borderWidth: 1,
     borderColor: '#e2e8f0',
     borderRadius: 6,
     backgroundColor: 'white',
+    height: 36,
   },
-  positionScrollContent: {
+  compactPicker: {
+    height: 36,
+    fontSize: 13,
+  },
+  customDelimiterContainer: {
+    marginBottom: 16,
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  compactInput: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 6,
     padding: 8,
-  },
-  positionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  positionFieldName: {
     fontSize: 14,
+    backgroundColor: 'white',
+  },
+  positionContainer: {
+    backgroundColor: 'white',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 8,
+    maxHeight: 180,
+  },
+  compactPositionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    marginBottom: 4,
+    backgroundColor: '#f8fafc',
+    borderRadius: 4,
+  },
+  compactFieldName: {
+    fontSize: 13,
     fontWeight: '600',
     color: '#2d3748',
     flex: 1,
+    marginRight: 8,
   },
-  positionInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  compactPositionInput: {
+    width: 50,
   },
-  positionLabel: {
-    fontSize: 12,
-    color: '#718096',
-    fontWeight: '500',
-  },
-  positionInput: {
+  positionNumberInput: {
     borderWidth: 1,
     borderColor: '#cbd5e0',
     borderRadius: 4,
     padding: 6,
-    fontSize: 14,
-    width: 50,
-    textAlign: 'center',
+    fontSize: 13,
     backgroundColor: 'white',
+    fontWeight: '600',
   },
   noFieldsText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#a0aec0',
     textAlign: 'center',
     fontStyle: 'italic',
-    padding: 20,
+    padding: 16,
   },
 });
