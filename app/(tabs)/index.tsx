@@ -593,10 +593,13 @@ export default function TemplatesScreen() {
                       style={styles.compactInput}
                       placeholder="csv"
                       value={csvExportSettings.fileExtension || ''}
-                      onChangeText={(text) => setCsvExportSettings(prev => ({
-                        ...prev,
-                        fileExtension: text.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
-                      }))}
+                      onChangeText={(text) => {
+                        const cleanText = text.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                        setCsvExportSettings(prev => ({
+                          ...prev,
+                          fileExtension: cleanText
+                        }));
+                      }}
                       maxLength={10}
                     />
                   </View>
