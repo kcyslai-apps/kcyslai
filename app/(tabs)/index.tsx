@@ -203,21 +203,25 @@ export default function TemplatesScreen() {
     setShowTemplateModal(true);
   };
 
+  const [showUseTemplateModal, setShowUseTemplateModal] = useState(false);
+  const [selectedTemplateForUse, setSelectedTemplateForUse] = useState<Template | null>(null);
+
   const useTemplate = (template: Template) => {
-    Alert.alert(
-      'Use Template',
-      `Start data collection using "${template.name}" template?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Start Collection',
-          onPress: () => {
-            // Navigate to data entry screen with this template
-            router.push(`/data-entry?templateId=${template.id}`);
-          }
-        }
-      ]
-    );
+    setSelectedTemplateForUse(template);
+    setShowUseTemplateModal(true);
+  };
+
+  const confirmUseTemplate = () => {
+    if (selectedTemplateForUse) {
+      router.push(`/data-entry?templateId=${selectedTemplateForUse.id}`);
+      setShowUseTemplateModal(false);
+      setSelectedTemplateForUse(null);
+    }
+  };
+
+  const cancelUseTemplate = () => {
+    setShowUseTemplateModal(false);
+    setSelectedTemplateForUse(null);
   };
 
   const deleteTemplate = (templateId: string) => {
@@ -514,6 +518,42 @@ export default function TemplatesScreen() {
                 </TouchableOpacity>
               </View>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Use Template Confirmation Modal */}
+      <Modal visible={showUseTemplateModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.useTemplateModalContent}>
+            <Text style={styles.useTemplateModalTitle}>🚀 Use Template</Text>
+            
+            <View style={styles.useTemplateInfo}>
+              <Text style={styles.useTemplateText}>
+                Start data collection using
+              </Text>
+              <Text style={styles.useTemplateNameText}>
+                "{selectedTemplateForUse?.name}"
+              </Text>
+              <Text style={styles.useTemplateText}>
+                template?
+              </Text>
+            </View>
+
+            <View style={styles.useTemplateButtons}>
+              <TouchableOpacity
+                style={styles.useTemplateCancelButton}
+                onPress={cancelUseTemplate}
+              >
+                <Text style={styles.useTemplateCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.useTemplateStartButton}
+                onPress={confirmUseTemplate}
+              >
+                <Text style={styles.useTemplateStartButtonText}>▶️ Start Collection</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -889,5 +929,84 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  useTemplateModalContent: {
+    backgroundColor: 'white',
+    padding: 25,
+    borderRadius: 20,
+    width: '85%',
+    maxWidth: 320,
+    alignItems: 'center',
+    boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+    elevation: 10,
+  },
+  useTemplateModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  useTemplateInfo: {
+    alignItems: 'center',
+    marginBottom: 25,
+  },
+  useTemplateText: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  useTemplateNameText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    marginVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: '#e8f4f8',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#4299e1',
+  },
+  useTemplateButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  useTemplateCancelButton: {
+    flex: 1,
+    backgroundColor: '#a0aec0',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    boxShadow: '0px 3px 6px rgba(160, 174, 192, 0.3)',
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#cbd5e0',
+  },
+  useTemplateCancelButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+  },
+  useTemplateStartButton: {
+    flex: 1,
+    backgroundColor: '#68d391',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    boxShadow: '0px 3px 6px rgba(104, 211, 145, 0.3)',
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#9ae6b4',
+  },
+  useTemplateStartButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
   },
 });
