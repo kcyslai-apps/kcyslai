@@ -545,7 +545,7 @@ export default function TemplatesScreen() {
                 style={styles.useTemplateStartButton}
                 onPress={confirmUseTemplate}
               >
-                <Text style={styles.useTemplateStartButtonText}>▶️ Start Collection</Text>
+                <Text style={styles.useTemplateStartButtonText}>Use</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -966,41 +966,36 @@ const styles = StyleSheet.create({
   },
   useTemplateButtons: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 15,
     width: '100%',
+    justifyContent: 'center',
   },
   useTemplateCancelButton: {
-    flex: 1,
-    backgroundColor: '#a0aec0',
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
     alignItems: 'center',
-    boxShadow: '0px 3px 6px rgba(160, 174, 192, 0.3)',
-    elevation: 4,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#cbd5e0',
+    minWidth: 80,
   },
   useTemplateCancelButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+    color: '#718096',
+    fontSize: 14,
+    fontWeight: '500',
   },
   useTemplateStartButton: {
-    flex: 1,
-    backgroundColor: '#68d391',
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: '#4299e1',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
     alignItems: 'center',
-    boxShadow: '0px 3px 6px rgba(104, 211, 145, 0.3)',
-    elevation: 4,
-    borderWidth: 2,
-    borderColor: '#9ae6b4',
+    minWidth: 80,
   },
   useTemplateStartButtonText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
