@@ -505,46 +505,46 @@ export default function TemplatesScreen() {
               {/* CSV Export Settings Tab */}
               {activeTab === 'csv' && (
                 <View style={styles.csvSettingsSection}>
-                  {/* Header Option & Delimiter Selection - Combined Row */}
-                  <View style={styles.csvSettingRow}>
-                    <View style={styles.csvSettingHalf}>
-                      <Text style={styles.csvSettingTitle}>Header Option</Text>
-                      <TouchableOpacity
-                        style={styles.compactCheckbox}
-                        onPress={() => setCsvExportSettings(prev => ({
-                          ...prev,
-                          includeHeader: !prev.includeHeader
-                        }))}
-                      >
-                        <Text style={styles.compactCheckboxIcon}>
-                          {csvExportSettings.includeHeader ? '✅' : '🚫'}
-                        </Text>
-                        <Text style={styles.compactCheckboxText}>Include Header</Text>
-                      </TouchableOpacity>
-                    </View>
+                  {/* Header Option - Vertical Layout */}
+                  <View style={styles.csvSettingGroup}>
+                    <Text style={styles.csvSettingTitle}>Header Option</Text>
+                    <TouchableOpacity
+                      style={styles.compactCheckbox}
+                      onPress={() => setCsvExportSettings(prev => ({
+                        ...prev,
+                        includeHeader: !prev.includeHeader
+                      }))}
+                    >
+                      <Text style={styles.compactCheckboxIcon}>
+                        {csvExportSettings.includeHeader ? '✅' : '🚫'}
+                      </Text>
+                      <Text style={styles.compactCheckboxText}>Include Header</Text>
+                    </TouchableOpacity>
+                  </View>
 
-                    <View style={styles.csvSettingHalf}>
-                      <Text style={styles.csvSettingTitle}>Delimiter</Text>
-                      <View style={styles.compactPickerContainer}>
-                        <Picker
-                          selectedValue={csvExportSettings.delimiter}
-                          onValueChange={(value) => setCsvExportSettings(prev => ({
-                            ...prev,
-                            delimiter: value
-                          }))}
-                          style={styles.compactPicker}
-                        >
-                          <Picker.Item label="Comma ," value="comma" />
-                          <Picker.Item label="Semicolon ;" value="semicolon" />
-                          <Picker.Item label="Pipe |" value="pipe" />
-                          <Picker.Item label="Custom" value="custom" />
-                        </Picker>
-                      </View>
+                  {/* Delimiter Selection - Vertical Layout */}
+                  <View style={styles.csvSettingGroup}>
+                    <Text style={styles.csvSettingTitle}>Delimiter</Text>
+                    <View style={styles.compactPickerContainer}>
+                      <Picker
+                        selectedValue={csvExportSettings.delimiter}
+                        onValueChange={(value) => setCsvExportSettings(prev => ({
+                          ...prev,
+                          delimiter: value
+                        }))}
+                        style={styles.compactPicker}
+                      >
+                        <Picker.Item label="Comma ," value="comma" />
+                        <Picker.Item label="Semicolon ;" value="semicolon" />
+                        <Picker.Item label="Pipe |" value="pipe" />
+                        <Picker.Item label="Custom" value="custom" />
+                      </Picker>
                     </View>
                   </View>
                   
+                  {/* Custom Delimiter Input - Vertical Layout */}
                   {csvExportSettings.delimiter === 'custom' && (
-                    <View style={styles.customDelimiterContainer}>
+                    <View style={styles.csvSettingGroup}>
                       <Text style={styles.csvSettingTitle}>Custom Delimiter</Text>
                       <TextInput
                         style={styles.compactInput}
