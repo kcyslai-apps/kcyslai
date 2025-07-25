@@ -12,7 +12,8 @@ interface TemplateField {
   type: 'free_text' | 'date' | 'number' | 'fixed_data' | 'fixed_date' | 'barcode';
   required: boolean;
   defaultValue?: string;
-  options?: string[]; // For fixed_data type
+  options?: string[];
+  inputMode?: 'select_only' | 'editable';
 }
 
 interface CSVExportSettings {
@@ -144,7 +145,8 @@ export default function TemplatesScreen() {
       type: currentField.type || 'free_text',
       required: currentField.required || false,
       defaultValue: currentField.defaultValue || '',
-      options: currentField.options || []
+      options: currentField.options || [],
+      inputMode: currentField.inputMode || 'select_only'
     };
 
     let updatedFields = [...templateFields];
@@ -155,7 +157,7 @@ export default function TemplatesScreen() {
     }
 
     setTemplateFields(updatedFields);
-    
+
     // Initialize CSV position for new field
     if (editingFieldIndex === null) {
       const newPosition = Math.max(...Object.values(csvExportSettings.fieldPositions), 0) + 1;
@@ -167,7 +169,7 @@ export default function TemplatesScreen() {
         }
       }));
     }
-    
+
     setShowFieldModal(false);
     setCurrentField({});
     setEditingFieldIndex(null);
@@ -177,7 +179,7 @@ export default function TemplatesScreen() {
     const fieldToRemove = templateFields[index];
     const updatedFields = templateFields.filter((_, i) => i !== index);
     setTemplateFields(updatedFields);
-    
+
     // Remove CSV position for deleted field
     setCsvExportSettings(prev => {
       const { [fieldToRemove.id]: removed, ...remainingPositions } = prev.fieldPositions;
@@ -442,7 +444,7 @@ export default function TemplatesScreen() {
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>Data Collector</ThemedText>
 
-      
+
 
       <View style={styles.actionContainer}>
         <TouchableOpacity 
@@ -568,7 +570,7 @@ export default function TemplatesScreen() {
                       </Picker>
                     </View>
                   </View>
-                  
+
                   {/* Custom Delimiter Input - Vertical Layout */}
                   {csvExportSettings.delimiter === 'custom' && (
                     <View style={styles.csvSettingGroup}>
@@ -613,7 +615,7 @@ export default function TemplatesScreen() {
                   {/* Column Positioning - Optimized */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
-                    
+
                     {templateFields.length > 0 ? (
                       <ScrollView 
                         style={styles.positionContainer}
@@ -626,7 +628,7 @@ export default function TemplatesScreen() {
                           const currentPosition = csvExportSettings.fieldPositions[field.id] || index + 1;
                           const duplicatePositions = getDuplicatePositions();
                           const isDuplicate = duplicatePositions.includes(currentPosition);
-                          
+
                           return (
                             <View key={field.id} style={styles.compactPositionRow}>
                               <Text style={styles.compactFieldName} numberOfLines={1}>
@@ -667,7 +669,7 @@ export default function TemplatesScreen() {
                         Add fields in the Fields tab to configure positions
                       </Text>
                     )}
-                    
+
                     {templateFields.length > 0 && !validateColumnPositions() && (
                       <Text style={styles.validationWarning}>
                         ⚠️ Duplicate column positions detected. Each field should have a unique position number.
@@ -816,6 +818,33 @@ export default function TemplatesScreen() {
                 </View>
               )}
 
+              {currentField.type === 'fixed_data' && (
+                <View style={styles.defaultValueSection}>
+                  <Text style={styles.defaultValueLabel}>Input Mode:</Text>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={currentField.inputMode || 'select_only'}
+                      onValueChange={(value) => setCurrentField({ ...currentField, inputMode: value as 'select_only' | 'editable' })}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Select Only" value="select_only" />
+                      <Picker.Item label="Editable" value="editable" />
+                    </Picker>
+                  </View>
+                  {currentField.inputMode === 'select_only' && (
+                    <Text style={styles.inputModeDescription}>
+                      Users can only choose from the predefined “Options” list. Manual typing is not allowed.
+                    </Text>
+                  )}
+                  {currentField.inputMode === 'editable' && (
+                    <Text style={styles.inputModeDescription}>
+                      Users can select from the “Options” list or manually enter a custom value.
+                      Predefined options act as suggestions or shortcuts.
+                    </Text>
+                  )}
+                </View>
+              )}
+
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={styles.cancelButton}
@@ -844,7 +873,7 @@ export default function TemplatesScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.useTemplateModalContent}>
             <Text style={styles.useTemplateModalTitle}>🚀 Use Template</Text>
-            
+
             <View style={styles.useTemplateInfo}>
               <Text style={styles.useTemplateNameText}>
                 "{selectedTemplateForUse?.name}"
@@ -874,17 +903,17 @@ export default function TemplatesScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.viewTemplateModalContent}>
             <Text style={styles.viewTemplateModalTitle}>👁️ View Template</Text>
-            
+
             <View style={styles.viewTemplateInfo}>
               <Text style={styles.viewTemplateNameText}>
                 "{selectedTemplateForView?.name}"
               </Text>
-              
+
               <View style={styles.viewTemplateDetails}>
                 <Text style={styles.viewTemplateDetailText}>
                   Fields: {selectedTemplateForView?.fields.length || 0}
                 </Text>
-                
+
                 {selectedTemplateForView?.fields && selectedTemplateForView.fields.length > 0 && (
                   <View style={styles.viewTemplateFieldsList}>
                     {selectedTemplateForView.fields.map((field, index) => (
@@ -914,12 +943,12 @@ export default function TemplatesScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.deleteTemplateModalContent}>
             <Text style={styles.deleteTemplateModalTitle}>🗑️ Delete Template</Text>
-            
+
             <View style={styles.deleteTemplateInfo}>
               <Text style={styles.deleteTemplateNameText}>
                 "{selectedTemplateForDelete?.name}"
               </Text>
-              
+
               <Text style={styles.deleteTemplateWarningText}>
                 Are you sure you want to delete this template? This action cannot be undone.
               </Text>
@@ -986,7 +1015,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#9ae6b4',
   },
-  
+
   buttonText: {
     color: 'white',
     fontSize: 18,
@@ -1762,11 +1791,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   defaultValueInput: {
-    backgroundColor: '#ffffff',
-    borderWidth: 2,
-    borderColor: '#cbd5e0',
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#2d3748',
+    marginBottom: 0,
+  },
+  inputModeDescription: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 8,
+    fontStyle: 'italic',
+    lineHeight: 16,
   },
 });

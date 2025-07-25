@@ -15,6 +15,7 @@ interface TemplateField {
   required: boolean;
   defaultValue?: string;
   options?: string[];
+  inputMode?: 'select_only' | 'editable';
 }
 
 interface Template {
@@ -225,20 +226,50 @@ export default function DataEntryScreen() {
           allOptions.unshift(defaultValue);
         }
         
-        return (
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={value || field.defaultValue || ''}
-              onValueChange={(itemValue) => updateFieldValue(field.id, itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select..." value="" />
-              {allOptions.map((option, index) => (
-                <Picker.Item key={index} label={option} value={option} />
-              ))}
-            </Picker>
-          </View>
-        );
+        // Check input mode - default to 'select_only' for backward compatibility
+        const inputMode = field.inputMode || 'select_only';
+        
+        if (inputMode === 'editable') {
+          return (
+            <View style={styles.editableFixedDataContainer}>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={value || field.defaultValue || ''}
+                  onValueChange={(itemValue) => updateFieldValue(field.id, itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select from options..." value="" />
+                  {allOptions.map((option, index) => (
+                    <Picker.Item key={index} label={option} value={option} />
+                  ))}
+                </Picker>
+              </View>
+              <Text style={styles.orText}>OR</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter custom value"
+                value={value}
+                onChangeText={(text) => updateFieldValue(field.id, text)}
+              />
+            </View>
+          );
+        } else {
+          // Select only mode
+          return (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={value || field.defaultValue || ''}
+                onValueChange={(itemValue) => updateFieldValue(field.id, itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select..." value="" />
+                {allOptions.map((option, index) => (
+                  <Picker.Item key={index} label={option} value={option} />
+                ))}
+              </Picker>
+            </View>
+          );
+        }
 
       case 'barcode':
         return (
@@ -546,5 +577,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  editableFixedDataContainer: {
+    gap: 10,
+  },
+  orText: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: '500',
+    paddingVertical: 5,
   },
 });
