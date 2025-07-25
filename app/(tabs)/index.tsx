@@ -516,6 +516,7 @@ export default function TemplatesScreen() {
                           includeHeader: value === 'with'
                         }))}
                         style={styles.compactPicker}
+                        itemStyle={styles.pickerItem}
                       >
                         <Picker.Item label="With Header" value="with" />
                         <Picker.Item label="Without Header" value="without" />
@@ -1568,11 +1569,16 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     borderRadius: 6,
     backgroundColor: 'white',
-    height: 36,
+    height: 40,
   },
   compactPicker: {
-    height: 36,
-    fontSize: 13,
+    height: 40,
+    fontSize: 14,
+    color: '#2d3748',
+  },
+  pickerItem: {
+    fontSize: 14,
+    color: '#2d3748',
   },
   customDelimiterContainer: {
     marginBottom: 16,
