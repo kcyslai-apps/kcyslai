@@ -213,7 +213,7 @@ export default function DataEntryScreen() {
         return (
           <View style={styles.pickerContainer}>
             <Picker
-              selectedValue={value}
+              selectedValue={value || field.defaultValue || ''}
               onValueChange={(itemValue) => updateFieldValue(field.id, itemValue)}
               style={styles.picker}
             >
