@@ -594,13 +594,19 @@ export default function TemplatesScreen() {
                       placeholder="csv"
                       value={csvExportSettings.fileExtension || ''}
                       onChangeText={(text) => {
+                        // Only allow alphanumeric characters and convert to lowercase
                         const cleanText = text.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                        setCsvExportSettings(prev => ({
-                          ...prev,
-                          fileExtension: cleanText
-                        }));
+                        // Only update if the text actually changed to prevent loops
+                        if (cleanText !== csvExportSettings.fileExtension) {
+                          setCsvExportSettings(prev => ({
+                            ...prev,
+                            fileExtension: cleanText
+                          }));
+                        }
                       }}
                       maxLength={10}
+                      autoCorrect={false}
+                      autoCapitalize="none"
                     />
                   </View>
 
