@@ -216,6 +216,15 @@ export default function DataEntryScreen() {
         );
 
       case 'fixed_data':
+        // Ensure default value is always available as an option
+        const allOptions = field.options || [];
+        const defaultValue = field.defaultValue;
+        
+        // Add default value to options if it exists and isn't already in the options
+        if (defaultValue && !allOptions.includes(defaultValue)) {
+          allOptions.unshift(defaultValue);
+        }
+        
         return (
           <View style={styles.pickerContainer}>
             <Picker
@@ -224,7 +233,7 @@ export default function DataEntryScreen() {
               style={styles.picker}
             >
               <Picker.Item label="Select..." value="" />
-              {field.options?.map((option, index) => (
+              {allOptions.map((option, index) => (
                 <Picker.Item key={index} label={option} value={option} />
               ))}
             </Picker>
