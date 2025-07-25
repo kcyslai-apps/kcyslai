@@ -662,8 +662,11 @@ export default function TemplatesScreen() {
                   style={styles.checkbox}
                   onPress={() => setCurrentField({ ...currentField, required: !currentField.required })}
                 >
+                  <Text style={styles.checkboxIcon}>
+                    {currentField.required ? '☑' : '☐'}
+                  </Text>
                   <Text style={styles.checkboxText}>
-                    {currentField.required ? '☑' : '☐'} Required Field
+                    Required Field
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1053,10 +1056,23 @@ const styles = StyleSheet.create({
   checkbox: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    minHeight: 48,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  checkboxIcon: {
+    fontSize: 24,
+    marginRight: 12,
+    color: '#4299e1',
   },
   checkboxText: {
     fontSize: 16,
     color: '#2d3748',
+    flex: 1,
   },
   fieldsSection: {
     marginBottom: 20,
