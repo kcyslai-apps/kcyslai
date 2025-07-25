@@ -61,7 +61,10 @@ export default function DataEntryScreen() {
           // Initialize form data with default values
           const initialData: { [fieldId: string]: string } = {};
           foundTemplate.fields.forEach(field => {
-            if (field.defaultValue) {
+            if (field.type === 'fixed_data' && field.defaultValue) {
+              // For fixed_data fields, set the default value
+              initialData[field.id] = field.defaultValue;
+            } else if (field.defaultValue) {
               initialData[field.id] = field.defaultValue;
             } else {
               initialData[field.id] = '';
@@ -156,7 +159,10 @@ export default function DataEntryScreen() {
     
     const initialData: { [fieldId: string]: string } = {};
     template.fields.forEach(field => {
-      if (field.defaultValue) {
+      if (field.type === 'fixed_data' && field.defaultValue) {
+        // For fixed_data fields, set the default value
+        initialData[field.id] = field.defaultValue;
+      } else if (field.defaultValue) {
         initialData[field.id] = field.defaultValue;
       } else {
         initialData[field.id] = '';
