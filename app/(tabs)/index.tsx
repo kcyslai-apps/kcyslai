@@ -15,11 +15,19 @@ interface TemplateField {
   options?: string[]; // For fixed_data type
 }
 
+interface CSVExportSettings {
+  includeHeader: boolean;
+  delimiter: 'comma' | 'semicolon' | 'pipe' | 'custom';
+  customDelimiter?: string;
+  fieldPositions: { [fieldId: string]: number };
+}
+
 interface Template {
   id: string;
   name: string;
   description: string;
   fields: TemplateField[];
+  csvExportSettings: CSVExportSettings;
   createdAt: Date;
 }
 
@@ -63,6 +71,12 @@ export default function TemplatesScreen() {
             name: template.name,
             description: template.description || '',
             fields: template.fields || [],
+            csvExportSettings: template.csvExportSettings || {
+              includeHeader: true,
+              delimiter: 'comma',
+              customDelimiter: '',
+              fieldPositions: {}
+            },
             createdAt: new Date(template.createdAt)
           }));
           setTemplates(loadedTemplates);
@@ -88,6 +102,13 @@ export default function TemplatesScreen() {
     setNewTemplateName('');
     setTemplateFields([]);
     setEditingTemplateId(null);
+    setActiveTab('fields');
+    setCsvExportSettings({
+      includeHeader: true,
+      delimiter: 'comma',
+      customDelimiter: '',
+      fieldPositions: {}
+    });
     setShowTemplateModal(true);
   };
 
@@ -132,14 +153,37 @@ export default function TemplatesScreen() {
     }
 
     setTemplateFields(updatedFields);
+    
+    // Initialize CSV position for new field
+    if (editingFieldIndex === null) {
+      const newPosition = Math.max(...Object.values(csvExportSettings.fieldPositions), 0) + 1;
+      setCsvExportSettings(prev => ({
+        ...prev,
+        fieldPositions: {
+          ...prev.fieldPositions,
+          [newField.id]: newPosition
+        }
+      }));
+    }
+    
     setShowFieldModal(false);
     setCurrentField({});
     setEditingFieldIndex(null);
   };
 
   const removeField = (index: number) => {
+    const fieldToRemove = templateFields[index];
     const updatedFields = templateFields.filter((_, i) => i !== index);
     setTemplateFields(updatedFields);
+    
+    // Remove CSV position for deleted field
+    setCsvExportSettings(prev => {
+      const { [fieldToRemove.id]: removed, ...remainingPositions } = prev.fieldPositions;
+      return {
+        ...prev,
+        fieldPositions: remainingPositions
+      };
+    });
   };
 
   const saveTemplate = () => {
@@ -162,6 +206,7 @@ export default function TemplatesScreen() {
               ...template,
               name: newTemplateName.trim(),
               fields: templateFields,
+              csvExportSettings: csvExportSettings,
             }
           : template
       );
@@ -173,6 +218,7 @@ export default function TemplatesScreen() {
         name: newTemplateName.trim(),
         description: '',
         fields: templateFields,
+        csvExportSettings: csvExportSettings,
         createdAt: new Date()
       };
       updatedTemplates = [...templates, newTemplate];
@@ -202,6 +248,13 @@ export default function TemplatesScreen() {
     setNewTemplateName(template.name);
     setTemplateFields([...template.fields]);
     setEditingTemplateId(template.id);
+    setActiveTab('fields');
+    setCsvExportSettings(template.csvExportSettings || {
+      includeHeader: true,
+      delimiter: 'comma',
+      customDelimiter: '',
+      fieldPositions: {}
+    });
     setShowTemplateModal(true);
   };
 
@@ -211,6 +264,13 @@ export default function TemplatesScreen() {
   const [selectedTemplateForView, setSelectedTemplateForView] = useState<Template | null>(null);
   const [showDeleteTemplateModal, setShowDeleteTemplateModal] = useState(false);
   const [selectedTemplateForDelete, setSelectedTemplateForDelete] = useState<Template | null>(null);
+  const [activeTab, setActiveTab] = useState<'fields' | 'csv'>('fields');
+  const [csvExportSettings, setCsvExportSettings] = useState<CSVExportSettings>({
+    includeHeader: true,
+    delimiter: 'comma',
+    customDelimiter: '',
+    fieldPositions: {}
+  });
 
   const useTemplate = (template: Template) => {
     setSelectedTemplateForUse(template);
@@ -268,6 +328,26 @@ export default function TemplatesScreen() {
   const removeFixedDataOption = (index: number) => {
     const options = (currentField.options || []).filter((_, i) => i !== index);
     setCurrentField({ ...currentField, options });
+  };
+
+  const updateFieldPosition = (fieldId: string, position: number) => {
+    setCsvExportSettings(prev => ({
+      ...prev,
+      fieldPositions: {
+        ...prev.fieldPositions,
+        [fieldId]: position
+      }
+    }));
+  };
+
+  const getDelimiterSymbol = (delimiter: string, customDelimiter?: string) => {
+    switch (delimiter) {
+      case 'comma': return ',';
+      case 'semicolon': return ';';
+      case 'pipe': return '|';
+      case 'custom': return customDelimiter || ',';
+      default: return ',';
+    }
   };
 
   const renderTemplate = ({ item }: { item: Template }) => (
@@ -375,29 +455,145 @@ export default function TemplatesScreen() {
                 onChangeText={setNewTemplateName}
               />
 
-              <View style={styles.fieldsSection}>
-                <View style={styles.fieldsSectionHeader}>
-                  <Text style={styles.fieldsSectionTitle}>Fields ({templateFields.length})</Text>
-                  <TouchableOpacity style={styles.addFieldButton} onPress={addField}>
-                    <Text style={styles.addFieldButtonText}>Add Field</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView 
-                  style={styles.fieldsScrollView}
-                  contentContainerStyle={styles.fieldsScrollContent}
-                  showsVerticalScrollIndicator={true}
-                  persistentScrollbar={true}
-                  scrollIndicatorInsets={{ right: 1 }}
-                  indicatorStyle="black"
+              {/* Tab Navigation */}
+              <View style={styles.tabContainer}>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'fields' && styles.activeTab]}
+                  onPress={() => setActiveTab('fields')}
                 >
-                  {templateFields.map((item, index) => (
-                    <View key={`${item.id}-${index}`}>
-                      {renderField({ item, index })}
-                    </View>
-                  ))}
-                </ScrollView>
+                  <Text style={[styles.tabText, activeTab === 'fields' && styles.activeTabText]}>
+                    📝 Fields
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'csv' && styles.activeTab]}
+                  onPress={() => setActiveTab('csv')}
+                >
+                  <Text style={[styles.tabText, activeTab === 'csv' && styles.activeTabText]}>
+                    🗂️ CSV Export Settings
+                  </Text>
+                </TouchableOpacity>
               </View>
+
+              {/* Fields Tab */}
+              {activeTab === 'fields' && (
+                <View style={styles.fieldsSection}>
+                  <View style={styles.fieldsSectionHeader}>
+                    <Text style={styles.fieldsSectionTitle}>Fields ({templateFields.length})</Text>
+                    <TouchableOpacity style={styles.addFieldButton} onPress={addField}>
+                      <Text style={styles.addFieldButtonText}>Add Field</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <ScrollView 
+                    style={styles.fieldsScrollView}
+                    contentContainerStyle={styles.fieldsScrollContent}
+                    showsVerticalScrollIndicator={true}
+                    persistentScrollbar={true}
+                    scrollIndicatorInsets={{ right: 1 }}
+                    indicatorStyle="black"
+                  >
+                    {templateFields.map((item, index) => (
+                      <View key={`${item.id}-${index}`}>
+                        {renderField({ item, index })}
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {/* CSV Export Settings Tab */}
+              {activeTab === 'csv' && (
+                <View style={styles.csvSettingsSection}>
+                  {/* Header Option */}
+                  <View style={styles.csvSettingGroup}>
+                    <Text style={styles.csvSettingTitle}>Header Option</Text>
+                    <TouchableOpacity
+                      style={styles.checkbox}
+                      onPress={() => setCsvExportSettings(prev => ({
+                        ...prev,
+                        includeHeader: !prev.includeHeader
+                      }))}
+                    >
+                      <Text style={styles.checkboxText}>
+                        {csvExportSettings.includeHeader ? '✅' : '🚫'} Export with header
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Delimiter Selection */}
+                  <View style={styles.csvSettingGroup}>
+                    <Text style={styles.csvSettingTitle}>Delimiter Selection</Text>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={csvExportSettings.delimiter}
+                        onValueChange={(value) => setCsvExportSettings(prev => ({
+                          ...prev,
+                          delimiter: value
+                        }))}
+                        style={styles.picker}
+                      >
+                        <Picker.Item label="Comma ," value="comma" />
+                        <Picker.Item label="Semicolon ;" value="semicolon" />
+                        <Picker.Item label="Pipe |" value="pipe" />
+                        <Picker.Item label="Custom Delimiter" value="custom" />
+                      </Picker>
+                    </View>
+                    
+                    {csvExportSettings.delimiter === 'custom' && (
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Enter custom delimiter (e.g. #, ~, etc.)"
+                        value={csvExportSettings.customDelimiter || ''}
+                        onChangeText={(text) => setCsvExportSettings(prev => ({
+                          ...prev,
+                          customDelimiter: text
+                        }))}
+                        maxLength={3}
+                      />
+                    )}
+                  </View>
+
+                  {/* Column Positioning */}
+                  <View style={styles.csvSettingGroup}>
+                    <Text style={styles.csvSettingTitle}>Column Positioning</Text>
+                    <Text style={styles.csvSettingDescription}>
+                      Set the CSV column position for each field
+                    </Text>
+                    
+                    <ScrollView 
+                      style={styles.positionScrollView}
+                      contentContainerStyle={styles.positionScrollContent}
+                      showsVerticalScrollIndicator={true}
+                    >
+                      {templateFields.map((field, index) => (
+                        <View key={field.id} style={styles.positionRow}>
+                          <Text style={styles.positionFieldName}>{field.name}</Text>
+                          <View style={styles.positionInputContainer}>
+                            <Text style={styles.positionLabel}>Position:</Text>
+                            <TextInput
+                              style={styles.positionInput}
+                              value={String(csvExportSettings.fieldPositions[field.id] || index + 1)}
+                              onChangeText={(text) => {
+                                const position = parseInt(text) || 1;
+                                updateFieldPosition(field.id, position);
+                              }}
+                              keyboardType="numeric"
+                              placeholder="1"
+                            />
+                          </View>
+                        </View>
+                      ))}
+                    </ScrollView>
+
+                    {templateFields.length === 0 && (
+                      <Text style={styles.noFieldsText}>
+                        Add fields in the Fields tab to configure column positions
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              )}
 
               <View style={styles.modalButtons}>
                 <TouchableOpacity
@@ -406,6 +602,13 @@ export default function TemplatesScreen() {
                     setNewTemplateName('');
                     setTemplateFields([]);
                     setEditingTemplateId(null);
+                    setActiveTab('fields');
+                    setCsvExportSettings({
+                      includeHeader: true,
+                      delimiter: 'comma',
+                      customDelimiter: '',
+                      fieldPositions: {}
+                    });
                     setShowTemplateModal(false);
                   }}
                 >
@@ -1250,5 +1453,107 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    borderRadius: 8,
+    backgroundColor: '#f8fafc',
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  activeTab: {
+    backgroundColor: '#4299e1',
+    boxShadow: '0px 2px 4px rgba(66, 153, 225, 0.2)',
+    elevation: 2,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#718096',
+  },
+  activeTabText: {
+    color: 'white',
+  },
+  csvSettingsSection: {
+    marginBottom: 20,
+  },
+  csvSettingGroup: {
+    marginBottom: 25,
+    padding: 16,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  csvSettingTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 12,
+  },
+  csvSettingDescription: {
+    fontSize: 14,
+    color: '#4a5568',
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
+  positionScrollView: {
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 6,
+    backgroundColor: 'white',
+  },
+  positionScrollContent: {
+    padding: 8,
+  },
+  positionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  positionFieldName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2d3748',
+    flex: 1,
+  },
+  positionInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  positionLabel: {
+    fontSize: 12,
+    color: '#718096',
+    fontWeight: '500',
+  },
+  positionInput: {
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    borderRadius: 4,
+    padding: 6,
+    fontSize: 14,
+    width: 50,
+    textAlign: 'center',
+    backgroundColor: 'white',
+  },
+  noFieldsText: {
+    fontSize: 14,
+    color: '#a0aec0',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    padding: 20,
   },
 });
