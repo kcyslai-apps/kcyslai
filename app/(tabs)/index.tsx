@@ -335,7 +335,7 @@ export default function TemplatesScreen() {
       ...prev,
       fieldPositions: {
         ...prev.fieldPositions,
-        [fieldId]: position || 0
+        [fieldId]: position === null ? 0 : position
       }
     }));
   };
@@ -606,13 +606,13 @@ export default function TemplatesScreen() {
                                     styles.positionNumberInput,
                                     isDuplicate && styles.duplicatePositionInput
                                   ]}
-                                  value={currentPosition > 0 ? String(currentPosition) : ''}
+                                  value={currentPosition === 0 ? '' : String(currentPosition)}
                                   onChangeText={(text) => {
                                     if (text === '') {
                                       updateFieldPosition(field.id, null);
                                     } else {
                                       const position = parseInt(text);
-                                      if (!isNaN(position) && position > 0) {
+                                      if (!isNaN(position) && position >= 0) {
                                         updateFieldPosition(field.id, position);
                                       }
                                     }
