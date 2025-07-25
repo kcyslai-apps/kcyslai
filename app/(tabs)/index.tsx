@@ -529,14 +529,8 @@ export default function TemplatesScreen() {
             <Text style={styles.useTemplateModalTitle}>🚀 Use Template</Text>
             
             <View style={styles.useTemplateInfo}>
-              <Text style={styles.useTemplateText}>
-                Start data collection using
-              </Text>
               <Text style={styles.useTemplateNameText}>
                 "{selectedTemplateForUse?.name}"
-              </Text>
-              <Text style={styles.useTemplateText}>
-                template?
               </Text>
             </View>
 
