@@ -688,6 +688,15 @@ export default function TemplatesScreen() {
               )}
 
               {currentField.type === 'fixed_data' && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Default value (optional)"
+                  value={currentField.defaultValue || ''}
+                  onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
+                />
+              )}
+
+              {currentField.type === 'fixed_data' && (
                 <View style={styles.fixedDataSection}>
                   <Text style={styles.label}>Options:</Text>
                   {(currentField.options || []).map((option, index) => (
