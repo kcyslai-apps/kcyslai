@@ -189,11 +189,13 @@ export default function TemplatesScreen() {
   };
 
   const viewTemplate = (template: Template) => {
-    Alert.alert(
-      template.name,
-      `Description: ${template.description || 'No description'}\n\nFields (${template.fields.length}):\n${template.fields.map(f => `• ${f.name} (${fieldTypes.find(t => t.value === f.type)?.label})`).join('\n')}`,
-      [{ text: 'Close', style: 'cancel' }]
-    );
+    setSelectedTemplateForView(template);
+    setShowViewTemplateModal(true);
+  };
+
+  const closeViewTemplate = () => {
+    setShowViewTemplateModal(false);
+    setSelectedTemplateForView(null);
   };
 
   const editTemplate = (template: Template) => {
@@ -205,6 +207,8 @@ export default function TemplatesScreen() {
 
   const [showUseTemplateModal, setShowUseTemplateModal] = useState(false);
   const [selectedTemplateForUse, setSelectedTemplateForUse] = useState<Template | null>(null);
+  const [showViewTemplateModal, setShowViewTemplateModal] = useState(false);
+  const [selectedTemplateForView, setSelectedTemplateForView] = useState<Template | null>(null);
 
   const useTemplate = (template: Template) => {
     setSelectedTemplateForUse(template);
@@ -546,6 +550,49 @@ export default function TemplatesScreen() {
                 onPress={confirmUseTemplate}
               >
                 <Text style={styles.useTemplateStartButtonText}>Use</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* View Template Modal */}
+      <Modal visible={showViewTemplateModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.viewTemplateModalContent}>
+            <Text style={styles.viewTemplateModalTitle}>👁️ View Template</Text>
+            
+            <View style={styles.viewTemplateInfo}>
+              <Text style={styles.viewTemplateNameText}>
+                "{selectedTemplateForView?.name}"
+              </Text>
+              
+              <View style={styles.viewTemplateDetails}>
+                <Text style={styles.viewTemplateDetailText}>
+                  Description: {selectedTemplateForView?.description || 'No description'}
+                </Text>
+                <Text style={styles.viewTemplateDetailText}>
+                  Fields: {selectedTemplateForView?.fields.length || 0}
+                </Text>
+                
+                {selectedTemplateForView?.fields && selectedTemplateForView.fields.length > 0 && (
+                  <View style={styles.viewTemplateFieldsList}>
+                    {selectedTemplateForView.fields.map((field, index) => (
+                      <Text key={index} style={styles.viewTemplateFieldItem}>
+                        • {field.name} ({fieldTypes.find(t => t.value === field.type)?.label})
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </View>
+
+            <View style={styles.viewTemplateButtons}>
+              <TouchableOpacity
+                style={styles.viewTemplateCloseButton}
+                onPress={closeViewTemplate}
+              >
+                <Text style={styles.viewTemplateCloseButtonText}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1001,6 +1048,85 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   useTemplateStartButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  viewTemplateModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 340,
+    alignItems: 'center',
+    boxShadow: '0px 8px 32px rgba(0, 0, 0, 0.12)',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+  },
+  viewTemplateModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  viewTemplateInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  viewTemplateNameText: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#63b3ed',
+    minWidth: '80%',
+    boxShadow: '0px 2px 8px rgba(99, 179, 237, 0.15)',
+    elevation: 3,
+  },
+  viewTemplateDetails: {
+    width: '100%',
+    alignItems: 'flex-start',
+  },
+  viewTemplateDetailText: {
+    fontSize: 16,
+    color: '#4a5568',
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  viewTemplateFieldsList: {
+    marginTop: 10,
+    width: '100%',
+  },
+  viewTemplateFieldItem: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 4,
+    paddingLeft: 8,
+    lineHeight: 20,
+  },
+  viewTemplateButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  viewTemplateCloseButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  viewTemplateCloseButtonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
