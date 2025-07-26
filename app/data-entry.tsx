@@ -410,8 +410,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
+    padding: 15,
+    paddingTop: 50,
   },
   backButton: {
     marginRight: 15,
@@ -428,10 +428,11 @@ const styles = StyleSheet.create({
   },
   templateInfo: {
     backgroundColor: '#f7fafc',
-    padding: 15,
-    marginHorizontal: 20,
-    borderRadius: 8,
-    borderLeftWidth: 4,
+    padding: 12,
+    marginHorizontal: 15,
+    marginBottom: 10,
+    borderRadius: 6,
+    borderLeftWidth: 3,
     borderLeftColor: '#4299e1',
   },
   templateName: {
@@ -454,16 +455,16 @@ const styles = StyleSheet.create({
     borderTopColor: '#e2e8f0',
   },
   formContainer: {
-    padding: 20,
+    padding: 15,
   },
   fieldContainer: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
   fieldLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   required: {
     color: '#e53e3e',
@@ -471,11 +472,12 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#cbd5e0',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    borderRadius: 6,
+    padding: 10,
+    fontSize: 15,
     backgroundColor: '#ffffff',
     textAlignVertical: 'top',
+    minHeight: 40,
   },
   pickerContainer: {
     borderWidth: 1,
@@ -484,14 +486,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   picker: {
-    height: 50,
+    height: 44,
   },
   fixedValueContainer: {
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 6,
+    padding: 10,
     backgroundColor: '#f7fafc',
+    minHeight: 40,
   },
   fixedValue: {
     fontSize: 16,
@@ -499,17 +502,18 @@ const styles = StyleSheet.create({
   },
   barcodeContainer: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   barcodeInput: {
     flex: 1,
   },
   scanButton: {
     backgroundColor: '#4299e1',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 6,
     justifyContent: 'center',
+    minHeight: 40,
   },
   scanButtonText: {
     color: 'white',
@@ -517,15 +521,17 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    padding: 20,
+    padding: 15,
+    paddingBottom: 20,
     gap: 10,
   },
   resetButton: {
     flex: 1,
     backgroundColor: '#a0aec0',
-    paddingVertical: 15,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 6,
     alignItems: 'center',
+    minHeight: 44,
   },
   resetButtonText: {
     color: 'white',
@@ -535,9 +541,10 @@ const styles = StyleSheet.create({
   saveButton: {
     flex: 1,
     backgroundColor: '#48bb78',
-    paddingVertical: 15,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 6,
     alignItems: 'center',
+    minHeight: 44,
   },
   saveButtonText: {
     color: 'white',
@@ -602,26 +609,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   editableUnifiedContainer: {
-    gap: 10,
+    gap: 8,
   },
   quickSelectContainer: {
-    marginTop: 8,
+    marginTop: 6,
   },
   quickSelectLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#4a5568',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   quickSelectScroll: {
     flexDirection: 'row',
   },
   quickSelectOption: {
     backgroundColor: '#e2e8f0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    marginRight: 6,
     borderWidth: 1,
     borderColor: '#cbd5e0',
   },
