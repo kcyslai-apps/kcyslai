@@ -15,6 +15,8 @@ interface TemplateField {
   defaultValue?: string;
   options?: string[];
   inputMode?: 'select_only' | 'editable';
+  dateFormat?: string;
+  customDateFormat?: string;
 }
 
 interface CSVExportSettings {
@@ -54,6 +56,15 @@ export default function TemplatesScreen() {
     { label: 'Fixed Data', value: 'fixed_data' },
     { label: 'Fixed Date', value: 'fixed_date' },
     { label: 'Barcode Scanning', value: 'barcode' },
+  ];
+
+  const dateFormats = [
+    { label: 'yyyyMMdd (e.g. 20250724)', value: 'yyyyMMdd' },
+    { label: 'dd/MM/yyyy (e.g. 24/07/2025)', value: 'dd/MM/yyyy' },
+    { label: 'MM-dd-yyyy (e.g. 07-24-2025)', value: 'MM-dd-yyyy' },
+    { label: 'yyyy-MM-dd (e.g. 2025-07-24)', value: 'yyyy-MM-dd' },
+    { label: 'dd MMM yyyy (e.g. 24 Jul 2025)', value: 'dd MMM yyyy' },
+    { label: 'Custom Format', value: 'custom' },
   ];
 
   useEffect(() => {
@@ -122,7 +133,8 @@ export default function TemplatesScreen() {
       type: 'free_text',
       required: false,
       defaultValue: '',
-      options: []
+      options: [],
+      dateFormat: 'yyyy-MM-dd'
     });
     setEditingFieldIndex(null);
     setShowFieldModal(true);
@@ -147,7 +159,9 @@ export default function TemplatesScreen() {
       required: currentField.required || false,
       defaultValue: currentField.defaultValue || '',
       options: currentField.options || [],
-      inputMode: currentField.inputMode || 'select_only'
+      inputMode: currentField.inputMode || 'select_only',
+      dateFormat: currentField.dateFormat || 'yyyy-MM-dd',
+      customDateFormat: currentField.customDateFormat || ''
     };
 
     let updatedFields = [...templateFields];
@@ -859,6 +873,37 @@ export default function TemplatesScreen() {
                     >
                       <Text style={styles.clearDateButtonText}>Clear Date</Text>
                     </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
+              {(currentField.type === 'date' || currentField.type === 'fixed_date') && (
+                <View style={styles.defaultValueSection}>
+                  <Text style={styles.defaultValueLabel}>Date Format:</Text>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={currentField.dateFormat || 'yyyy-MM-dd'}
+                      onValueChange={(value) => setCurrentField({ ...currentField, dateFormat: value })}
+                      style={styles.picker}
+                    >
+                      {dateFormats.map((format) => (
+                        <Picker.Item key={format.value} label={format.label} value={format.value} />
+                      ))}
+                    </Picker>
+                  </View>
+                  {currentField.dateFormat === 'custom' && (
+                    <View style={styles.customFormatSection}>
+                      <Text style={styles.customFormatLabel}>Custom Format:</Text>
+                      <TextInput
+                        style={[styles.input, styles.customFormatInput]}
+                        placeholder="Enter custom format (e.g. dd.MM.yy)"
+                        value={currentField.customDateFormat || ''}
+                        onChangeText={(text) => setCurrentField({ ...currentField, customDateFormat: text })}
+                      />
+                      <Text style={styles.formatHint}>
+                        Use: yyyy (year), MM (month), dd (day), MMM (month name)
+                      </Text>
+                    </View>
                   )}
                 </View>
               )}
@@ -2079,5 +2124,28 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+  },
+  customFormatSection: {
+    marginTop: 12,
+    padding: 10,
+    backgroundColor: '#f0f8ff',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+  },
+  customFormatLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 6,
+  },
+  customFormatInput: {
+    marginBottom: 8,
+  },
+  formatHint: {
+    fontSize: 12,
+    color: '#718096',
+    fontStyle: 'italic',
+    lineHeight: 16,
   },
 });
