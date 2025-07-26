@@ -153,7 +153,7 @@ export default function DataEntryScreen() {
         'Success',
         successMessage,
         [
-          { text: 'Add Another', onPress: resetForm },
+          { text: 'Add Another Entry', onPress: resetForm },
           { text: 'Back to Templates', onPress: () => router.back() }
         ]
       );
@@ -163,17 +163,41 @@ export default function DataEntryScreen() {
     }
   };
 
+  const getSortedFields = () => {
+    if (!template) return [];
+    
+    // Separate fixed fields from other fields
+    const fixedFields = template.fields.filter(field => 
+      field.type === 'fixed_data' || field.type === 'fixed_date'
+    );
+    const otherFields = template.fields.filter(field => 
+      field.type !== 'fixed_data' && field.type !== 'fixed_date'
+    );
+    
+    // Return fixed fields first, then other fields
+    return [...fixedFields, ...otherFields];
+  };
+
   const resetForm = () => {
     if (!template) return;
     
     const initialData: { [fieldId: string]: string } = {};
     template.fields.forEach(field => {
-      if (field.type === 'fixed_data' && field.defaultValue) {
-        // For fixed_data fields, set the default value
-        initialData[field.id] = field.defaultValue;
+      if (field.type === 'fixed_data' || field.type === 'fixed_date') {
+        // Keep existing values for fixed fields, or set default if empty
+        const currentValue = formData[field.id];
+        if (currentValue) {
+          initialData[field.id] = currentValue;
+        } else if (field.defaultValue) {
+          initialData[field.id] = field.defaultValue;
+        } else {
+          initialData[field.id] = '';
+        }
       } else if (field.defaultValue) {
+        // Reset non-fixed fields to their default values
         initialData[field.id] = field.defaultValue;
       } else {
+        // Clear non-fixed fields
         initialData[field.id] = '';
       }
     });
@@ -339,20 +363,40 @@ export default function DataEntryScreen() {
         </View>
 
         <View style={styles.formContainer}>
-          {template.fields.map((field) => (
-            <View key={field.id} style={styles.fieldContainer}>
-              <Text style={styles.fieldLabel}>
-                {field.name}
-                {field.required && <Text style={styles.required}> *</Text>}
-              </Text>
-              {renderField(field)}
-            </View>
-          ))}
+          {getSortedFields().map((field, index) => {
+            const isFixedField = field.type === 'fixed_data' || field.type === 'fixed_date';
+            const nextField = getSortedFields()[index + 1];
+            const isLastFixedField = isFixedField && nextField && nextField.type !== 'fixed_data' && nextField.type !== 'fixed_date';
+            
+            return (
+              <View key={field.id}>
+                <View style={[
+                  styles.fieldContainer,
+                  isFixedField && styles.fixedFieldContainer
+                ]}>
+                  <Text style={[
+                    styles.fieldLabel,
+                    isFixedField && styles.fixedFieldLabel
+                  ]}>
+                    {field.name}
+                    {field.required && <Text style={styles.required}> *</Text>}
+                    {isFixedField && <Text style={styles.fixedFieldIndicator}> 📌</Text>}
+                  </Text>
+                  {renderField(field)}
+                </View>
+                {isLastFixedField && (
+                  <View style={styles.fieldSeparator}>
+                    <Text style={styles.separatorText}>━━━ Variable Fields ━━━</Text>
+                  </View>
+                )}
+              </View>
+            );
+          })}
         </View>
 
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.resetButton} onPress={resetForm}>
-            <Text style={styles.resetButtonText}>Reset Form</Text>
+            <Text style={styles.resetButtonText}>New Entry</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton} onPress={saveDataRecord}>
             <Text style={styles.saveButtonText}>Save Data</Text>
@@ -461,11 +505,36 @@ const styles = StyleSheet.create({
   fieldContainer: {
     marginBottom: 12,
   },
+  fixedFieldContainer: {
+    backgroundColor: '#f8fafc',
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#48bb78',
+    marginBottom: 12,
+  },
   fieldLabel: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#2d3748',
     marginBottom: 6,
+  },
+  fixedFieldLabel: {
+    color: '#2d5016',
+  },
+  fixedFieldIndicator: {
+    color: '#48bb78',
+    fontSize: 14,
+  },
+  fieldSeparator: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  separatorText: {
+    fontSize: 14,
+    color: '#718096',
+    fontWeight: '600',
+    letterSpacing: 1,
   },
   required: {
     color: '#e53e3e',
