@@ -35,19 +35,23 @@ interface DataRecord {
 }
 
 export default function DataEntryScreen() {
-  const { templateId } = useLocalSearchParams();
+  const { templateId, dataFileName } = useLocalSearchParams();
   const [template, setTemplate] = useState<Template | null>(null);
   const [formData, setFormData] = useState<{ [fieldId: string]: string }>({});
   const [showCamera, setShowCamera] = useState(false);
   const [currentBarcodeField, setCurrentBarcodeField] = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
+  const [currentDataFileName, setCurrentDataFileName] = useState<string>('');
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
 
   useEffect(() => {
     loadTemplate();
-  }, [templateId]);
+    if (dataFileName && typeof dataFileName === 'string') {
+      setCurrentDataFileName(decodeURIComponent(dataFileName));
+    }
+  }, [templateId, dataFileName]);
 
   const loadTemplate = async () => {
     try {
@@ -141,9 +145,13 @@ export default function DataEntryScreen() {
       const updatedRecords = [...existingRecords, newRecord];
       await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
 
+      const successMessage = currentDataFileName 
+        ? `Data saved to "${currentDataFileName}" successfully!`
+        : 'Data saved successfully!';
+        
       Alert.alert(
         'Success',
-        'Data saved successfully!',
+        successMessage,
         [
           { text: 'Add Another', onPress: resetForm },
           { text: 'Back to Templates', onPress: () => router.back() }
@@ -322,6 +330,9 @@ export default function DataEntryScreen() {
         <View style={styles.templateInfo}>
           <Text style={styles.templateName}>{template.name}</Text>
           <Text style={styles.templateDescription}>{template.description}</Text>
+          {currentDataFileName && (
+            <Text style={styles.dataFileName}>📂 Data File: {currentDataFileName}</Text>
+          )}
         </View>
 
         <View style={styles.formContainer}>
@@ -429,6 +440,15 @@ const styles = StyleSheet.create({
   templateDescription: {
     fontSize: 14,
     color: '#4a5568',
+  },
+  dataFileName: {
+    fontSize: 14,
+    color: '#2d3748',
+    fontWeight: '600',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
   },
   formContainer: {
     padding: 20,

@@ -274,6 +274,8 @@ export default function TemplatesScreen() {
   const [selectedTemplateForView, setSelectedTemplateForView] = useState<Template | null>(null);
   const [showDeleteTemplateModal, setShowDeleteTemplateModal] = useState(false);
   const [selectedTemplateForDelete, setSelectedTemplateForDelete] = useState<Template | null>(null);
+  const [showDataFileModal, setShowDataFileModal] = useState(false);
+  const [dataFileName, setDataFileName] = useState('');
   const [activeTab, setActiveTab] = useState<'fields' | 'csv'>('fields');
   const [csvExportSettings, setCsvExportSettings] = useState<CSVExportSettings>({
     includeHeader: false,
@@ -289,9 +291,20 @@ export default function TemplatesScreen() {
 
   const confirmUseTemplate = () => {
     if (selectedTemplateForUse) {
-      router.push(`/data-entry?templateId=${selectedTemplateForUse.id}`);
+      // Generate default filename
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const defaultFileName = `${selectedTemplateForUse.name}_${year}${month}${day}_${hours}${minutes}${seconds}`;
+      setDataFileName(defaultFileName);
+      
       setShowUseTemplateModal(false);
-      setSelectedTemplateForUse(null);
+      setShowDataFileModal(true);
     }
   };
 
@@ -321,6 +334,22 @@ export default function TemplatesScreen() {
   const cancelDeleteTemplate = () => {
     setShowDeleteTemplateModal(false);
     setSelectedTemplateForDelete(null);
+  };
+
+  const confirmCreateDataFile = () => {
+    if (selectedTemplateForUse && dataFileName.trim()) {
+      // Navigate to data entry with both template ID and data file name
+      router.push(`/data-entry?templateId=${selectedTemplateForUse.id}&dataFileName=${encodeURIComponent(dataFileName.trim())}`);
+      setShowDataFileModal(false);
+      setSelectedTemplateForUse(null);
+      setDataFileName('');
+    }
+  };
+
+  const cancelCreateDataFile = () => {
+    setShowDataFileModal(false);
+    setSelectedTemplateForUse(null);
+    setDataFileName('');
   };
 
   const addFixedDataOption = () => {
@@ -971,6 +1000,50 @@ export default function TemplatesScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Data File Creation Modal */}
+      <Modal visible={showDataFileModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.dataFileModalContent}>
+            <Text style={styles.dataFileModalTitle}>💾 Create Data File</Text>
+
+            <View style={styles.dataFileInfo}>
+              <Text style={styles.dataFileDescription}>
+                Create a new data file for storing collected entries from:
+              </Text>
+              <Text style={styles.dataFileTemplateText}>
+                "{selectedTemplateForUse?.name}"
+              </Text>
+            </View>
+
+            <View style={styles.dataFileInputSection}>
+              <Text style={styles.dataFileInputLabel}>File Name:</Text>
+              <TextInput
+                style={styles.dataFileInput}
+                value={dataFileName}
+                onChangeText={setDataFileName}
+                placeholder="Enter file name"
+                selectTextOnFocus={true}
+              />
+            </View>
+
+            <View style={styles.dataFileButtons}>
+              <TouchableOpacity
+                style={styles.dataFileCancelButton}
+                onPress={cancelCreateDataFile}
+              >
+                <Text style={styles.dataFileCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.dataFileCreateButton}
+                onPress={confirmCreateDataFile}
+              >
+                <Text style={styles.dataFileCreateButtonText}>Create File</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -1595,6 +1668,105 @@ const styles = StyleSheet.create({
   deleteTemplateConfirmButtonText: {
     color: 'white',
     fontSize: 14,
+    fontWeight: '500',
+  },
+  dataFileModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    boxShadow: '0px 8px 32px rgba(0, 0, 0, 0.12)',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+  },
+  dataFileModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  dataFileInfo: {
+    alignItems: 'center',
+    marginBottom: 25,
+    width: '100%',
+  },
+  dataFileDescription: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  dataFileTemplateText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#68d391',
+    minWidth: '80%',
+    boxShadow: '0px 2px 8px rgba(104, 211, 145, 0.15)',
+    elevation: 3,
+  },
+  dataFileInputSection: {
+    width: '100%',
+    marginBottom: 25,
+  },
+  dataFileInputLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 8,
+  },
+  dataFileInput: {
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#ffffff',
+    width: '100%',
+  },
+  dataFileButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  dataFileCancelButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    minWidth: 100,
+  },
+  dataFileCancelButtonText: {
+    color: '#718096',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  dataFileCreateButton: {
+    backgroundColor: '#48bb78',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 100,
+  },
+  dataFileCreateButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontWeight: '500',
   },
   tabContainer: {
