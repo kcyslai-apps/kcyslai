@@ -299,10 +299,10 @@ export default function TemplatesScreen() {
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
-      
+
       const defaultFileName = `${selectedTemplateForUse.name}_${year}${month}${day}_${hours}${minutes}${seconds}`;
       setDataFileName(defaultFileName);
-      
+
       setShowUseTemplateModal(false);
       setShowDataFileModal(true);
     }
@@ -815,9 +815,10 @@ export default function TemplatesScreen() {
                   <Text style={styles.defaultValueLabel}>Default Value (Optional):</Text>
                   <TextInput
                     style={[styles.input, styles.defaultValueInput]}
-                    placeholder="Enter default selection"
+                    placeholder="Enter default value (max 30 chars)"
                     value={currentField.defaultValue || ''}
                     onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
+                    maxLength={30}
                   />
                 </View>
               )}
@@ -832,6 +833,7 @@ export default function TemplatesScreen() {
                         placeholder={`Option ${index + 1}`}
                         value={option}
                         onChangeText={(text) => updateFixedDataOption(index, text)}
+                        maxLength={30}
                       />
                       <TouchableOpacity
                         style={styles.removeOptionButton}
