@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, Modal, TextInput, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as FileSystem from 'expo-file-system';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
@@ -283,6 +284,8 @@ export default function TemplatesScreen() {
     customDelimiter: '',
     fieldPositions: {}
   });
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showFixedDatePicker, setShowFixedDatePicker] = useState(false);
 
   const useTemplate = (template: Template) => {
     setSelectedTemplateForUse(template);
@@ -403,6 +406,22 @@ export default function TemplatesScreen() {
       case 'pipe': return '|';
       case 'custom': return customDelimiter || ',';
       default: return ',';
+    }
+  };
+
+  const handleDatePickerChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      setCurrentField({ ...currentField, defaultValue: formattedDate });
+    }
+  };
+
+  const handleFixedDatePickerChange = (event: any, selectedDate?: Date) => {
+    setShowFixedDatePicker(false);
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      setCurrentField({ ...currentField, defaultValue: formattedDate });
     }
   };
 
@@ -798,15 +817,49 @@ export default function TemplatesScreen() {
                 </View>
               )}
 
+              {currentField.type === 'date' && (
+                <View style={styles.defaultValueSection}>
+                  <Text style={styles.defaultValueLabel}>Default Date (Optional):</Text>
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text style={styles.datePickerButtonText}>
+                      {currentField.defaultValue || 'Select Default Date'}
+                    </Text>
+                    <Text style={styles.datePickerIcon}>📅</Text>
+                  </TouchableOpacity>
+                  {currentField.defaultValue && (
+                    <TouchableOpacity
+                      style={styles.clearDateButton}
+                      onPress={() => setCurrentField({ ...currentField, defaultValue: '' })}
+                    >
+                      <Text style={styles.clearDateButtonText}>Clear Date</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
               {currentField.type === 'fixed_date' && (
                 <View style={styles.defaultValueSection}>
                   <Text style={styles.defaultValueLabel}>Fixed Date Value:</Text>
-                  <TextInput
-                    style={[styles.input, styles.defaultValueInput]}
-                    placeholder="YYYY-MM-DD"
-                    value={currentField.defaultValue || ''}
-                    onChangeText={(text) => setCurrentField({ ...currentField, defaultValue: text })}
-                  />
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => setShowFixedDatePicker(true)}
+                  >
+                    <Text style={styles.datePickerButtonText}>
+                      {currentField.defaultValue || 'Select Fixed Date'}
+                    </Text>
+                    <Text style={styles.datePickerIcon}>📅</Text>
+                  </TouchableOpacity>
+                  {currentField.defaultValue && (
+                    <TouchableOpacity
+                      style={styles.clearDateButton}
+                      onPress={() => setCurrentField({ ...currentField, defaultValue: '' })}
+                    >
+                      <Text style={styles.clearDateButtonText}>Clear Date</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
 
@@ -1046,6 +1099,26 @@ export default function TemplatesScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Date Picker Modal for Default Date */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={currentField.defaultValue ? new Date(currentField.defaultValue) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleDatePickerChange}
+        />
+      )}
+
+      {/* Date Picker Modal for Fixed Date */}
+      {showFixedDatePicker && (
+        <DateTimePicker
+          value={currentField.defaultValue ? new Date(currentField.defaultValue) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleFixedDatePickerChange}
+        />
+      )}
     </ThemedView>
   );
 }
@@ -1973,5 +2046,38 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontStyle: 'italic',
     lineHeight: 16,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#ffffff',
+    marginBottom: 8,
+  },
+  datePickerButtonText: {
+    fontSize: 16,
+    color: '#2d3748',
+    flex: 1,
+  },
+  datePickerIcon: {
+    fontSize: 18,
+    marginLeft: 8,
+  },
+  clearDateButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  clearDateButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
