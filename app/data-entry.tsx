@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -46,6 +45,9 @@ export default function DataEntryScreen() {
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
 
+  const [isFixedFieldModal, setIsFixedFieldModal] = useState(false);
+  const [fixedFormData, setFixedFormData] = useState<{ [fieldId: string]: string }>({});
+
   useEffect(() => {
     loadTemplate();
     if (dataFileName && typeof dataFileName === 'string') {
@@ -60,22 +62,28 @@ export default function DataEntryScreen() {
         const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
         const templates: Template[] = JSON.parse(content);
         const foundTemplate = templates.find(t => t.id === templateId);
-        
+
         if (foundTemplate) {
           setTemplate(foundTemplate);
           // Initialize form data with default values
           const initialData: { [fieldId: string]: string } = {};
+          const initialFixedData: { [fieldId: string]: string } = {};
           foundTemplate.fields.forEach(field => {
-            if (field.type === 'fixed_data' && field.defaultValue) {
-              // For fixed_data fields, set the default value
-              initialData[field.id] = field.defaultValue;
-            } else if (field.defaultValue) {
+            if (field.type === 'fixed_data' || field.type === 'fixed_date') {
+              if (field.defaultValue) {
+                initialFixedData[field.id] = field.defaultValue;
+              } else {
+                initialFixedData[field.id] = '';
+              }
+            }
+            else if (field.defaultValue) {
               initialData[field.id] = field.defaultValue;
             } else {
               initialData[field.id] = '';
             }
           });
           setFormData(initialData);
+          setFixedFormData(initialFixedData);
         } else {
           Alert.alert('Error', 'Template not found');
           router.back();
@@ -90,6 +98,13 @@ export default function DataEntryScreen() {
 
   const updateFieldValue = (fieldId: string, value: string) => {
     setFormData(prev => ({
+      ...prev,
+      [fieldId]: value
+    }));
+  };
+
+  const updateFixedFieldValue = (fieldId: string, value: string) => {
+    setFixedFormData(prev => ({
       ...prev,
       [fieldId]: value
     }));
@@ -137,7 +152,7 @@ export default function DataEntryScreen() {
         id: Date.now().toString(),
         templateId: template.id,
         templateName: template.name,
-        data: { ...formData },
+        data: { ...formData, ...fixedFormData },
         timestamp: new Date()
       };
 
@@ -145,10 +160,10 @@ export default function DataEntryScreen() {
       const updatedRecords = [...existingRecords, newRecord];
       await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
 
-      const successMessage = currentDataFileName 
+      const successMessage = currentDataFileName
         ? `Data saved to "${currentDataFileName}" successfully!`
         : 'Data saved successfully!';
-        
+
       Alert.alert(
         'Success',
         successMessage,
@@ -165,22 +180,22 @@ export default function DataEntryScreen() {
 
   const getSortedFields = () => {
     if (!template) return [];
-    
+
     // Separate fixed fields from other fields
-    const fixedFields = template.fields.filter(field => 
+    const fixedFields = template.fields.filter(field =>
       field.type === 'fixed_data' || field.type === 'fixed_date'
     );
-    const otherFields = template.fields.filter(field => 
+    const otherFields = template.fields.filter(field =>
       field.type !== 'fixed_data' && field.type !== 'fixed_date'
     );
-    
+
     // Return fixed fields first, then other fields
     return [...fixedFields, ...otherFields];
   };
 
   const resetForm = () => {
     if (!template) return;
-    
+
     const initialData: { [fieldId: string]: string } = {};
     template.fields.forEach(field => {
       if (field.type === 'fixed_data' || field.type === 'fixed_date') {
@@ -206,6 +221,7 @@ export default function DataEntryScreen() {
 
   const renderField = (field: TemplateField) => {
     const value = formData[field.id] || '';
+    const fixedValue = fixedFormData[field.id] || '';
 
     switch (field.type) {
       case 'free_text':
@@ -214,7 +230,7 @@ export default function DataEntryScreen() {
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
-            onChangeText={(text) => updateFieldValue(field.id, text)}
+            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
             multiline={true}
             numberOfLines={3}
           />
@@ -226,7 +242,7 @@ export default function DataEntryScreen() {
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
-            onChangeText={(text) => updateFieldValue(field.id, text)}
+            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
             keyboardType="numeric"
           />
         );
@@ -237,7 +253,7 @@ export default function DataEntryScreen() {
             style={styles.input}
             placeholder="YYYY-MM-DD"
             value={value}
-            onChangeText={(text) => updateFieldValue(field.id, text)}
+            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
           />
         );
 
@@ -252,15 +268,15 @@ export default function DataEntryScreen() {
         // Ensure default value is always available as an option
         const allOptions = field.options || [];
         const defaultValue = field.defaultValue;
-        
+
         // Add default value to options if it exists and isn't already in the options
         if (defaultValue && !allOptions.includes(defaultValue)) {
           allOptions.unshift(defaultValue);
         }
-        
+
         // Check input mode - default to 'select_only' for backward compatibility
         const inputMode = field.inputMode || 'select_only';
-        
+
         if (inputMode === 'editable') {
           return (
             <View style={styles.editableUnifiedContainer}>
@@ -268,7 +284,7 @@ export default function DataEntryScreen() {
                 style={styles.input}
                 placeholder="Type or tap to select from options"
                 value={value}
-                onChangeText={(text) => updateFieldValue(field.id, text)}
+                onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
               />
               {allOptions.length > 0 && (
                 <View style={styles.quickSelectContainer}>
@@ -313,7 +329,7 @@ export default function DataEntryScreen() {
               style={[styles.input, styles.barcodeInput]}
               placeholder="Scan or enter barcode"
               value={value}
-              onChangeText={(text) => updateFieldValue(field.id, text)}
+              onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
             />
             <TouchableOpacity
               style={styles.scanButton}
@@ -330,7 +346,7 @@ export default function DataEntryScreen() {
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
-            onChangeText={(text) => updateFieldValue(field.id, text)}
+            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
           />
         );
     }
@@ -343,6 +359,31 @@ export default function DataEntryScreen() {
       </ThemedView>
     );
   }
+
+  const renderFixedFieldsModal = () => {
+    if (!template) return null;
+
+    const fixedFields = template.fields.filter(field => field.type === 'fixed_data' || field.type === 'fixed_date');
+
+    return (
+      <Modal visible={isFixedFieldModal} transparent animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Enter Fixed Data</Text>
+            {fixedFields.map(field => (
+              <View key={field.id} style={styles.modalFieldContainer}>
+                <Text style={styles.modalFieldLabel}>{field.name}</Text>
+                {renderField(field)}
+              </View>
+            ))}
+            <TouchableOpacity style={styles.modalButton} onPress={() => setIsFixedFieldModal(false)}>
+              <Text style={styles.modalButtonText}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -367,7 +408,7 @@ export default function DataEntryScreen() {
             const isFixedField = field.type === 'fixed_data' || field.type === 'fixed_date';
             const nextField = getSortedFields()[index + 1];
             const isLastFixedField = isFixedField && nextField && nextField.type !== 'fixed_data' && nextField.type !== 'fixed_date';
-            
+
             return (
               <View key={field.id}>
                 <View style={[
@@ -442,6 +483,7 @@ export default function DataEntryScreen() {
           )}
         </View>
       </Modal>
+      {renderFixedFieldsModal()}
     </ThemedView>
   );
 }
@@ -706,5 +748,41 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#2d3748',
     fontWeight: '500',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  modalFieldContainer: {
+    marginBottom: 10,
+  },
+  modalFieldLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  modalButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
