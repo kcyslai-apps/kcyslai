@@ -239,26 +239,29 @@ export default function DataEntryScreen() {
         
         if (inputMode === 'editable') {
           return (
-            <View style={styles.editableFixedDataContainer}>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={value || field.defaultValue || ''}
-                  onValueChange={(itemValue) => updateFieldValue(field.id, itemValue)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select from options..." value="" />
-                  {allOptions.map((option, index) => (
-                    <Picker.Item key={index} label={option} value={option} />
-                  ))}
-                </Picker>
-              </View>
-              <Text style={styles.orText}>OR</Text>
+            <View style={styles.editableUnifiedContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Enter custom value"
+                placeholder="Type or tap to select from options"
                 value={value}
                 onChangeText={(text) => updateFieldValue(field.id, text)}
               />
+              {allOptions.length > 0 && (
+                <View style={styles.quickSelectContainer}>
+                  <Text style={styles.quickSelectLabel}>Quick Select:</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickSelectScroll}>
+                    {allOptions.map((option, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.quickSelectOption}
+                        onPress={() => updateFieldValue(field.id, option)}
+                      >
+                        <Text style={styles.quickSelectOptionText}>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
             </View>
           );
         } else {
@@ -598,14 +601,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  editableFixedDataContainer: {
+  editableUnifiedContainer: {
     gap: 10,
   },
-  orText: {
-    textAlign: 'center',
+  quickSelectContainer: {
+    marginTop: 8,
+  },
+  quickSelectLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    fontWeight: '600',
+    color: '#4a5568',
+    marginBottom: 6,
+  },
+  quickSelectScroll: {
+    flexDirection: 'row',
+  },
+  quickSelectOption: {
+    backgroundColor: '#e2e8f0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+  },
+  quickSelectOptionText: {
+    fontSize: 13,
+    color: '#2d3748',
     fontWeight: '500',
-    paddingVertical: 5,
   },
 });
