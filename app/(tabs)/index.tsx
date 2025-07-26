@@ -878,13 +878,13 @@ export default function TemplatesScreen() {
               )}
 
               {(currentField.type === 'date' || currentField.type === 'fixed_date') && (
-                <View style={styles.defaultValueSection}>
+                <View style={styles.dateFormatSection}>
                   <Text style={styles.defaultValueLabel}>Date Format:</Text>
-                  <View style={styles.pickerContainer}>
+                  <View style={styles.dateFormatPickerContainer}>
                     <Picker
                       selectedValue={currentField.dateFormat || 'yyyy-MM-dd'}
                       onValueChange={(value) => setCurrentField({ ...currentField, dateFormat: value })}
-                      style={styles.picker}
+                      style={styles.dateFormatPicker}
                     >
                       {dateFormats.map((format) => (
                         <Picker.Item key={format.value} label={format.label} value={format.value} />
@@ -2147,5 +2147,25 @@ const styles = StyleSheet.create({
     color: '#718096',
     fontStyle: 'italic',
     lineHeight: 16,
+  },
+  dateFormatSection: {
+    marginBottom: 15,
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  dateFormatPickerContainer: {
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: '#ffffff',
+    minHeight: 60,
+  },
+  dateFormatPicker: {
+    height: 60,
+    width: '100%',
   },
 });
