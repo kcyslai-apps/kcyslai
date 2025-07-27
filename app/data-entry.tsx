@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -52,6 +51,7 @@ export default function DataEntryScreen() {
   const [currentDateField, setCurrentDateField] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [tempDate, setTempDate] = useState(new Date());
+  const [isDatePickerChanging, setIsDatePickerChanging] = useState(false); // New state
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -73,11 +73,11 @@ export default function DataEntryScreen() {
 
         if (foundTemplate) {
           setTemplate(foundTemplate);
-          
+
           // Initialize fixed data form
           const initialFixedData: { [fieldId: string]: string } = {};
           const initialVariableData: { [fieldId: string]: string } = {};
-          
+
           foundTemplate.fields.forEach(field => {
             if (field.type === 'fixed_data' || field.type === 'fixed_date') {
               if (field.type === 'fixed_date') {
@@ -93,7 +93,7 @@ export default function DataEntryScreen() {
               }
             }
           });
-          
+
           setFixedFormData(initialFixedData);
           setVariableFormData(initialVariableData);
 
@@ -101,7 +101,7 @@ export default function DataEntryScreen() {
           const hasFixedFields = foundTemplate.fields.some(field => 
             field.type === 'fixed_data' || field.type === 'fixed_date'
           );
-          
+
           if (!hasFixedFields) {
             setCurrentPage('variable');
           }
@@ -157,10 +157,10 @@ export default function DataEntryScreen() {
 
   const parseFieldDate = (dateString: string, field: TemplateField): Date | null => {
     if (!dateString) return null;
-    
+
     try {
       let year = 0, month = 0, day = 0;
-      
+
       switch (field.dateFormat) {
         case 'dd/MM/yyyy':
           const ddMMyyyy = dateString.split('/');
@@ -211,14 +211,14 @@ export default function DataEntryScreen() {
           }
           break;
       }
-      
+
       if (year > 0 && month >= 0 && day > 0) {
         return new Date(year, month, day);
       }
     } catch (error) {
       console.log('Error parsing date:', error);
     }
-    
+
     return null;
   };
 
@@ -228,7 +228,7 @@ export default function DataEntryScreen() {
     const currentValue = field?.type === 'fixed_date' 
       ? fixedFormData[fieldId] 
       : variableFormData[fieldId];
-    
+
     // Parse current date value or use today
     let initialDate = new Date();
     if (currentValue && field) {
@@ -242,7 +242,7 @@ export default function DataEntryScreen() {
         console.log('Could not parse current date value, using today');
       }
     }
-    
+
     setSelectedDate(initialDate);
     setTempDate(initialDate);
     setCurrentDateField(fieldId);
@@ -251,11 +251,12 @@ export default function DataEntryScreen() {
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     const isAndroid = Platform.OS === 'android';
-    
+
     if (selectedDate) {
+      setIsDatePickerChanging(true); // Indicate date is changing
       setTempDate(selectedDate);
       setSelectedDate(selectedDate);
-      
+
       // For Android, immediately apply the change and close
       if (isAndroid) {
         applyDateChange(selectedDate);
@@ -272,7 +273,7 @@ export default function DataEntryScreen() {
       const field = template.fields.find(f => f.id === currentDateField);
       if (field) {
         const formattedDate = formatDateForField(date, field);
-        
+
         if (field.type === 'fixed_date') {
           updateFixedFieldValue(currentDateField, formattedDate);
         } else {
@@ -287,6 +288,7 @@ export default function DataEntryScreen() {
     setCurrentDateField(null);
     // Reset temp date to current selected date
     setTempDate(selectedDate);
+    setIsDatePickerChanging(false); // Indicate date is not changing
   };
 
   const openBarcodeScanner = (fieldId: string) => {
@@ -402,7 +404,7 @@ export default function DataEntryScreen() {
         initialData[field.id] = field.defaultValue || '';
       }
     });
-    
+
     setVariableFormData(initialData);
   };
 
@@ -468,11 +470,15 @@ export default function DataEntryScreen() {
               pointerEvents="none"
             />
             <TouchableOpacity
-              style={styles.calendarButton}
-              onPress={() => openDatePicker(field.id)}
-            >
-              <Text style={styles.calendarButtonText}>📅</Text>
-            </TouchableOpacity>
+                style={[
+                  styles.calendarButton,
+                  (showDatePicker || isDatePickerChanging) && styles.disabledCalendarButton
+                ]}
+                onPress={() => openDatePicker(field.id)}
+                disabled={showDatePicker || isDatePickerChanging}
+              >
+                <Text style={styles.calendarButtonText}>📅</Text>
+              </TouchableOpacity>
           </View>
         );
 
@@ -488,8 +494,12 @@ export default function DataEntryScreen() {
                 pointerEvents="none"
               />
               <TouchableOpacity
-                style={styles.calendarButton}
+                style={[
+                  styles.calendarButton,
+                  (showDatePicker || isDatePickerChanging) && styles.disabledCalendarButton
+                ]}
                 onPress={() => openDatePicker(field.id)}
+                disabled={showDatePicker || isDatePickerChanging}
               >
                 <Text style={styles.calendarButtonText}>📅</Text>
               </TouchableOpacity>
@@ -561,11 +571,15 @@ export default function DataEntryScreen() {
               onChangeText={(text) => updateFunction(field.id, text)}
             />
             <TouchableOpacity
-              style={styles.scanButton}
-              onPress={() => openBarcodeScanner(field.id)}
-            >
-              <Text style={styles.scanButtonText}>📷 Scan</Text>
-            </TouchableOpacity>
+                style={[
+                  styles.calendarButton,
+                  (showDatePicker || isDatePickerChanging) && styles.disabledCalendarButton
+                ]}
+                onPress={() => openDatePicker(field.id)}
+                disabled={showDatePicker || isDatePickerChanging}
+              >
+                <Text style={styles.calendarButtonText}>📅</Text>
+              </TouchableOpacity>
           </View>
         );
 
@@ -618,7 +632,7 @@ export default function DataEntryScreen() {
             <Text style={styles.pageInstruction}>
               Enter the fixed data that will be used for all entries:
             </Text>
-            
+
             {getFixedFields().map((field) => (
               <View key={field.id} style={styles.fieldContainer}>
                 <Text style={styles.fieldLabel}>
@@ -969,7 +983,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     marginBottom: 20,
-    textAlign: 'center',
+    ```text
+  textAlign: 'center',
   },
   permissionButton: {
     backgroundColor: '#4299e1',
@@ -1091,5 +1106,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledCalendarButton: {
+    opacity: 0.5,
   },
 });
