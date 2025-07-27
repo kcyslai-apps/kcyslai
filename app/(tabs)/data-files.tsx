@@ -23,6 +23,7 @@ interface Template {
   description: string;
   fields: TemplateField[];
   createdAt: Date;
+  csvExportSettings?: CSVExportSettings;
 }
 
 interface TemplateField {
@@ -38,6 +39,14 @@ interface FileGroup {
   fileName: string;
   records: DataRecord[];
   totalRecords: number;
+}
+
+interface CSVExportSettings {
+  includeHeader: boolean;
+  delimiter: 'comma' | 'semicolon' | 'pipe' | 'custom';
+  customDelimiter?: string;
+  fieldPositions: { [fieldId: string]: number };
+  fileExtension: string;
 }
 
 export default function DataFilesScreen() {
@@ -135,39 +144,65 @@ export default function DataFilesScreen() {
         return;
       }
 
-      // Get all unique field names from the file group records
-      const allFieldNames = new Set<string>();
-      fileGroup.records.forEach(record => {
-        Object.keys(record.data).forEach(fieldId => {
-          const template = templates.find(t => t.id === record.templateId);
-          const field = template?.fields.find(f => f.id === fieldId);
-          if (field) {
-            allFieldNames.add(field.name);
-          }
-        });
-      });
+      // Get the template from the first record (all records in a file use the same template)
+      const firstRecord = fileGroup.records[0];
+      const template = templates.find(t => t.id === firstRecord.templateId);
+      
+      if (!template) {
+        Alert.alert('Error', 'Template not found for this file');
+        return;
+      }
 
-      // Create CSV header
-      const headers = ['Template', 'Timestamp', ...Array.from(allFieldNames)];
-      let csvContent = headers.join(',') + '\n';
+      // Get CSV export settings from template
+      const csvSettings = template.csvExportSettings || {
+        includeHeader: false,
+        delimiter: 'comma',
+        customDelimiter: '',
+        fieldPositions: {},
+        fileExtension: 'csv'
+      };
+
+      // Get delimiter symbol
+      const getDelimiterSymbol = (delimiter: string, customDelimiter?: string) => {
+        switch (delimiter) {
+          case 'comma': return ',';
+          case 'semicolon': return ';';
+          case 'pipe': return '|';
+          case 'custom': return customDelimiter || ',';
+          default: return ',';
+        }
+      };
+
+      const delimiter = getDelimiterSymbol(csvSettings.delimiter, csvSettings.customDelimiter);
+
+      // Sort fields by their position (fields without position go to the end)
+      const fieldsWithPosition = template.fields
+        .map(field => ({
+          ...field,
+          position: csvSettings.fieldPositions[field.id] || 999
+        }))
+        .sort((a, b) => a.position - b.position);
+
+      let csvContent = '';
+
+      // Add header if configured
+      if (csvSettings.includeHeader) {
+        const headers = fieldsWithPosition.map(field => `"${field.name}"`);
+        csvContent += headers.join(delimiter) + '\n';
+      }
 
       // Add data rows
       fileGroup.records.forEach(record => {
-        const template = templates.find(t => t.id === record.templateId);
-        const row = [
-          `"${record.templateName}"`,
-          `"${record.timestamp.toISOString()}"`,
-          ...Array.from(allFieldNames).map(fieldName => {
-            const field = template?.fields.find(f => f.name === fieldName);
-            const value = field ? record.data[field.id] || '' : '';
-            return `"${value.replace(/"/g, '""')}"`;
-          })
-        ];
-        csvContent += row.join(',') + '\n';
+        const row = fieldsWithPosition.map(field => {
+          const value = record.data[field.id] || '';
+          return `"${value.replace(/"/g, '""')}"`;
+        });
+        csvContent += row.join(delimiter) + '\n';
       });
 
-      // Save CSV file
-      const fileName = `${fileGroup.fileName}_export.csv`;
+      // Use template's file extension
+      const fileExtension = csvSettings.fileExtension || 'csv';
+      const fileName = `${fileGroup.fileName}_export.${fileExtension}`;
       const filePath = FileSystem.documentDirectory + fileName;
       await FileSystem.writeAsStringAsync(filePath, csvContent);
 
@@ -175,16 +210,16 @@ export default function DataFilesScreen() {
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
         await Sharing.shareAsync(filePath, {
-          mimeType: 'text/csv',
+          mimeType: fileExtension === 'csv' ? 'text/csv' : 'text/plain',
           dialogTitle: 'Export File Group Data',
         });
       } else {
-        Alert.alert('Export Complete', `CSV file saved as ${fileName}`);
+        Alert.alert('Export Complete', `File saved as ${fileName}`);
       }
 
     } catch (error) {
-      console.error('Error exporting CSV:', error);
-      Alert.alert('Error', 'Failed to export CSV');
+      console.error('Error exporting file:', error);
+      Alert.alert('Error', 'Failed to export file');
     }
   };
 
