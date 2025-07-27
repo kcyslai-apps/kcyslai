@@ -142,7 +142,8 @@ export default function TemplatesScreen() {
 
   const saveField = () => {
     if (!currentField.name?.trim()) {
-      Alert.alert('Invalid Input', 'Please enter a field name.');
+      setValidationError('Please enter a field name.');
+      setShowValidationModal(true);
       return;
     }
 
@@ -201,17 +202,20 @@ export default function TemplatesScreen() {
 
   const saveTemplate = () => {
     if (!newTemplateName.trim()) {
-      Alert.alert('Invalid Input', 'Please enter a template name.');
+      setValidationError('Please enter a template name.');
+      setShowValidationModal(true);
       return;
     }
 
     if (templateFields.length === 0) {
-      Alert.alert('Invalid Input', 'Please add at least one field to the template.');
+      setValidationError('Please add at least one field to the template.');
+      setShowValidationModal(true);
       return;
     }
 
     if (!validateColumnPositions()) {
-      Alert.alert('Invalid CSV Settings', 'Please fix duplicate column positions before saving the template.');
+      setValidationError('Please fix duplicate column positions before saving the template.');
+      setShowValidationModal(true);
       return;
     }
 
@@ -223,7 +227,8 @@ export default function TemplatesScreen() {
     );
 
     if (duplicateTemplate) {
-      Alert.alert('Validation Error', 'Template name already exists. Please enter a unique name.');
+      setValidationError('Template name already exists. Please enter a unique name.');
+      setShowValidationModal(true);
       return;
     }
 
@@ -303,6 +308,8 @@ export default function TemplatesScreen() {
     customDelimiter: '',
     fieldPositions: {}
   });
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [validationError, setValidationError] = useState('');
 
 
   const useTemplate = (template: Template) => {
@@ -1069,6 +1076,33 @@ export default function TemplatesScreen() {
         </View>
       </Modal>
 
+      {/* Validation Error Modal */}
+      <Modal visible={showValidationModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.validationModalContent}>
+            <Text style={styles.validationModalTitle}>⚠️ Validation Error</Text>
+
+            <View style={styles.validationModalInfo}>
+              <Text style={styles.validationModalMessage}>
+                {validationError}
+              </Text>
+            </View>
+
+            <View style={styles.validationModalButtons}>
+              <TouchableOpacity
+                style={styles.validationModalOkButton}
+                onPress={() => {
+                  setShowValidationModal(false);
+                  setValidationError('');
+                }}
+              >
+                <Text style={styles.validationModalOkButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
 
     </ThemedView>
   );
@@ -1730,6 +1764,69 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
     borderRadius: 4,
     textAlign: 'center',
+  },
+  validationModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 340,
+    alignItems: 'center',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  validationModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  validationModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  validationModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#fed7d7',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#fc8181',
+    minWidth: '80%',
+  },
+  validationModalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  validationModalOkButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 100,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  validationModalOkButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   tabContainer: {
     flexDirection: 'row',
