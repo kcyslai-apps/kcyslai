@@ -159,10 +159,18 @@ export default function FileDetailsScreen() {
     return (
       <View style={styles.recordItem}>
         <View style={styles.recordHeader}>
-          <Text style={styles.inputTimeLabel}>Input Time</Text>
-          <Text style={styles.timestamp}>
-            {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
-          </Text>
+          <View style={styles.inputTimeSection}>
+            <Text style={styles.inputTimeLabel}>Input Time</Text>
+            <Text style={styles.timestamp}>
+              {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.deleteRecordButton}
+            onPress={() => deleteRecord(item.id)}
+          >
+            <Text style={styles.deleteRecordText}>🗑️</Text>
+          </TouchableOpacity>
         </View>
         
         <ScrollView style={styles.recordData} showsVerticalScrollIndicator={false}>
@@ -178,13 +186,6 @@ export default function FileDetailsScreen() {
             );
           })}
         </ScrollView>
-        
-        <TouchableOpacity
-          style={styles.deleteRecordButton}
-          onPress={() => deleteRecord(item.id)}
-        >
-          <Text style={styles.deleteRecordText}>🗑️ Delete</Text>
-        </TouchableOpacity>
       </View>
     );
   };
@@ -389,24 +390,25 @@ const styles = StyleSheet.create({
   recordHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
     paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
+  inputTimeSection: {
+    flex: 1,
+    marginRight: 8,
+  },
   inputTimeLabel: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#2d3748',
-    flex: 1,
-    marginRight: 8,
+    marginBottom: 2,
   },
   timestamp: {
     fontSize: 12,
     color: '#718096',
-    flexShrink: 0,
-    textAlign: 'right',
   },
   recordData: {
     marginBottom: 12,
@@ -434,17 +436,19 @@ const styles = StyleSheet.create({
   },
   deleteRecordButton: {
     backgroundColor: '#fed7d7',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignSelf: 'flex-end',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#fc8181',
-    marginTop: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 32,
+    height: 32,
   },
   deleteRecordText: {
     color: '#c53030',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
   },
   emptyContainer: {
