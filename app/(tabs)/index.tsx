@@ -727,22 +727,29 @@ export default function TemplatesScreen() {
                                 <Picker
                                   selectedValue={currentPosition}
                                   onValueChange={(value) => {
-                                    if (value !== null && value !== undefined) {
+                                    if (value !== null && value !== undefined && value !== '') {
                                       updateFieldPosition(field.id, value);
                                     }
                                   }}
                                   style={styles.newPositionDropdown}
                                   itemStyle={styles.newDropdownItem}
                                   mode="dropdown"
+                                  prompt="Select Position"
                                 >
                                   {availablePositions.map((position) => (
                                     <Picker.Item 
                                       key={position} 
-                                      label={`${position}`} 
-                                      value={position} 
+                                      label={position.toString()} 
+                                      value={position}
+                                      color="#2d3748"
                                     />
                                   ))}
                                 </Picker>
+                                <View style={styles.dropdownDisplayOverlay}>
+                                  <Text style={styles.dropdownDisplayText}>
+                                    {currentPosition || ''}
+                                  </Text>
+                                </View>
                               </View>
                             </View>
                           );
@@ -2006,6 +2013,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    position: 'relative',
   },
   newPositionDropdown: {
     height: 45,
@@ -2014,7 +2022,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     backgroundColor: 'transparent',
-    textAlign: 'center',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0,
   },
   newDropdownItem: {
     fontSize: 16,
@@ -2022,6 +2035,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     height: 45,
     fontWeight: '700',
+  },
+  dropdownDisplayOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    pointerEvents: 'none',
+  },
+  dropdownDisplayText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2d3748',
+    textAlign: 'center',
   },
   noFieldsText: {
     fontSize: 13,
