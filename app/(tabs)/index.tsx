@@ -58,7 +58,7 @@ export default function TemplatesScreen() {
     { label: 'Barcode Scanning', value: 'barcode' },
   ];
 
-  
+
 
   useEffect(() => {
     loadTemplates();
@@ -215,6 +215,18 @@ export default function TemplatesScreen() {
       return;
     }
 
+    // Check for duplicate template names (excluding the current template if editing)
+    const trimmedName = newTemplateName.trim();
+    const duplicateTemplate = templates.find(template => 
+      template.name.toLowerCase() === trimmedName.toLowerCase() && 
+      template.id !== editingTemplateId
+    );
+
+    if (duplicateTemplate) {
+      Alert.alert('Validation Error', 'Template name already exists. Please enter a unique name.');
+      return;
+    }
+
     let updatedTemplates;
     if (editingTemplateId) {
       // Edit existing template
@@ -233,7 +245,7 @@ export default function TemplatesScreen() {
       // Create new template
       const newTemplate: Template = {
         id: Date.now().toString(),
-        name: newTemplateName.trim(),
+        name: trimmedName,
         description: '',
         fields: templateFields,
         csvExportSettings: csvExportSettings,
@@ -291,7 +303,7 @@ export default function TemplatesScreen() {
     customDelimiter: '',
     fieldPositions: {}
   });
-  
+
 
   const useTemplate = (template: Template) => {
     setSelectedTemplateForUse(template);
@@ -406,7 +418,7 @@ export default function TemplatesScreen() {
     }
   };
 
-  
+
 
   const renderTemplate = ({ item }: { item: Template }) => (
     <View style={styles.templateItem}>
@@ -823,7 +835,7 @@ export default function TemplatesScreen() {
                       <Picker.Item label="Custom Format" value="custom" />
                     </Picker>
                   </View>
-                  
+
                   {currentField.dateFormat === 'custom' && (
                     <View style={styles.customFormatSection}>
                       <Text style={styles.customFormatLabel}>Custom Date Format:</Text>
@@ -930,7 +942,7 @@ export default function TemplatesScreen() {
         </View>
       </Modal>
 
-      
+
 
       {/* View Template Modal */}
       <Modal visible={showViewTemplateModal} transparent animationType="fade">
@@ -1056,7 +1068,7 @@ export default function TemplatesScreen() {
         </View>
       </Modal>
 
-      
+
     </ThemedView>
   );
 }
@@ -1446,7 +1458,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+
   viewTemplateModalContent: {
     backgroundColor: 'white',
     padding: 30,
