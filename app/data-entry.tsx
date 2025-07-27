@@ -34,6 +34,7 @@ interface DataRecord {
   templateName: string;
   data: { [fieldId: string]: string };
   timestamp: Date;
+  dataFileName?: string;
 }
 
 export default function DataEntryScreen() {
@@ -393,7 +394,8 @@ export default function DataEntryScreen() {
         templateId: template.id,
         templateName: template.name,
         data: combinedData,
-        timestamp: new Date()
+        timestamp: new Date(),
+        dataFileName: currentDataFileName
       };
 
       // Save updated records
