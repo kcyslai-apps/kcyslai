@@ -364,7 +364,8 @@ export default function DataEntryScreen() {
               style={[styles.input, styles.dateInput]}
               placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
               value={value}
-              onChangeText={(text) => updateFunction(field.id, text)}
+              editable={false}
+              pointerEvents="none"
             />
             <TouchableOpacity
               style={styles.calendarButton}
@@ -383,7 +384,8 @@ export default function DataEntryScreen() {
                 style={[styles.input, styles.dateInput]}
                 placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
                 value={value}
-                onChangeText={(text) => updateFunction(field.id, text)}
+                editable={false}
+                pointerEvents="none"
               />
               <TouchableOpacity
                 style={styles.calendarButton}
@@ -917,6 +919,8 @@ const styles = StyleSheet.create({
   },
   dateInput: {
     flex: 1,
+    backgroundColor: '#f8f9fa',
+    color: '#495057',
   },
   calendarButton: {
     backgroundColor: '#4299e1',
