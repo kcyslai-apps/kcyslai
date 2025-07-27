@@ -231,13 +231,19 @@ export default function DataFilesScreen() {
 
       const delimiter = getDelimiterSymbol(csvSettings.delimiter, csvSettings.customDelimiter);
 
-      // Sort fields by their position in ascending order
+      // Sort fields by their position in strict ascending numerical order
       const fieldsWithPosition = template.fields
-        .map((field, index) => ({
-          ...field,
-          position: csvSettings.fieldPositions[field.id] || (1000 + index)
-        }))
-        .sort((a, b) => a.position - b.position);
+        .map((field, index) => {
+          const position = csvSettings.fieldPositions[field.id];
+          return {
+            ...field,
+            position: position !== undefined && position > 0 ? position : (1000 + index)
+          };
+        })
+        .sort((a, b) => {
+          // Ensure strict numerical ascending order (1, 2, 3, 20, 21, etc.)
+          return a.position - b.position;
+        });
 
       let csvContent = '';
 
