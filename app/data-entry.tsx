@@ -502,8 +502,17 @@ export default function DataEntryScreen() {
             multiline={true}
             numberOfLines={3}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
-            onFocus={() => !isFixedPage && scrollToField(field.id)}
+            onFocus={(event) => {
+              if (!isFixedPage) {
+                scrollToField(field.id);
+                // Auto-select text on focus
+                if (value) {
+                  event.target.setSelection(0, value.length);
+                }
+              }
+            }}
             blurOnSubmit={false}
+            selectTextOnFocus={true}
           />
         );
 
@@ -517,8 +526,17 @@ export default function DataEntryScreen() {
             onChangeText={(text) => updateFunction(field.id, text)}
             keyboardType="numeric"
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
-            onFocus={() => !isFixedPage && scrollToField(field.id)}
+            onFocus={(event) => {
+              if (!isFixedPage) {
+                scrollToField(field.id);
+                // Auto-select text on focus
+                if (value) {
+                  event.target.setSelection(0, value.length);
+                }
+              }
+            }}
             blurOnSubmit={false}
+            selectTextOnFocus={true}
           />
         );
 
@@ -590,8 +608,17 @@ export default function DataEntryScreen() {
                 value={value}
                 onChangeText={(text) => updateFunction(field.id, text)}
                 onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
-                onFocus={() => !isFixedPage && scrollToField(field.id)}
+                onFocus={(event) => {
+                  if (!isFixedPage) {
+                    scrollToField(field.id);
+                    // Auto-select text on focus
+                    if (value) {
+                      event.target.setSelection(0, value.length);
+                    }
+                  }
+                }}
                 blurOnSubmit={false}
+                selectTextOnFocus={true}
               />
               {allOptions.length > 0 && (
                 <View style={styles.quickSelectContainer}>
@@ -638,8 +665,17 @@ export default function DataEntryScreen() {
               value={value}
               onChangeText={(text) => updateFunction(field.id, text)}
               onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
-              onFocus={() => !isFixedPage && scrollToField(field.id)}
+              onFocus={(event) => {
+                if (!isFixedPage) {
+                  scrollToField(field.id);
+                  // Auto-select text on focus
+                  if (value) {
+                    event.target.setSelection(0, value.length);
+                  }
+                }
+              }}
               blurOnSubmit={false}
+              selectTextOnFocus={true}
             />
             <TouchableOpacity
               style={styles.scanButton}
@@ -659,8 +695,17 @@ export default function DataEntryScreen() {
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
-            onFocus={() => !isFixedPage && scrollToField(field.id)}
+            onFocus={(event) => {
+              if (!isFixedPage) {
+                scrollToField(field.id);
+                // Auto-select text on focus
+                if (value) {
+                  event.target.setSelection(0, value.length);
+                }
+              }
+            }}
             blurOnSubmit={false}
+            selectTextOnFocus={true}
           />
         );
     }
