@@ -228,11 +228,6 @@ export default function DataFilesScreen() {
         <Text style={styles.statsText}>
           Total Files: {fileGroups.length}
         </Text>
-        {fileGroups.map(group => (
-          <Text key={group.fileName} style={styles.fileStatsText}>
-            📁 {group.fileName}: {group.totalRecords} records
-          </Text>
-        ))}
       </View>
 
       
@@ -274,13 +269,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2c5282',
-    marginBottom: 8,
-  },
-  fileStatsText: {
-    fontSize: 14,
-    color: '#4a5568',
-    marginBottom: 4,
-    paddingLeft: 10,
   },
   
   fileGroupsList: {
