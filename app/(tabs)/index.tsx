@@ -390,13 +390,28 @@ export default function TemplatesScreen() {
   };
 
   const updateFieldPosition = (fieldId: string, position: number | null) => {
-    setCsvExportSettings(prev => ({
-      ...prev,
-      fieldPositions: {
-        ...prev.fieldPositions,
-        [fieldId]: position === null ? 0 : position
+    setCsvExportSettings(prev => {
+      const newPosition = position === null ? 0 : position;
+      
+      // If this position is already taken by another field, swap them
+      const currentFieldWithPosition = Object.entries(prev.fieldPositions)
+        .find(([id, pos]) => id !== fieldId && pos === newPosition);
+      
+      let updatedPositions = { ...prev.fieldPositions };
+      
+      if (currentFieldWithPosition) {
+        // Swap positions: give the other field the current field's old position
+        const currentFieldOldPosition = prev.fieldPositions[fieldId] || 0;
+        updatedPositions[currentFieldWithPosition[0]] = currentFieldOldPosition;
       }
-    }));
+      
+      updatedPositions[fieldId] = newPosition;
+      
+      return {
+        ...prev,
+        fieldPositions: updatedPositions
+      };
+    });
   };
 
   
@@ -685,28 +700,30 @@ export default function TemplatesScreen() {
                         nestedScrollEnabled={true}
                       >
                         {templateFields.map((field, index) => {
-                          const currentPosition = csvExportSettings.fieldPositions[field.id] || (index + 1);
+                          // Get current position or assign default sequential position
+                          let currentPosition = csvExportSettings.fieldPositions[field.id];
+                          if (!currentPosition || currentPosition === 0) {
+                            currentPosition = index + 1;
+                            // Update the position in the state to ensure consistency
+                            updateFieldPosition(field.id, currentPosition);
+                          }
                           
                           // Get all assigned positions except for the current field
                           const assignedPositions = Object.entries(csvExportSettings.fieldPositions)
-                            .filter(([fieldId, _]) => fieldId !== field.id)
-                            .map(([_, position]) => position)
-                            .filter(pos => pos > 0);
+                            .filter(([fieldId, position]) => fieldId !== field.id && position > 0)
+                            .map(([_, position]) => position);
 
                           // Generate available positions (1 to total fields count)
                           const maxPositions = templateFields.length;
                           const availablePositions = [];
                           for (let i = 1; i <= maxPositions; i++) {
-                            if (!assignedPositions.includes(i)) {
+                            if (!assignedPositions.includes(i) || i === currentPosition) {
                               availablePositions.push(i);
                             }
                           }
 
-                          // Always include the current position in the list even if it's assigned
-                          if (currentPosition > 0 && !availablePositions.includes(currentPosition)) {
-                            availablePositions.push(currentPosition);
-                            availablePositions.sort((a, b) => a - b);
-                          }
+                          // Ensure positions are sorted
+                          availablePositions.sort((a, b) => a - b);
 
                           return (
                             <View key={field.id} style={styles.compactPositionRow}>
@@ -720,13 +737,20 @@ export default function TemplatesScreen() {
                                   style={styles.positionDropdown}
                                   itemStyle={styles.positionDropdownItem}
                                 >
-                                  {availablePositions.map((position) => (
+                                  {availablePositions.length > 0 ? (
+                                    availablePositions.map((position) => (
+                                      <Picker.Item 
+                                        key={position} 
+                                        label={`Position ${position}`} 
+                                        value={position} 
+                                      />
+                                    ))
+                                  ) : (
                                     <Picker.Item 
-                                      key={position} 
-                                      label={String(position)} 
-                                      value={position} 
+                                      label={`Position ${currentPosition}`} 
+                                      value={currentPosition} 
                                     />
-                                  ))}
+                                  )}
                                 </Picker>
                               </View>
                             </View>
