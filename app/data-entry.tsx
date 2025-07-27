@@ -487,12 +487,6 @@ export default function DataEntryScreen() {
       const inputRef = inputRefs.current[fieldId];
       if (inputRef?.current && scrollViewRef.current) {
         inputRef.current.measure((x, y, width, height, pageX, pageY) => {
-          // More conservative keyboard height estimates for better compatibility
-          const keyboardHeight = Platform.OS === 'ios' ? 350 : 320;
-          
-          // Get current scroll position
-          scrollViewRef.current?.getScrollResponder()?.scrollResponderGetScrollableNode()?.getScrollableNode()?.scrollTop || 0;
-          
           // Calculate the position where we want the field to appear
           // This should be well above the keyboard (about 100px from top of visible area)
           const targetPosition = 100;
