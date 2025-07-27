@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, ScrollView, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { router } from 'expo-router';
@@ -43,6 +43,8 @@ export default function DataFilesScreen() {
   const [records, setRecords] = useState<DataRecord[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [fileGroups, setFileGroups] = useState<FileGroup[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -204,28 +206,29 @@ export default function DataFilesScreen() {
   
 
   const deleteFileGroup = (fileName: string) => {
-    Alert.alert(
-      'Delete File',
-      `Are you sure you want to delete "${fileName}" and all its data records?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const updatedRecords = records.filter(r => (r.dataFileName || 'Unnamed File') !== fileName);
-              await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
-              setRecords(updatedRecords);
-              Alert.alert('Success', 'File deleted successfully');
-            } catch (error) {
-              console.error('Error deleting file:', error);
-              Alert.alert('Error', 'Failed to delete file');
-            }
-          }
-        }
-      ]
-    );
+    setFileToDelete(fileName);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteFile = async () => {
+    if (fileToDelete) {
+      try {
+        const updatedRecords = records.filter(r => (r.dataFileName || 'Unnamed File') !== fileToDelete);
+        await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
+        setRecords(updatedRecords);
+        setShowDeleteModal(false);
+        setFileToDelete(null);
+        Alert.alert('Success', 'File deleted successfully');
+      } catch (error) {
+        console.error('Error deleting file:', error);
+        Alert.alert('Error', 'Failed to delete file');
+      }
+    }
+  };
+
+  const cancelDeleteFile = () => {
+    setShowDeleteModal(false);
+    setFileToDelete(null);
   };
 
   const viewFileDetails = (fileGroup: FileGroup) => {
@@ -290,6 +293,42 @@ export default function DataFilesScreen() {
         refreshing={false}
         onRefresh={loadData}
       />
+
+      {/* Delete File Confirmation Modal */}
+      <Modal visible={showDeleteModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <Text style={styles.deleteModalTitle}>🗑️ Delete File</Text>
+
+            <View style={styles.deleteModalInfo}>
+              <Text style={styles.deleteModalMessage}>
+                Are you sure you want to delete this file?
+              </Text>
+              <Text style={styles.deleteModalFileName}>
+                "{fileToDelete}"
+              </Text>
+              <Text style={styles.deleteModalWarning}>
+                This action cannot be undone. All data records in this file will be permanently deleted.
+              </Text>
+            </View>
+
+            <View style={styles.deleteModalButtons}>
+              <TouchableOpacity
+                style={styles.deleteModalCancelButton}
+                onPress={cancelDeleteFile}
+              >
+                <Text style={styles.deleteModalCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteModalConfirmButton}
+                onPress={confirmDeleteFile}
+              >
+                <Text style={styles.deleteModalConfirmButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -399,5 +438,96 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#fc8181',
+  },
+  deleteModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  deleteModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  deleteModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 15,
+  },
+  deleteModalFileName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    marginBottom: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#fc8181',
+    minWidth: '80%',
+  },
+  deleteModalWarning: {
+    fontSize: 14,
+    color: '#e53e3e',
+    textAlign: 'center',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  deleteModalButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  deleteModalCancelButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    minWidth: 80,
+  },
+  deleteModalCancelButtonText: {
+    color: '#718096',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  deleteModalConfirmButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  deleteModalConfirmButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
