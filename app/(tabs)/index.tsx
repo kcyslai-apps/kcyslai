@@ -893,26 +893,27 @@ export default function TemplatesScreen() {
               )}
 
               {currentField.type === 'fixed_data' && (
-                <View style={styles.defaultValueSection}>
-                  <Text style={styles.defaultValueLabel}>Input Mode:</Text>
-                  <View style={styles.pickerContainer}>
+                <View style={styles.inputModeSection}>
+                  <Text style={styles.inputModeSectionLabel}>Input Mode:</Text>
+                  <View style={styles.inputModePickerContainer}>
                     <Picker
-                      selectedValue={currentField.inputMode || 'select_only'}
+                      selectedValue={currentField.inputMode || 'editable'}
                       onValueChange={(value) => setCurrentField({ ...currentField, inputMode: value as 'select_only' | 'editable' })}
-                      style={styles.picker}
+                      style={styles.inputModePicker}
+                      itemStyle={styles.inputModePickerItem}
                     >
-                      <Picker.Item label="Select Only" value="select_only" />
                       <Picker.Item label="Editable" value="editable" />
+                      <Picker.Item label="Select Only" value="select_only" />
                     </Picker>
                   </View>
-                  {currentField.inputMode === 'select_only' && (
+                  {(currentField.inputMode === 'select_only') && (
                     <Text style={styles.inputModeDescription}>
-                      Users can only choose from the predefined “Options” list. Manual typing is not allowed.
+                      Users can only choose from the predefined "Options" list. Manual typing is not allowed.
                     </Text>
                   )}
-                  {currentField.inputMode === 'editable' && (
+                  {(currentField.inputMode === 'editable' || !currentField.inputMode) && (
                     <Text style={styles.inputModeDescription}>
-                      Users can select from the “Options” list or manually enter a custom value.
+                      Users can select from the "Options" list or manually enter a custom value.
                       Predefined options act as suggestions or shortcuts.
                     </Text>
                   )}
@@ -1933,6 +1934,36 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     lineHeight: 16,
   },
+   inputModeSection: {
+    marginBottom: 15,
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  inputModeSectionLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 8,
+  },
+  inputModePickerContainer: {
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: '#ffffff',
+    minHeight: 60,
+  },
+  inputModePicker: {
+    height: 60,
+    width: '100%',
+  },
+  inputModePickerItem: {
+    fontSize: 16,
+    color: '#2d3748',
+  },
   datePickerButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1955,7 +1986,7 @@ const styles = StyleSheet.create({
   },
   clearDateButton: {
     backgroundColor: '#e53e3e',
-    paddingVertical: 8,
+        paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
     alignItems: 'center',
