@@ -308,16 +308,8 @@ export default function TemplatesScreen() {
 
   const confirmUseTemplate = () => {
     if (selectedTemplateForUse) {
-      // Generate default filename
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-
-      const defaultFileName = `${selectedTemplateForUse.name}_${year}${month}${day}_${hours}${minutes}${seconds}`;
+      // Generate default filename based on template name
+      const defaultFileName = selectedTemplateForUse.name.replace(/[^a-zA-Z0-9_-]/g, '_');
       setDataFileName(defaultFileName);
 
       setShowUseTemplateModal(false);
@@ -355,8 +347,20 @@ export default function TemplatesScreen() {
 
   const confirmCreateDataFile = () => {
     if (selectedTemplateForUse && dataFileName.trim()) {
-      // Navigate to data entry with both template ID and data file name
-      router.push(`/data-entry?templateId=${selectedTemplateForUse.id}&dataFileName=${encodeURIComponent(dataFileName.trim())}`);
+      // Generate timestamp for final filename
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+      const finalFileName = `${dataFileName.trim()}_${timestamp}`;
+
+      // Navigate to data entry with both template ID and final data file name
+      router.push(`/data-entry?templateId=${selectedTemplateForUse.id}&dataFileName=${encodeURIComponent(finalFileName)}`);
       setShowDataFileModal(false);
       setSelectedTemplateForUse(null);
       setDataFileName('');
@@ -1109,15 +1113,18 @@ export default function TemplatesScreen() {
 
             <View style={styles.dataFileInfo}>
               <Text style={styles.dataFileDescription}>
-                Create a new data file for storing collected entries from:
+                Create a new data file for template:
               </Text>
               <Text style={styles.dataFileTemplateText}>
                 "{selectedTemplateForUse?.name}"
               </Text>
+              <Text style={styles.dataFileHint}>
+                A timestamp will be automatically added to the final file name.
+              </Text>
             </View>
 
             <View style={styles.dataFileInputSection}>
-              <Text style={styles.dataFileInputLabel}>File Name:</Text>
+              <Text style={styles.dataFileInputLabel}>File Name (without timestamp):</Text>
               <TextInput
                 style={styles.dataFileInput}
                 value={dataFileName}
@@ -1125,6 +1132,9 @@ export default function TemplatesScreen() {
                 placeholder="Enter file name"
                 selectTextOnFocus={true}
               />
+              <Text style={styles.dataFilePreview}>
+                Final name will be: {dataFileName.trim() ? `${dataFileName.trim()}_[timestamp]` : '[filename]_[timestamp]'}
+              </Text>
             </View>
 
             <View style={styles.dataFileButtons}>
@@ -1878,6 +1888,25 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '500',
+  },
+  dataFileHint: {
+    fontSize: 14,
+    color: '#718096',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: 8,
+    lineHeight: 20,
+  },
+  dataFilePreview: {
+    fontSize: 13,
+    color: '#4a5568',
+    fontStyle: 'italic',
+    marginTop: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: '#f8fafc',
+    borderRadius: 4,
+    textAlign: 'center',
   },
   tabContainer: {
     flexDirection: 'row',
