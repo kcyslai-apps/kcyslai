@@ -486,27 +486,29 @@ export default function DataEntryScreen() {
     setTimeout(() => {
       const inputRef = inputRefs.current[fieldId];
       if (inputRef?.current && scrollViewRef.current) {
-        inputRef.current.measureInWindow((x, y, width, height) => {
-          // Get the screen height and keyboard height estimation
-          const screenHeight = Platform.OS === 'ios' ? 812 : 800; // Approximate screen heights
-          const keyboardHeight = Platform.OS === 'ios' ? 300 : 280; // Approximate keyboard heights
-          const availableHeight = screenHeight - keyboardHeight;
+        inputRef.current.measure((x, y, width, height, pageX, pageY) => {
+          // More conservative keyboard height estimates for better compatibility
+          const keyboardHeight = Platform.OS === 'ios' ? 350 : 320;
           
-          // Calculate desired position (field should be in upper third of available space)
-          const desiredTopPosition = availableHeight * 0.2;
+          // Get current scroll position
+          scrollViewRef.current?.getScrollResponder()?.scrollResponderGetScrollableNode()?.getScrollableNode()?.scrollTop || 0;
           
-          // Calculate scroll offset needed
-          const currentFieldTop = y;
-          const scrollOffset = currentFieldTop - desiredTopPosition;
+          // Calculate the position where we want the field to appear
+          // This should be well above the keyboard (about 100px from top of visible area)
+          const targetPosition = 100;
           
-          // Scroll to position the field above the keyboard
+          // Calculate how much we need to scroll
+          // pageY is the absolute position of the field on screen
+          const scrollOffset = pageY - targetPosition;
+          
+          // Ensure field is visible above keyboard by scrolling
           scrollViewRef.current?.scrollTo({ 
             y: Math.max(0, scrollOffset), 
             animated: true 
           });
         });
       }
-    }, 150); // Slightly longer delay for keyboard animation
+    }, 200); // Allow more time for keyboard animation
   };
 
   const renderField = (field: TemplateField, isFixedPage: boolean = false) => {
