@@ -15,6 +15,8 @@ interface TemplateField {
   defaultValue?: string;
   options?: string[];
   inputMode?: 'select_only' | 'editable';
+  dateFormat?: string;
+  customDateFormat?: string;
 }
 
 interface CSVExportSettings {
@@ -124,7 +126,9 @@ export default function TemplatesScreen() {
       type: 'free_text',
       required: false,
       defaultValue: '',
-      options: []
+      options: [],
+      dateFormat: 'YYYY-MM-DD',
+      customDateFormat: ''
     });
     setEditingFieldIndex(null);
     setShowFieldModal(true);
@@ -149,7 +153,9 @@ export default function TemplatesScreen() {
       required: currentField.required || false,
       defaultValue: currentField.defaultValue || '',
       options: currentField.options || [],
-      inputMode: currentField.inputMode || 'select_only'
+      inputMode: currentField.inputMode || 'select_only',
+      dateFormat: currentField.dateFormat || 'YYYY-MM-DD',
+      customDateFormat: currentField.customDateFormat || ''
     };
 
     let updatedFields = [...templateFields];
@@ -461,6 +467,11 @@ export default function TemplatesScreen() {
         <Text style={styles.fieldName}>{item.name}</Text>
         <Text style={styles.fieldType}>Type: {fieldTypes.find(t => t.value === item.type)?.label}</Text>
         <Text style={styles.fieldRequired}>Required: {item.required ? 'Yes' : 'No'}</Text>
+        {(item.type === 'date' || item.type === 'fixed_date') && (
+          <Text style={styles.fieldFormat}>
+            Format: {item.dateFormat === 'custom' ? item.customDateFormat || 'Custom' : item.dateFormat || 'YYYY-MM-DD'}
+          </Text>
+        )}
       </View>
       <View style={styles.fieldActions}>
         <TouchableOpacity
@@ -808,7 +819,41 @@ export default function TemplatesScreen() {
                 </View>
               )}
 
-              
+              {(currentField.type === 'date' || currentField.type === 'fixed_date') && (
+                <View style={styles.dateFormatSection}>
+                  <Text style={styles.defaultValueLabel}>Date Format:</Text>
+                  <View style={styles.dateFormatPickerContainer}>
+                    <Picker
+                      selectedValue={currentField.dateFormat || 'YYYY-MM-DD'}
+                      onValueChange={(value) => setCurrentField({ ...currentField, dateFormat: value })}
+                      style={styles.dateFormatPicker}
+                    >
+                      <Picker.Item label="YYYY-MM-DD (e.g., 2025-07-27)" value="YYYY-MM-DD" />
+                      <Picker.Item label="dd/MM/yyyy (e.g., 27/07/2025)" value="dd/MM/yyyy" />
+                      <Picker.Item label="MM/dd/yyyy (e.g., 07/27/2025)" value="MM/dd/yyyy" />
+                      <Picker.Item label="yyyyMMdd (e.g., 20250727)" value="yyyyMMdd" />
+                      <Picker.Item label="dd-MM-yyyy (e.g., 27-07-2025)" value="dd-MM-yyyy" />
+                      <Picker.Item label="yyyy.MM.dd (e.g., 2025.07.27)" value="yyyy.MM.dd" />
+                      <Picker.Item label="Custom Format" value="custom" />
+                    </Picker>
+                  </View>
+                  
+                  {currentField.dateFormat === 'custom' && (
+                    <View style={styles.customFormatSection}>
+                      <Text style={styles.customFormatLabel}>Custom Date Format:</Text>
+                      <TextInput
+                        style={[styles.input, styles.customFormatInput]}
+                        placeholder="e.g., dd-MMM-yyyy, MM/yyyy, etc."
+                        value={currentField.customDateFormat || ''}
+                        onChangeText={(text) => setCurrentField({ ...currentField, customDateFormat: text })}
+                      />
+                      <Text style={styles.formatHint}>
+                        Use: yyyy (year), MM (month), dd (day), MMM (short month name), MMMM (full month name)
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
 
               {currentField.type === 'fixed_data' && (
                 <View style={styles.defaultValueSection}>
@@ -1335,6 +1380,11 @@ const styles = StyleSheet.create({
   fieldRequired: {
     fontSize: 12,
     color: '#718096',
+  },
+  fieldFormat: {
+    fontSize: 12,
+    color: '#4a5568',
+    fontStyle: 'italic',
   },
   fieldActions: {
     flexDirection: 'row',

@@ -261,6 +261,8 @@ export default function DataEntryScreen() {
         return (
           <View style={styles.fixedValueContainer}>
             <Text style={styles.fixedValue}>{field.defaultValue || 'No date set'}</Text>
+            <Text style={styles.fixedFormatHint}>yyyyMMdd (e.g., 20250727)</Text>
+            <Text style={styles.fixedFormatHint}>dd/MM/yyyy (e.g., 27/07/2025)</Text>
           </View>
         );
 
@@ -610,7 +612,16 @@ const styles = StyleSheet.create({
   },
   fixedValue: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d5016',
+    textAlign: 'center',
+  },
+  fixedFormatHint: {
+    fontSize: 12,
     color: '#4a5568',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: 4,
   },
   barcodeContainer: {
     flexDirection: 'row',
