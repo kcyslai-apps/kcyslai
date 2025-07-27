@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView, Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
@@ -89,13 +89,37 @@ export default function FileDetailsScreen() {
     }
   };
 
+  const deleteRecord = (recordId: string) => {
+    Alert.alert(
+      'Delete Record',
+      'Are you sure you want to delete this record?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const updatedRecords = records.filter(r => r.id !== recordId);
+              await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
+              setRecords(updatedRecords);
+            } catch (error) {
+              console.error('Error deleting record:', error);
+              Alert.alert('Error', 'Failed to delete record');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const renderRecord = ({ item }: { item: DataRecord }) => {
     const template = templates.find(t => t.id === item.templateId);
     
     return (
       <View style={styles.recordItem}>
         <View style={styles.recordHeader}>
-          <Text style={styles.templateName}>{item.templateName}</Text>
+          <Text style={styles.inputTimeLabel}>Input Time</Text>
           <Text style={styles.timestamp}>
             {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
           </Text>
@@ -114,6 +138,13 @@ export default function FileDetailsScreen() {
             );
           })}
         </ScrollView>
+        
+        <TouchableOpacity
+          style={styles.deleteRecordButton}
+          onPress={() => deleteRecord(item.id)}
+        >
+          <Text style={styles.deleteRecordText}>🗑️ Delete</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -199,8 +230,8 @@ const styles = StyleSheet.create({
   recordItem: {
     backgroundColor: 'white',
     borderRadius: 8,
-    padding: 15,
-    marginBottom: 10,
+    padding: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     shadowColor: '#000',
@@ -213,13 +244,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-    paddingBottom: 8,
+    marginBottom: 8,
+    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  templateName: {
-    fontSize: 16,
+  inputTimeLabel: {
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#2d3748',
     flex: 1,
@@ -229,24 +260,39 @@ const styles = StyleSheet.create({
     color: '#718096',
   },
   recordData: {
-    maxHeight: 120,
+    maxHeight: 100,
+    marginBottom: 8,
   },
   dataRow: {
     flexDirection: 'row',
-    marginBottom: 5,
+    marginBottom: 3,
   },
   fieldName: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#4a5568',
-    width: 100,
+    width: 90,
     flexShrink: 0,
   },
   fieldValue: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#2d3748',
     flex: 1,
     flexWrap: 'wrap',
+  },
+  deleteRecordButton: {
+    backgroundColor: '#fed7d7',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignSelf: 'flex-end',
+    borderWidth: 1,
+    borderColor: '#fc8181',
+  },
+  deleteRecordText: {
+    color: '#c53030',
+    fontSize: 12,
+    fontWeight: '600',
   },
   emptyContainer: {
     alignItems: 'center',
