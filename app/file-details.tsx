@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView, Alert, TextInput } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
@@ -37,6 +37,8 @@ export default function FileDetailsScreen() {
   const [records, setRecords] = useState<DataRecord[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [fileRecords, setFileRecords] = useState<DataRecord[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filteredRecords, setFilteredRecords] = useState<DataRecord[]>([]);
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -47,14 +49,47 @@ export default function FileDetailsScreen() {
 
   useEffect(() => {
     if (records.length > 0 && fileName) {
-      const filteredRecords = records.filter(record => 
+      const filtered = records.filter(record => 
         (record.dataFileName || 'Unnamed File') === fileName
       );
-      setFileRecords(filteredRecords.sort((a, b) => 
+      const sorted = filtered.sort((a, b) => 
         b.timestamp.getTime() - a.timestamp.getTime()
-      ));
+      );
+      setFileRecords(sorted);
+      setFilteredRecords(sorted);
     }
   }, [records, fileName]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredRecords(fileRecords);
+    } else {
+      const filtered = fileRecords.filter(record => {
+        const template = templates.find(t => t.id === record.templateId);
+        
+        // Search in template name
+        if (record.templateName.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return true;
+        }
+        
+        // Search in all field values
+        return Object.entries(record.data).some(([fieldId, value]) => {
+          const field = template?.fields.find(f => f.id === fieldId);
+          if (!field || !value) return false;
+          
+          // Search in field name
+          if (field.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+            return true;
+          }
+          
+          // Search in field value
+          return value.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+      });
+      
+      setFilteredRecords(filtered);
+    }
+  }, [searchQuery, fileRecords, templates]);
 
   const loadData = async () => {
     await Promise.all([loadRecords(), loadTemplates()]);
@@ -160,11 +195,31 @@ export default function FileDetailsScreen() {
 
       <View style={styles.fileInfo}>
         <Text style={styles.fileName}>📁 {fileName}</Text>
-        <Text style={styles.recordCount}>{fileRecords.length} records</Text>
+        <Text style={styles.recordCount}>
+          {filteredRecords.length} of {fileRecords.length} records
+        </Text>
+      </View>
+
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="🔍 Search entries..."
+          placeholderTextColor="#9ca3af"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity
+            style={styles.clearSearchButton}
+            onPress={() => setSearchQuery('')}
+          >
+            <Text style={styles.clearSearchText}>✕</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <FlatList
-        data={fileRecords}
+        data={filteredRecords}
         renderItem={renderRecord}
         keyExtractor={(item) => item.id}
         style={styles.recordsList}
@@ -173,7 +228,12 @@ export default function FileDetailsScreen() {
         onRefresh={loadData}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No records found in this file.</Text>
+            <Text style={styles.emptyText}>
+              {searchQuery.length > 0 
+                ? `No records found matching "${searchQuery}"`
+                : "No records found in this file."
+              }
+            </Text>
           </View>
         }
       />
@@ -222,6 +282,37 @@ const styles = StyleSheet.create({
   recordCount: {
     fontSize: 14,
     color: '#4a5568',
+  },
+  searchContainer: {
+    marginHorizontal: 20,
+    marginBottom: 15,
+    position: 'relative',
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    backgroundColor: '#ffffff',
+    paddingRight: 40,
+  },
+  clearSearchButton: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+  },
+  clearSearchText: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: 'bold',
   },
   recordsList: {
     flex: 1,
