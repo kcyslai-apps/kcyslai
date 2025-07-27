@@ -732,14 +732,19 @@ export default function TemplatesScreen() {
                               <View style={styles.positionDropdownContainer}>
                                 <Picker
                                   selectedValue={currentPosition}
-                                  onValueChange={(value) => updateFieldPosition(field.id, value)}
+                                  onValueChange={(value) => {
+                                    if (value !== null && value !== undefined) {
+                                      updateFieldPosition(field.id, value);
+                                    }
+                                  }}
                                   style={styles.positionDropdown}
                                   itemStyle={styles.positionDropdownItem}
+                                  mode="dropdown"
                                 >
                                   {availablePositions.map((position) => (
                                     <Picker.Item 
                                       key={position} 
-                                      label={position.toString()} 
+                                      label={`${position}`} 
                                       value={position} 
                                     />
                                   ))}
@@ -2027,8 +2032,9 @@ const styles = StyleSheet.create({
     height: 50,
     width: '100%',
     color: '#2d3748',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
+    backgroundColor: 'transparent',
   },
   positionDropdownItem: {
     fontSize: 14,
