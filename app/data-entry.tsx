@@ -316,8 +316,14 @@ export default function DataEntryScreen() {
   const handleBarcodeScanned = ({ data }: BarcodeScanningResult) => {
     if (currentBarcodeField) {
       updateVariableFieldValue(currentBarcodeField, data);
+      const scannedFieldId = currentBarcodeField;
       setCurrentBarcodeField(null);
       setShowCamera(false);
+      
+      // Auto-advance to next field after barcode scan
+      setTimeout(() => {
+        moveToNextField(scannedFieldId);
+      }, 200);
     }
   };
 
