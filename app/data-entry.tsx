@@ -208,6 +208,11 @@ export default function DataEntryScreen() {
   };
 
   const openDatePicker = (fieldId: string) => {
+    // Prevent opening if already busy or open
+    if (isDatePickerBusy || showDatePicker) {
+      return;
+    }
+
     // Get current field value or use today's date
     const field = template?.fields.find(f => f.id === fieldId);
     const currentValue = field?.type === 'fixed_date' 
@@ -228,11 +233,15 @@ export default function DataEntryScreen() {
       }
     }
 
+    setIsDatePickerBusy(true);
     setSelectedDate(initialDate);
     setTempDate(initialDate);
     setCurrentDateField(fieldId);
-    setShowDatePicker(true);
-    setIsDatePickerBusy(true);
+    
+    // Small delay to ensure state is set before showing picker
+    setTimeout(() => {
+      setShowDatePicker(true);
+    }, 50);
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -242,18 +251,14 @@ export default function DataEntryScreen() {
       setTempDate(selectedDate);
       setSelectedDate(selectedDate);
 
-      // For Android, immediately apply the change and close with a small delay
+      // For Android, immediately apply the change and close
       if (isAndroid) {
-        setTimeout(() => {
-          applyDateChange(selectedDate);
-          closeDatePicker();
-        }, 100);
+        applyDateChange(selectedDate);
+        closeDatePicker();
       }
     } else if (isAndroid) {
       // User cancelled on Android
-      setTimeout(() => {
-        closeDatePicker();
-      }, 100);
+      closeDatePicker();
     }
   };
 
@@ -273,17 +278,14 @@ export default function DataEntryScreen() {
   };
 
   const closeDatePicker = () => {
-    // Prevent rapid state changes
-    if (isDatePickerBusy && showDatePicker) {
-      setShowDatePicker(false);
-      
-      // Clean up state with a slight delay to prevent conflicts
-      setTimeout(() => {
-        setCurrentDateField(null);
-        setTempDate(selectedDate);
-        setIsDatePickerBusy(false);
-      }, 150);
-    }
+    // Immediately hide the picker
+    setShowDatePicker(false);
+    
+    // Clean up state after a short delay
+    setTimeout(() => {
+      setCurrentDateField(null);
+      setIsDatePickerBusy(false);
+    }, 100);
   };
 
   const openBarcodeScanner = (fieldId: string) => {
