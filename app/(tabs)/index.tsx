@@ -217,11 +217,7 @@ export default function TemplatesScreen() {
       return;
     }
 
-    if (!validateColumnPositions()) {
-      setValidationError('Please fix duplicate column positions before saving the template.');
-      setShowValidationModal(true);
-      return;
-    }
+    
 
     // Check for duplicate template names (excluding the current template if editing)
     const trimmedName = newTemplateName.trim();
@@ -403,22 +399,7 @@ export default function TemplatesScreen() {
     }));
   };
 
-  const validateColumnPositions = () => {
-    const positions = Object.values(csvExportSettings.fieldPositions).filter(pos => pos > 0);
-    const uniquePositions = new Set(positions);
-    return positions.length === uniquePositions.size;
-  };
-
-  const getDuplicatePositions = () => {
-    const positions = Object.values(csvExportSettings.fieldPositions);
-    const positionCounts = {};
-    positions.forEach(pos => {
-      if (pos > 0) {
-        positionCounts[pos] = (positionCounts[pos] || 0) + 1;
-      }
-    });
-    return Object.keys(positionCounts).filter(pos => positionCounts[pos] > 1).map(Number);
-  };
+  
 
   const getDelimiterSymbol = (delimiter: string, customDelimiter?: string) => {
     switch (delimiter) {
@@ -691,7 +672,7 @@ export default function TemplatesScreen() {
                     </View>
                   </View>
 
-                  {/* Column Positioning - Optimized */}
+                  {/* Column Positioning - Dropdown Selection */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
 
@@ -704,41 +685,50 @@ export default function TemplatesScreen() {
                         nestedScrollEnabled={true}
                       >
                         {templateFields.map((field, index) => {
-                          const currentPosition = csvExportSettings.fieldPositions[field.id] || index + 1;
-                          const duplicatePositions = getDuplicatePositions();
-                          const isDuplicate = duplicatePositions.includes(currentPosition);
+                          const currentPosition = csvExportSettings.fieldPositions[field.id] || (index + 1);
+                          
+                          // Get all assigned positions except for the current field
+                          const assignedPositions = Object.entries(csvExportSettings.fieldPositions)
+                            .filter(([fieldId, _]) => fieldId !== field.id)
+                            .map(([_, position]) => position)
+                            .filter(pos => pos > 0);
+
+                          // Generate available positions (1 to total fields count)
+                          const maxPositions = templateFields.length;
+                          const availablePositions = [];
+                          for (let i = 1; i <= maxPositions; i++) {
+                            if (!assignedPositions.includes(i)) {
+                              availablePositions.push(i);
+                            }
+                          }
+
+                          // Always include the current position in the list even if it's assigned
+                          if (currentPosition > 0 && !availablePositions.includes(currentPosition)) {
+                            availablePositions.push(currentPosition);
+                            availablePositions.sort((a, b) => a - b);
+                          }
 
                           return (
                             <View key={field.id} style={styles.compactPositionRow}>
                               <Text style={styles.compactFieldName} numberOfLines={1}>
                                 {field.name}
                               </Text>
-                              <View style={styles.compactPositionInput}>
-                                <TextInput
-                                  style={[
-                                    styles.positionNumberInput,
-                                    isDuplicate && styles.duplicatePositionInput
-                                  ]}
-                                  value={currentPosition === 0 ? '' : String(currentPosition)}
-                                  onChangeText={(text) => {
-                                    if (text === '') {
-                                      updateFieldPosition(field.id, null);
-                                    } else {
-                                      const position = parseInt(text);
-                                      if (!isNaN(position) && position >= 0) {
-                                        updateFieldPosition(field.id, position);
-                                      }
-                                    }
-                                  }}
-                                  keyboardType="numeric"
-                                  placeholder={String(index + 1)}
-                                  textAlign="center"
-                                  selectTextOnFocus={true}
-                                />
+                              <View style={styles.positionDropdownContainer}>
+                                <Picker
+                                  selectedValue={currentPosition}
+                                  onValueChange={(value) => updateFieldPosition(field.id, value)}
+                                  style={styles.positionDropdown}
+                                  itemStyle={styles.positionDropdownItem}
+                                >
+                                  {availablePositions.map((position) => (
+                                    <Picker.Item 
+                                      key={position} 
+                                      label={String(position)} 
+                                      value={position} 
+                                    />
+                                  ))}
+                                </Picker>
                               </View>
-                              {isDuplicate && (
-                                <Text style={styles.duplicateWarning}>!</Text>
-                              )}
                             </View>
                           );
                         })}
@@ -746,12 +736,6 @@ export default function TemplatesScreen() {
                     ) : (
                       <Text style={styles.noFieldsText}>
                         Add fields in the Fields tab to configure positions
-                      </Text>
-                    )}
-
-                    {templateFields.length > 0 && !validateColumnPositions() && (
-                      <Text style={styles.validationWarning}>
-                        ⚠️ Duplicate column positions detected. Each field should have a unique position number.
                       </Text>
                     )}
                   </View>
@@ -2011,26 +1995,22 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     padding: 16,
   },
-  duplicatePositionInput: {
-    borderColor: '#e53e3e',
-    borderWidth: 2,
-    backgroundColor: '#fed7d7',
-  },
-  duplicateWarning: {
-    color: '#e53e3e',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  validationWarning: {
-    fontSize: 12,
-    color: '#e53e3e',
-    textAlign: 'center',
-    marginTop: 8,
-    padding: 8,
-    backgroundColor: '#fed7d7',
+  positionDropdownContainer: {
+    width: 70,
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
     borderRadius: 4,
-    fontWeight: '500',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+  },
+  positionDropdown: {
+    height: 40,
+    width: '100%',
+  },
+  positionDropdownItem: {
+    fontSize: 14,
+    color: '#2d3748',
+    textAlign: 'center',
   },
   defaultValueSection: {
     marginBottom: 15,
