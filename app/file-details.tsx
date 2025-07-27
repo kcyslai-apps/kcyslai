@@ -41,6 +41,7 @@ export default function FileDetailsScreen() {
   const [filteredRecords, setFilteredRecords] = useState<DataRecord[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
+  const [showTemplateNotFoundModal, setShowTemplateNotFoundModal] = useState(false);
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -153,6 +154,35 @@ export default function FileDetailsScreen() {
     setRecordToDelete(null);
   };
 
+  const continueInput = () => {
+    if (fileRecords.length === 0) {
+      Alert.alert('No Records', 'Cannot continue input - no records found in this file');
+      return;
+    }
+
+    // Get the template ID from the first record (all records in a file should use the same template)
+    const firstRecord = fileRecords[0];
+    const templateExists = templates.find(t => t.id === firstRecord.templateId);
+
+    if (!templateExists) {
+      setShowTemplateNotFoundModal(true);
+      return;
+    }
+
+    // Navigate to data entry with the existing template and file name
+    router.push({
+      pathname: '/data-entry',
+      params: {
+        templateId: firstRecord.templateId,
+        dataFileName: encodeURIComponent(fileName || 'Unnamed File')
+      }
+    });
+  };
+
+  const closeTemplateNotFoundModal = () => {
+    setShowTemplateNotFoundModal(false);
+  };
+
   const renderRecord = ({ item }: { item: DataRecord }) => {
     const template = templates.find(t => t.id === item.templateId);
     
@@ -201,6 +231,14 @@ export default function FileDetailsScreen() {
         <Text style={styles.recordCount}>
           Total Records: {fileRecords.length}
         </Text>
+        {fileRecords.length > 0 && (
+          <TouchableOpacity
+            style={styles.continueInputButton}
+            onPress={continueInput}
+          >
+            <Text style={styles.continueInputButtonText}>🔄 Continue Input</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.searchContainer}>
@@ -273,6 +311,31 @@ export default function FileDetailsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Template Not Found Modal */}
+      <Modal visible={showTemplateNotFoundModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.templateNotFoundModalContent}>
+            <Text style={styles.templateNotFoundModalTitle}>⚠️ Template Not Available</Text>
+
+            <View style={styles.templateNotFoundModalInfo}>
+              <Text style={styles.templateNotFoundModalMessage}>
+                Template no longer available. Unable to continue input.
+              </Text>
+              <Text style={styles.templateNotFoundModalSubMessage}>
+                The original template used for this file has been deleted or is missing.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.templateNotFoundModalButton}
+              onPress={closeTemplateNotFoundModal}
+            >
+              <Text style={styles.templateNotFoundModalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -328,6 +391,22 @@ const styles = StyleSheet.create({
   recordCount: {
     fontSize: 12,
     color: '#4a5568',
+    marginBottom: 8,
+  },
+  continueInputButton: {
+    backgroundColor: '#48bb78',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#38a169',
+    marginTop: 4,
+  },
+  continueInputButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   searchContainer: {
     marginHorizontal: 12,
@@ -531,5 +610,60 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+  },
+  templateNotFoundModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#fbb6ce',
+  },
+  templateNotFoundModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  templateNotFoundModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  templateNotFoundModalMessage: {
+    fontSize: 16,
+    color: '#e53e3e',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 15,
+    fontWeight: 'bold',
+  },
+  templateNotFoundModalSubMessage: {
+    fontSize: 14,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  templateNotFoundModalButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  templateNotFoundModalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
