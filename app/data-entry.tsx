@@ -446,15 +446,78 @@ export default function DataEntryScreen() {
     }, 100);
   };
 
-  const exitDataEntry = () => {
-    Alert.alert(
-      'Exit Data Entry',
-      `You have saved ${recordCount} record(s). Do you want to exit?`,
-      [
-        { text: 'Continue', style: 'cancel' },
-        { text: 'Exit', onPress: () => router.back() }
-      ]
-    );
+  const exitDataEntry = async () => {
+    // Check if there's unsaved data in the form
+    const hasUnsavedData = Object.values(variableFormData).some(value => value.trim() !== '');
+    
+    if (hasUnsavedData) {
+      // Auto-save the current data before exiting
+      if (validateVariableForm() && template) {
+        try {
+          // Load existing records
+          let existingRecords: DataRecord[] = [];
+          const fileExists = await FileSystem.getInfoAsync(DATA_RECORDS_FILE);
+          if (fileExists.exists) {
+            const content = await FileSystem.readAsStringAsync(DATA_RECORDS_FILE);
+            existingRecords = JSON.parse(content);
+          }
+
+          // Combine fixed and variable data
+          const combinedData = { ...fixedFormData, ...variableFormData };
+
+          // Create new record
+          const newRecord: DataRecord = {
+            id: Date.now().toString(),
+            templateId: template.id,
+            templateName: template.name,
+            data: combinedData,
+            timestamp: new Date(),
+            dataFileName: currentDataFileName
+          };
+
+          // Save updated records
+          const updatedRecords = [...existingRecords, newRecord];
+          await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
+
+          const finalCount = recordCount + 1;
+          Alert.alert(
+            'Data Saved',
+            `Successfully saved ${finalCount} record(s) to "${currentDataFileName}".`,
+            [{ text: 'OK', onPress: () => router.back() }]
+          );
+        } catch (error) {
+          console.error('Error saving data on exit:', error);
+          Alert.alert(
+            'Save Error',
+            'Failed to save data. Do you want to exit without saving?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Exit Without Saving', style: 'destructive', onPress: () => router.back() }
+            ]
+          );
+        }
+      } else {
+        // Invalid data - ask user what to do
+        Alert.alert(
+          'Invalid Data',
+          'There are validation errors in the current entry. Do you want to exit without saving this entry?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Exit Without Saving', style: 'destructive', onPress: () => router.back() }
+          ]
+        );
+      }
+    } else {
+      // No unsaved data - show normal exit confirmation
+      Alert.alert(
+        'Exit Data Entry',
+        `You have saved ${recordCount} record(s) to "${currentDataFileName}". Do you want to exit?`,
+        [
+          { text: 'Continue', style: 'cancel' },
+          { text: 'Exit', onPress: () => router.back() }
+        ]
+      );
+    }
   };
 
   const getFixedFields = () => {
