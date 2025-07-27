@@ -254,18 +254,21 @@ export default function DataEntryScreen() {
     const isAndroid = Platform.OS === 'android';
 
     if (selectedDate) {
-      //setIsDatePickerChanging(true); // Indicate date is changing - REMOVED
       setTempDate(selectedDate);
       setSelectedDate(selectedDate);
 
-      // For Android, immediately apply the change and close
+      // For Android, immediately apply the change and close with a small delay
       if (isAndroid) {
-        applyDateChange(selectedDate);
-        closeDatePicker();
+        setTimeout(() => {
+          applyDateChange(selectedDate);
+          closeDatePicker();
+        }, 100);
       }
     } else if (isAndroid) {
       // User cancelled on Android
-      closeDatePicker();
+      setTimeout(() => {
+        closeDatePicker();
+      }, 100);
     }
   };
 
@@ -285,11 +288,17 @@ export default function DataEntryScreen() {
   };
 
   const closeDatePicker = () => {
-    setShowDatePicker(false);
-    setCurrentDateField(null);
-    // Reset temp date to current selected date
-    setTempDate(selectedDate);
-    setIsDatePickerBusy(false);
+    // Prevent rapid state changes
+    if (isDatePickerBusy && showDatePicker) {
+      setShowDatePicker(false);
+      
+      // Clean up state with a slight delay to prevent conflicts
+      setTimeout(() => {
+        setCurrentDateField(null);
+        setTempDate(selectedDate);
+        setIsDatePickerBusy(false);
+      }, 150);
+    }
   };
 
   const openBarcodeScanner = (fieldId: string) => {
@@ -721,9 +730,22 @@ export default function DataEntryScreen() {
 
       {/* Date Picker Modal */}
       {showDatePicker && (
-        <Modal visible={showDatePicker} transparent animationType="fade">
-          <View style={styles.datePickerModalOverlay}>
-            <View style={styles.datePickerModalContent}>
+        <Modal 
+          visible={showDatePicker} 
+          transparent 
+          animationType="fade"
+          onRequestClose={closeDatePicker}
+        >
+          <TouchableOpacity 
+            style={styles.datePickerModalOverlay}
+            activeOpacity={1}
+            onPress={closeDatePicker}
+          >
+            <TouchableOpacity 
+              style={styles.datePickerModalContent}
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+            >
               <Text style={styles.datePickerTitle}>Select Date</Text>
               <DateTimePicker
                 value={tempDate}
@@ -751,8 +773,8 @@ export default function DataEntryScreen() {
                   </TouchableOpacity>
                 </View>
               )}
-            </View>
-          </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
         </Modal>
       )}
     </ThemedView>
