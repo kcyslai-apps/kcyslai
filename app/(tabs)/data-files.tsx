@@ -200,29 +200,7 @@ export default function DataFilesScreen() {
     );
   };
 
-  const clearAllRecords = () => {
-    Alert.alert(
-      'Clear All Records',
-      'Are you sure you want to delete all data records? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify([]));
-              setRecords([]);
-              Alert.alert('Success', 'All records cleared');
-            } catch (error) {
-              console.error('Error clearing records:', error);
-              Alert.alert('Error', 'Failed to clear records');
-            }
-          }
-        }
-      ]
-    );
-  };
+  
 
   const renderRecord = ({ item }: { item: DataRecord }) => {
     const template = templates.find(t => t.id === item.templateId);
@@ -301,11 +279,7 @@ export default function DataFilesScreen() {
         ))}
       </View>
 
-      <View style={styles.actionContainer}>
-        <TouchableOpacity style={styles.clearButton} onPress={clearAllRecords}>
-          <Text style={styles.clearButtonText}>🗑️ Clear All Records</Text>
-        </TouchableOpacity>
-      </View>
+      
 
       <FlatList
         data={fileGroups}
@@ -352,23 +326,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     paddingLeft: 10,
   },
-  actionContainer: {
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  clearButton: {
-    backgroundColor: '#e53e3e',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    minWidth: 200,
-  },
-  clearButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
+  
   fileGroupsList: {
     flex: 1,
   },
