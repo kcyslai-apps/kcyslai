@@ -279,7 +279,7 @@ export default function DataFilesScreen() {
             style={styles.exportFileButton}
             onPress={() => exportFileGroupToCSV(item)}
           >
-            <Text style={styles.exportFileButtonText}>📊 Export File</Text>
+            <Text style={styles.exportFileButtonText}>📊 Export</Text>
           </TouchableOpacity>
         </View>
       </View>
