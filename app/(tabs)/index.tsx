@@ -277,7 +277,6 @@ export default function TemplatesScreen() {
     setShowTemplateModal(true);
   };
 
-  const [showUseTemplateModal, setShowUseTemplateModal] = useState(false);
   const [selectedTemplateForUse, setSelectedTemplateForUse] = useState<Template | null>(null);
   const [showViewTemplateModal, setShowViewTemplateModal] = useState(false);
   const [selectedTemplateForView, setSelectedTemplateForView] = useState<Template | null>(null);
@@ -296,23 +295,10 @@ export default function TemplatesScreen() {
 
   const useTemplate = (template: Template) => {
     setSelectedTemplateForUse(template);
-    setShowUseTemplateModal(true);
-  };
-
-  const confirmUseTemplate = () => {
-    if (selectedTemplateForUse) {
-      // Generate default filename based on template name
-      const defaultFileName = selectedTemplateForUse.name.replace(/[^a-zA-Z0-9_-]/g, '_');
-      setDataFileName(defaultFileName);
-
-      setShowUseTemplateModal(false);
-      setShowDataFileModal(true);
-    }
-  };
-
-  const cancelUseTemplate = () => {
-    setShowUseTemplateModal(false);
-    setSelectedTemplateForUse(null);
+    // Generate default filename based on template name
+    const defaultFileName = template.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+    setDataFileName(defaultFileName);
+    setShowDataFileModal(true);
   };
 
   const deleteTemplate = (templateId: string) => {
@@ -944,35 +930,7 @@ export default function TemplatesScreen() {
         </View>
       </Modal>
 
-      {/* Use Template Confirmation Modal */}
-      <Modal visible={showUseTemplateModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.useTemplateModalContent}>
-            <Text style={styles.useTemplateModalTitle}>🚀 Use Template</Text>
-
-            <View style={styles.useTemplateInfo}>
-              <Text style={styles.useTemplateNameText}>
-                "{selectedTemplateForUse?.name}"
-              </Text>
-            </View>
-
-            <View style={styles.useTemplateButtons}>
-              <TouchableOpacity
-                style={styles.useTemplateCancelButton}
-                onPress={cancelUseTemplate}
-              >
-                <Text style={styles.useTemplateCancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.useTemplateStartButton}
-                onPress={confirmUseTemplate}
-              >
-                <Text style={styles.useTemplateStartButtonText}>Use</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      
 
       {/* View Template Modal */}
       <Modal visible={showViewTemplateModal} transparent animationType="fade">
@@ -1488,85 +1446,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  useTemplateModalContent: {
-    backgroundColor: 'white',
-    padding: 30,
-    borderRadius: 16,
-    width: '90%',
-    maxWidth: 340,
-    alignItems: 'center',
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: '#f0f8ff',
-  },
-  useTemplateModalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 25,
-    color: '#2d3748',
-    textAlign: 'center',
-  },
-  useTemplateInfo: {
-    alignItems: 'center',
-    marginBottom: 30,
-    width: '100%',
-  },
-  useTemplateText: {
-    fontSize: 16,
-    color: '#4a5568',
-    textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 22,
-  },
-  useTemplateNameText: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    textAlign: 'center',
-    marginVertical: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#68d391',
-    minWidth: '80%',
-    elevation: 3,
-  },
-  useTemplateButtons: {
-    flexDirection: 'row',
-    gap: 15,
-    width: '100%',
-    justifyContent: 'center',
-  },
-  useTemplateCancelButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#cbd5e0',
-    minWidth: 80,
-  },
-  useTemplateCancelButtonText: {
-    color: '#718096',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  useTemplateStartButton: {
-    backgroundColor: '#4299e1',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    alignItems: 'center',
-    minWidth: 80,
-  },
-  useTemplateStartButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
-  },
+  
   viewTemplateModalContent: {
     backgroundColor: 'white',
     padding: 30,
