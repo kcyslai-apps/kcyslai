@@ -51,7 +51,7 @@ export default function DataEntryScreen() {
   const [currentDateField, setCurrentDateField] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [tempDate, setTempDate] = useState(new Date());
-  const [isDatePickerChanging, setIsDatePickerChanging] = useState(false); // New state
+  //const [isDatePickerChanging, setIsDatePickerChanging] = useState(false); // New state - REMOVED
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -253,7 +253,7 @@ export default function DataEntryScreen() {
     const isAndroid = Platform.OS === 'android';
 
     if (selectedDate) {
-      setIsDatePickerChanging(true); // Indicate date is changing
+      //setIsDatePickerChanging(true); // Indicate date is changing - REMOVED
       setTempDate(selectedDate);
       setSelectedDate(selectedDate);
 
@@ -288,7 +288,7 @@ export default function DataEntryScreen() {
     setCurrentDateField(null);
     // Reset temp date to current selected date
     setTempDate(selectedDate);
-    setIsDatePickerChanging(false); // Indicate date is not changing
+    //setIsDatePickerChanging(false); // Indicate date is not changing - REMOVED
   };
 
   const openBarcodeScanner = (fieldId: string) => {
@@ -470,12 +470,9 @@ export default function DataEntryScreen() {
               pointerEvents="none"
             />
             <TouchableOpacity
-                style={[
-                  styles.calendarButton,
-                  (showDatePicker || isDatePickerChanging) && styles.disabledCalendarButton
-                ]}
+                style={styles.calendarButton}
                 onPress={() => openDatePicker(field.id)}
-                disabled={showDatePicker || isDatePickerChanging}
+                disabled={showDatePicker}
               >
                 <Text style={styles.calendarButtonText}>📅</Text>
               </TouchableOpacity>
@@ -494,12 +491,9 @@ export default function DataEntryScreen() {
                 pointerEvents="none"
               />
               <TouchableOpacity
-                style={[
-                  styles.calendarButton,
-                  (showDatePicker || isDatePickerChanging) && styles.disabledCalendarButton
-                ]}
+                style={styles.calendarButton}
                 onPress={() => openDatePicker(field.id)}
-                disabled={showDatePicker || isDatePickerChanging}
+                disabled={showDatePicker}
               >
                 <Text style={styles.calendarButtonText}>📅</Text>
               </TouchableOpacity>
@@ -571,15 +565,11 @@ export default function DataEntryScreen() {
               onChangeText={(text) => updateFunction(field.id, text)}
             />
             <TouchableOpacity
-                style={[
-                  styles.calendarButton,
-                  (showDatePicker || isDatePickerChanging) && styles.disabledCalendarButton
-                ]}
-                onPress={() => openDatePicker(field.id)}
-                disabled={showDatePicker || isDatePickerChanging}
-              >
-                <Text style={styles.calendarButtonText}>📅</Text>
-              </TouchableOpacity>
+              style={styles.scanButton}
+              onPress={() => openBarcodeScanner(field.id)}
+            >
+              <Text style={styles.scanButtonText}>📷</Text>
+            </TouchableOpacity>
           </View>
         );
 
