@@ -202,42 +202,6 @@ export default function DataFilesScreen() {
 
   
 
-  const renderRecord = ({ item }: { item: DataRecord }) => {
-    const template = templates.find(t => t.id === item.templateId);
-    
-    return (
-      <View style={styles.recordItem}>
-        <View style={styles.recordHeader}>
-          <Text style={styles.templateName}>{item.templateName}</Text>
-          <Text style={styles.timestamp}>
-            {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
-          </Text>
-        </View>
-        
-        <ScrollView style={styles.recordData} showsVerticalScrollIndicator={false}>
-          {Object.entries(item.data).map(([fieldId, value]) => {
-            const field = template?.fields.find(f => f.id === fieldId);
-            if (!field || !value) return null;
-            
-            return (
-              <View key={fieldId} style={styles.dataRow}>
-                <Text style={styles.fieldName}>{field.name}:</Text>
-                <Text style={styles.fieldValue}>{value}</Text>
-              </View>
-            );
-          })}
-        </ScrollView>
-        
-        <TouchableOpacity
-          style={styles.deleteRecordButton}
-          onPress={() => deleteRecord(item.id)}
-        >
-          <Text style={styles.deleteRecordText}>🗑️ Delete</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   const renderFileGroup = ({ item }: { item: FileGroup }) => {
     return (
       <View style={styles.fileGroupContainer}>
@@ -252,14 +216,6 @@ export default function DataFilesScreen() {
         >
           <Text style={styles.exportFileButtonText}>📊 Export File to CSV</Text>
         </TouchableOpacity>
-
-        <FlatList
-          data={item.records}
-          renderItem={renderRecord}
-          keyExtractor={(record) => record.id}
-          scrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-        />
       </View>
     );
   };
@@ -373,71 +329,6 @@ const styles = StyleSheet.create({
   },
   exportFileButtonText: {
     color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  recordItem: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  recordHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  templateName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    flex: 1,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#718096',
-  },
-  recordData: {
-    maxHeight: 120,
-    marginBottom: 10,
-  },
-  dataRow: {
-    flexDirection: 'row',
-    marginBottom: 5,
-  },
-  fieldName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4a5568',
-    width: 100,
-    flexShrink: 0,
-  },
-  fieldValue: {
-    fontSize: 14,
-    color: '#2d3748',
-    flex: 1,
-    flexWrap: 'wrap',
-  },
-  deleteRecordButton: {
-    backgroundColor: '#fed7d7',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    alignSelf: 'flex-end',
-  },
-  deleteRecordText: {
-    color: '#e53e3e',
     fontSize: 12,
     fontWeight: 'bold',
   },
