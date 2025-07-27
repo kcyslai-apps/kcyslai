@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, ScrollView, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -57,6 +58,13 @@ export default function DataFilesScreen() {
   useEffect(() => {
     groupRecordsByFile();
   }, [records]);
+
+  // Reload data whenever the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   const loadData = async () => {
     await Promise.all([loadRecords(), loadTemplates()]);
