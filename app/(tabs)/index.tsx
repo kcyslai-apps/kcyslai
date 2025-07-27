@@ -687,12 +687,12 @@ export default function TemplatesScreen() {
                     </View>
                   </View>
 
-                  {/* Column Positioning - Rebuilt Implementation */}
+                  {/* Column Positioning - Compact Implementation */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
 
                     {templateFields.length > 0 ? (
-                      <View style={styles.newPositionContainer}>
+                      <View style={styles.compactPositionContainer}>
                         {templateFields.map((field, index) => {
                           // Get current position or assign default sequential position
                           let currentPosition = csvExportSettings.fieldPositions[field.id];
@@ -719,11 +719,11 @@ export default function TemplatesScreen() {
                           availablePositions.sort((a, b) => a - b);
 
                           return (
-                            <View key={field.id} style={styles.newPositionRow}>
-                              <Text style={styles.newFieldName} numberOfLines={2}>
+                            <View key={field.id} style={styles.compactPositionRow}>
+                              <Text style={styles.compactFieldName} numberOfLines={1}>
                                 {field.name}
                               </Text>
-                              <View style={styles.newDropdownContainer}>
+                              <View style={styles.compactDropdownContainer}>
                                 <Picker
                                   selectedValue={currentPosition}
                                   onValueChange={(value) => {
@@ -731,8 +731,8 @@ export default function TemplatesScreen() {
                                       updateFieldPosition(field.id, value);
                                     }
                                   }}
-                                  style={styles.newPositionDropdown}
-                                  itemStyle={styles.newDropdownItem}
+                                  style={styles.compactPositionDropdown}
+                                  itemStyle={styles.compactDropdownItem}
                                   mode="dropdown"
                                   prompt="Select Position"
                                 >
@@ -745,8 +745,8 @@ export default function TemplatesScreen() {
                                     />
                                   ))}
                                 </Picker>
-                                <View style={styles.dropdownDisplayOverlay}>
-                                  <Text style={styles.dropdownDisplayText}>
+                                <View style={styles.compactDropdownDisplayOverlay}>
+                                  <Text style={styles.compactDropdownDisplayText}>
                                     {currentPosition || ''}
                                   </Text>
                                 </View>
@@ -1971,56 +1971,56 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: 'white',
   },
-  newPositionContainer: {
+  compactPositionContainer: {
     backgroundColor: 'white',
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    padding: 12,
+    padding: 6,
     width: '100%',
   },
-  newPositionRow: {
+  compactPositionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    marginBottom: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    marginBottom: 4,
     backgroundColor: '#f8fafc',
-    borderRadius: 6,
-    minHeight: 60,
+    borderRadius: 4,
+    minHeight: 36,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  newFieldName: {
-    fontSize: 14,
+  compactFieldName: {
+    fontSize: 12,
     fontWeight: '600',
     color: '#2d3748',
     flex: 1,
-    marginRight: 12,
-    lineHeight: 18,
+    marginRight: 8,
+    lineHeight: 14,
   },
-  newDropdownContainer: {
-    width: 90,
+  compactDropdownContainer: {
+    width: 60,
     borderWidth: 1,
     borderColor: '#cbd5e0',
-    borderRadius: 6,
+    borderRadius: 4,
     backgroundColor: 'white',
     justifyContent: 'center',
-    minHeight: 45,
+    minHeight: 28,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
     position: 'relative',
   },
-  newPositionDropdown: {
-    height: 45,
+  compactPositionDropdown: {
+    height: 28,
     width: '100%',
     color: '#2d3748',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '600',
     backgroundColor: 'transparent',
     position: 'absolute',
     top: 0,
@@ -2029,14 +2029,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     opacity: 0,
   },
-  newDropdownItem: {
-    fontSize: 16,
+  compactDropdownItem: {
+    fontSize: 13,
     color: '#2d3748',
     textAlign: 'center',
-    height: 45,
-    fontWeight: '700',
+    height: 28,
+    fontWeight: '600',
   },
-  dropdownDisplayOverlay: {
+  compactDropdownDisplayOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -2047,9 +2047,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     pointerEvents: 'none',
   },
-  dropdownDisplayText: {
-    fontSize: 16,
-    fontWeight: '700',
+  compactDropdownDisplayText: {
+    fontSize: 13,
+    fontWeight: '600',
     color: '#2d3748',
     textAlign: 'center',
   },
