@@ -237,13 +237,10 @@ export default function DataFilesScreen() {
           const position = csvSettings.fieldPositions[field.id];
           return {
             ...field,
-            position: position !== undefined && position > 0 ? position : (1000 + index)
+            position: position !== undefined && position !== null && position > 0 ? position : (9999 + index)
           };
         })
-        .sort((a, b) => {
-          // Ensure strict numerical ascending order (1, 2, 3, 20, 21, etc.)
-          return a.position - b.position;
-        });
+        .sort((a, b) => a.position - b.position);
 
       let csvContent = '';
 
