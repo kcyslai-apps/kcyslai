@@ -55,6 +55,7 @@ export default function DataEntryScreen() {
   const inputRefs = useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
   const [fieldOrder, setFieldOrder] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -104,15 +105,15 @@ export default function DataEntryScreen() {
           const variableFields = foundTemplate.fields.filter(field => 
             field.type !== 'fixed_data' && field.type !== 'fixed_date'
           );
-          
+
           const refs: { [fieldId: string]: React.RefObject<TextInput> } = {};
           const order: string[] = [];
-          
+
           variableFields.forEach(field => {
             refs[field.id] = createRef<TextInput>();
             order.push(field.id);
           });
-          
+
           inputRefs.current = refs;
           setFieldOrder(order);
 
@@ -256,7 +257,7 @@ export default function DataEntryScreen() {
     setSelectedDate(initialDate);
     setTempDate(initialDate);
     setCurrentDateField(fieldId);
-    
+
     // Small delay to ensure state is set before showing picker
     setTimeout(() => {
       setShowDatePicker(true);
@@ -299,7 +300,7 @@ export default function DataEntryScreen() {
   const closeDatePicker = () => {
     // Immediately hide the picker
     setShowDatePicker(false);
-    
+
     // Clean up state after a short delay
     setTimeout(() => {
       setCurrentDateField(null);
@@ -355,7 +356,7 @@ export default function DataEntryScreen() {
   const proceedToVariablePage = () => {
     if (!validateFixedForm()) return;
     setCurrentPage('variable');
-    
+
     // Focus first field after page transition
     setTimeout(() => {
       if (fieldOrder.length > 0) {
@@ -398,7 +399,7 @@ export default function DataEntryScreen() {
 
       // Show brief success message
       setShowSuccessMessage(true);
-      
+
       // Hide success message and reset form after 0.5 seconds
       setTimeout(() => {
         setShowSuccessMessage(false);
@@ -427,7 +428,7 @@ export default function DataEntryScreen() {
     });
 
     setVariableFormData(initialData);
-    
+
     // Focus first field after reset
     setTimeout(() => {
       if (fieldOrder.length > 0) {
@@ -474,6 +475,17 @@ export default function DataEntryScreen() {
     }
   };
 
+    const scrollToField = (fieldId: string) => {
+    // Delay to allow keyboard to appear
+    setTimeout(() => {
+      inputRefs.current[fieldId]?.current?.measure((x, y, width, height, pageX, pageY) => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({ y: pageY - 100, animated: true }); // Adjust offset as needed
+        }
+      });
+    }, 100);
+  };
+
   const renderField = (field: TemplateField, isFixedPage: boolean = false) => {
     const value = isFixedPage ? (fixedFormData[field.id] || '') : (variableFormData[field.id] || '');
     const updateFunction = isFixedPage ? updateFixedFieldValue : updateVariableFieldValue;
@@ -490,6 +502,7 @@ export default function DataEntryScreen() {
             multiline={true}
             numberOfLines={3}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onFocus={() => !isFixedPage && scrollToField(field.id)}
             blurOnSubmit={false}
           />
         );
@@ -504,6 +517,7 @@ export default function DataEntryScreen() {
             onChangeText={(text) => updateFunction(field.id, text)}
             keyboardType="numeric"
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onFocus={() => !isFixedPage && scrollToField(field.id)}
             blurOnSubmit={false}
           />
         );
@@ -576,6 +590,7 @@ export default function DataEntryScreen() {
                 value={value}
                 onChangeText={(text) => updateFunction(field.id, text)}
                 onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+                onFocus={() => !isFixedPage && scrollToField(field.id)}
                 blurOnSubmit={false}
               />
               {allOptions.length > 0 && (
@@ -623,6 +638,7 @@ export default function DataEntryScreen() {
               value={value}
               onChangeText={(text) => updateFunction(field.id, text)}
               onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+              onFocus={() => !isFixedPage && scrollToField(field.id)}
               blurOnSubmit={false}
             />
             <TouchableOpacity
@@ -643,6 +659,7 @@ export default function DataEntryScreen() {
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onFocus={() => !isFixedPage && scrollToField(field.id)}
             blurOnSubmit={false}
           />
         );
@@ -659,7 +676,7 @@ export default function DataEntryScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} ref={scrollViewRef}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Text style={styles.backButtonText}>← Back</Text>
