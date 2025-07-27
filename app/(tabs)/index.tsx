@@ -552,7 +552,7 @@ export default function TemplatesScreen() {
                   onPress={() => setActiveTab('csv')}
                 >
                   <Text style={[styles.tabText, activeTab === 'csv' && styles.activeTabText]}>
-                    🗂️ CSV Export Settings
+                    🗂️ File Export Settings
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -584,7 +584,7 @@ export default function TemplatesScreen() {
                 </View>
               )}
 
-              {/* CSV Export Settings Tab */}
+              {/* File Export Settings Tab */}
               {activeTab === 'csv' && (
                 <View style={styles.csvSettingsSection}>
                   {/* Header Option - Vertical Layout */}
