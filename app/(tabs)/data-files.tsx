@@ -231,11 +231,11 @@ export default function DataFilesScreen() {
 
       const delimiter = getDelimiterSymbol(csvSettings.delimiter, csvSettings.customDelimiter);
 
-      // Sort fields by their position (fields without position go to the end)
+      // Sort fields by their position in ascending order
       const fieldsWithPosition = template.fields
-        .map(field => ({
+        .map((field, index) => ({
           ...field,
-          position: csvSettings.fieldPositions[field.id] || 999
+          position: csvSettings.fieldPositions[field.id] || (1000 + index)
         }))
         .sort((a, b) => a.position - b.position);
 
