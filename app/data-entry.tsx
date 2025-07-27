@@ -467,15 +467,15 @@ export default function DataEntryScreen() {
               pointerEvents="none"
             />
             <TouchableOpacity
-                style={[
-                  styles.calendarButton,
-                  (showDatePicker || isDatePickerBusy) && styles.disabledCalendarButton
-                ]}
-                onPress={() => openDatePicker(field.id)}
-                disabled={showDatePicker || isDatePickerBusy}
-              >
-                <Text style={styles.calendarButtonText}>📅</Text>
-              </TouchableOpacity>
+              style={[
+                styles.calendarButton,
+                (showDatePicker || isDatePickerBusy) && styles.disabledCalendarButton
+              ]}
+              onPress={() => openDatePicker(field.id)}
+              disabled={showDatePicker || isDatePickerBusy}
+            >
+              <Text style={styles.calendarButtonText}>📅</Text>
+            </TouchableOpacity>
           </View>
         );
 
