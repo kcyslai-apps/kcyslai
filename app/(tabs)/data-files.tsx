@@ -33,6 +33,8 @@ interface TemplateField {
   required: boolean;
   defaultValue?: string;
   options?: string[];
+  dateFormat?: string;
+  customDateFormat?: string;
 }
 
 interface FileGroup {
@@ -137,6 +139,60 @@ export default function DataFilesScreen() {
     setFileGroups(fileGroupsArray);
   };
 
+  // Format date according to template field settings
+  const formatDateForExport = (dateValue: string, field: TemplateField): string => {
+    if (!dateValue || (field.type !== 'date' && field.type !== 'fixed_date')) {
+      return dateValue;
+    }
+
+    try {
+      // Parse the stored date (always in YYYY-MM-DD format)
+      const dateParts = dateValue.split('-');
+      if (dateParts.length !== 3) return dateValue;
+      
+      const year = parseInt(dateParts[0]);
+      const month = parseInt(dateParts[1]);
+      const day = parseInt(dateParts[2]);
+      
+      if (isNaN(year) || isNaN(month) || isNaN(day)) return dateValue;
+
+      // Format according to field's date format
+      const dateFormat = field.dateFormat || 'yyyy-MM-dd';
+      const monthStr = String(month).padStart(2, '0');
+      const dayStr = String(day).padStart(2, '0');
+      const yearStr = String(year);
+
+      switch (dateFormat) {
+        case 'dd/MM/yyyy':
+          return `${dayStr}/${monthStr}/${yearStr}`;
+        case 'MM/dd/yyyy':
+          return `${monthStr}/${dayStr}/${yearStr}`;
+        case 'yyyyMMdd':
+          return `${yearStr}${monthStr}${dayStr}`;
+        case 'dd-MM-yyyy':
+          return `${dayStr}-${monthStr}-${yearStr}`;
+        case 'yyyy.MM.dd':
+          return `${yearStr}.${monthStr}.${dayStr}`;
+        case 'custom':
+          // Handle custom date format
+          if (field.customDateFormat) {
+            let customFormat = field.customDateFormat;
+            customFormat = customFormat.replace(/yyyy/g, yearStr);
+            customFormat = customFormat.replace(/MM/g, monthStr);
+            customFormat = customFormat.replace(/dd/g, dayStr);
+            return customFormat;
+          }
+          return dateValue;
+        default:
+          // Default YYYY-MM-DD format
+          return dateValue;
+      }
+    } catch (error) {
+      console.error('Error formatting date for export:', error);
+      return dateValue;
+    }
+  };
+
   const exportFileGroupToCSV = async (fileGroup: FileGroup) => {
     try {
       if (fileGroup.records.length === 0) {
@@ -194,7 +250,13 @@ export default function DataFilesScreen() {
       // Add data rows
       fileGroup.records.forEach(record => {
         const row = fieldsWithPosition.map(field => {
-          const value = record.data[field.id] || '';
+          let value = record.data[field.id] || '';
+          
+          // Format date fields according to template settings
+          if ((field.type === 'date' || field.type === 'fixed_date') && value) {
+            value = formatDateForExport(value, field);
+          }
+          
           return `"${value.replace(/"/g, '""')}"`;
         });
         csvContent += row.join(delimiter) + '\n';
