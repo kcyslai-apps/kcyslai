@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, ScrollView, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
@@ -49,6 +48,7 @@ interface CSVExportSettings {
   customDelimiter?: string;
   fieldPositions: { [fieldId: string]: number };
   fileExtension: string;
+  includeQuotes: boolean;
 }
 
 export default function DataFilesScreen() {
@@ -114,7 +114,7 @@ export default function DataFilesScreen() {
 
   const groupRecordsByFile = () => {
     const groups: { [fileName: string]: DataRecord[] } = {};
-    
+
     records.forEach(record => {
       const fileName = record.dataFileName || 'Unnamed File';
       if (!groups[fileName]) {
@@ -149,11 +149,11 @@ export default function DataFilesScreen() {
       // Parse the stored date (always in YYYY-MM-DD format)
       const dateParts = dateValue.split('-');
       if (dateParts.length !== 3) return dateValue;
-      
+
       const year = parseInt(dateParts[0]);
       const month = parseInt(dateParts[1]);
       const day = parseInt(dateParts[2]);
-      
+
       if (isNaN(year) || isNaN(month) || isNaN(day)) return dateValue;
 
       // Format according to field's date format
@@ -203,7 +203,7 @@ export default function DataFilesScreen() {
       // Get the template from the first record (all records in a file use the same template)
       const firstRecord = fileGroup.records[0];
       const template = templates.find(t => t.id === firstRecord.templateId);
-      
+
       if (!template) {
         Alert.alert('Error', 'Template not found for this file');
         return;
@@ -215,7 +215,8 @@ export default function DataFilesScreen() {
         delimiter: 'comma',
         customDelimiter: '',
         fieldPositions: {},
-        fileExtension: 'csv'
+        fileExtension: 'csv',
+        includeQuotes: true
       };
 
       // Get delimiter symbol
@@ -244,25 +245,31 @@ export default function DataFilesScreen() {
 
       let csvContent = '';
 
-      // Add header if configured
+      // Create header row if enabled
       if (csvSettings.includeHeader) {
-        const headers = fieldsWithPosition.map(field => `"${field.name}"`);
-        csvContent += headers.join(delimiter) + '\n';
+        const headerRow = fieldsWithPosition.map(field => {
+          if (csvSettings.includeQuotes) {
+            return `"${field.name}"`;
+          } else {
+            return field.name;
+          }
+        }).join(delimiter);
+        csvContent += headerRow + '\n';
       }
 
-      // Add data rows
+      // Create data rows
       fileGroup.records.forEach(record => {
         const row = fieldsWithPosition.map(field => {
-          let value = record.data[field.id] || '';
-          
-          // Format date fields according to template settings
-          if ((field.type === 'date' || field.type === 'fixed_date') && value) {
-            value = formatDateForExport(value, field);
+          const value = record.data[field.id] || '';
+          if (csvSettings.includeQuotes) {
+            // Escape quotes in the value by doubling them
+            const escapedValue = value.replace(/"/g, '""');
+            return `"${escapedValue}"`;
+          } else {
+            return value;
           }
-          
-          return `"${value.replace(/"/g, '""')}"`;
-        });
-        csvContent += row.join(delimiter) + '\n';
+        }).join(delimiter);
+        csvContent += row + '\n';
       });
 
       // Use template's file extension
@@ -312,7 +319,7 @@ export default function DataFilesScreen() {
     );
   };
 
-  
+
 
   const deleteFileGroup = (fileName: string) => {
     setFileToDelete(fileName);
@@ -327,7 +334,7 @@ export default function DataFilesScreen() {
         setRecords(updatedRecords);
         setShowDeleteModal(false);
         setFileToDelete(null);
-        
+
         // Show success message
         setShowSuccessMessage(true);
         setTimeout(() => {
@@ -359,7 +366,7 @@ export default function DataFilesScreen() {
           <Text style={styles.fileGroupName}>📁 {item.fileName}</Text>
           <Text style={styles.fileGroupCount}>{item.totalRecords} records</Text>
         </View>
-        
+
         <View style={styles.actionButtonsRow}>
           <TouchableOpacity
             style={styles.viewButton}
@@ -367,14 +374,14 @@ export default function DataFilesScreen() {
           >
             <Text style={styles.viewButtonText}>👁️ View</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.deleteFileButton}
             onPress={() => deleteFileGroup(item.fileName)}
           >
             <Text style={styles.deleteFileButtonText}>🗑️ Delete</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.exportFileButton}
             onPress={() => exportFileGroupToCSV(item)}
@@ -396,7 +403,7 @@ export default function DataFilesScreen() {
         </Text>
       </View>
 
-      
+
 
       <FlatList
         data={fileGroups}
@@ -481,7 +488,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2c5282',
   },
-  
+
   fileGroupsList: {
     flex: 1,
   },

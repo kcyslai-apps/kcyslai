@@ -25,6 +25,7 @@ interface CSVExportSettings {
   customDelimiter?: string;
   fieldPositions: { [fieldId: string]: number };
   fileExtension: string;
+  includeQuotes: boolean;
 }
 
 interface Template {
@@ -82,7 +83,9 @@ export default function TemplatesScreen() {
               includeHeader: false,
               delimiter: 'comma',
               customDelimiter: '',
-              fieldPositions: {}
+              fieldPositions: {},
+              fileExtension: 'csv',
+              includeQuotes: true
             },
             createdAt: new Date(template.createdAt)
           }));
@@ -115,7 +118,8 @@ export default function TemplatesScreen() {
       delimiter: 'comma',
       customDelimiter: '',
       fieldPositions: {},
-      fileExtension: 'csv'
+      fileExtension: 'csv',
+      includeQuotes: true
     });
     setShowTemplateModal(true);
   };
@@ -289,7 +293,8 @@ export default function TemplatesScreen() {
       delimiter: 'comma',
       customDelimiter: '',
       fieldPositions: {},
-      fileExtension: 'csv'
+      fileExtension: 'csv',
+      includeQuotes: true
     });
     setShowTemplateModal(true);
   };
@@ -667,6 +672,25 @@ export default function TemplatesScreen() {
                     />
                   </View>
 
+                  {/* Quotation Marks Option - Vertical Layout */}
+                  <View style={styles.csvSettingGroup}>
+                    <Text style={styles.csvSettingTitle}>Include quotation marks (" ") around data fields</Text>
+                    <View style={styles.compactPickerContainer}>
+                      <Picker
+                        selectedValue={csvExportSettings.includeQuotes ? 'yes' : 'no'}
+                        onValueChange={(value) => setCsvExportSettings(prev => ({
+                          ...prev,
+                          includeQuotes: value === 'yes'
+                        }))}
+                        style={styles.compactPicker}
+                        itemStyle={styles.pickerItem}
+                      >
+                        <Picker.Item label="Yes (default)" value="yes" />
+                        <Picker.Item label="No" value="no" />
+                      </Picker>
+                    </View>
+                  </View>
+
                   {/* Column Positioning - Optimized */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
@@ -747,7 +771,8 @@ export default function TemplatesScreen() {
                       delimiter: 'comma',
                       customDelimiter: '',
                       fieldPositions: {},
-                      fileExtension: 'csv'
+                      fileExtension: 'csv',
+                      includeQuotes: true
                     });
                     setShowTemplateModal(false);
                   }}
