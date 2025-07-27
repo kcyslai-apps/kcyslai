@@ -45,6 +45,7 @@ export default function DataFilesScreen() {
   const [fileGroups, setFileGroups] = useState<FileGroup[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -218,7 +219,12 @@ export default function DataFilesScreen() {
         setRecords(updatedRecords);
         setShowDeleteModal(false);
         setFileToDelete(null);
-        Alert.alert('Success', 'File deleted successfully');
+        
+        // Show success message
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+        }, 800);
       } catch (error) {
         console.error('Error deleting file:', error);
         Alert.alert('Error', 'Failed to delete file');
@@ -329,6 +335,15 @@ export default function DataFilesScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Success Message Overlay */}
+      {showSuccessMessage && (
+        <View style={styles.successMessageOverlay}>
+          <View style={styles.successMessageContainer}>
+            <Text style={styles.successMessageText}>✓ File deleted successfully</Text>
+          </View>
+        </View>
+      )}
     </ThemedView>
   );
 }
@@ -529,5 +544,35 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+  },
+  successMessageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    zIndex: 1000,
+  },
+  successMessageContainer: {
+    backgroundColor: '#f0fff4',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#68d391',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  successMessageText: {
+    color: '#2f855a',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
