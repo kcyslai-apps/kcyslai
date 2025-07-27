@@ -713,10 +713,9 @@ export default function TemplatesScreen() {
                             .filter(([fieldId, position]) => fieldId !== field.id && position > 0)
                             .map(([_, position]) => position);
 
-                          // Generate available positions (1 to total fields count)
-                          const maxPositions = templateFields.length;
+                          // Generate available positions (1 to 20)
                           const availablePositions = [];
-                          for (let i = 1; i <= maxPositions; i++) {
+                          for (let i = 1; i <= 20; i++) {
                             if (!assignedPositions.includes(i) || i === currentPosition) {
                               availablePositions.push(i);
                             }
@@ -737,20 +736,13 @@ export default function TemplatesScreen() {
                                   style={styles.positionDropdown}
                                   itemStyle={styles.positionDropdownItem}
                                 >
-                                  {availablePositions.length > 0 ? (
-                                    availablePositions.map((position) => (
-                                      <Picker.Item 
-                                        key={position} 
-                                        label={`Position ${position}`} 
-                                        value={position} 
-                                      />
-                                    ))
-                                  ) : (
+                                  {availablePositions.map((position) => (
                                     <Picker.Item 
-                                      label={`Position ${currentPosition}`} 
-                                      value={currentPosition} 
+                                      key={position} 
+                                      label={position.toString()} 
+                                      value={position} 
                                     />
-                                  )}
+                                  ))}
                                 </Picker>
                               </View>
                             </View>
@@ -2022,7 +2014,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   positionDropdownContainer: {
-    width: 70,
+    width: 80,
     borderWidth: 1,
     borderColor: '#cbd5e0',
     borderRadius: 4,
@@ -2034,12 +2026,16 @@ const styles = StyleSheet.create({
   positionDropdown: {
     height: 50,
     width: '100%',
+    color: '#2d3748',
+    fontSize: 14,
+    fontWeight: '600',
   },
   positionDropdownItem: {
     fontSize: 14,
     color: '#2d3748',
     textAlign: 'center',
     height: 50,
+    fontWeight: '600',
   },
   defaultValueSection: {
     marginBottom: 15,
