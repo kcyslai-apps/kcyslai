@@ -54,6 +54,7 @@ export default function DataEntryScreen() {
   const [isDatePickerBusy, setIsDatePickerBusy] = useState(false);
   const inputRefs = useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
   const [fieldOrder, setFieldOrder] = useState<string[]>([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -395,17 +396,14 @@ export default function DataEntryScreen() {
       const newCount = recordCount + 1;
       setRecordCount(newCount);
 
-      const successMessage = currentDataFileName
-        ? `Record ${newCount} saved to "${currentDataFileName}" successfully!`
-        : `Record ${newCount} saved successfully!`;
-
-      Alert.alert(
-        'Success',
-        successMessage,
-        [
-          { text: 'Add Another Entry', onPress: resetVariableForm },
-        ]
-      );
+      // Show brief success message
+      setShowSuccessMessage(true);
+      
+      // Hide success message and reset form after 0.5 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        resetVariableForm();
+      }, 500);
     } catch (error) {
       console.error('Error saving data:', error);
       Alert.alert('Error', 'Failed to save data');
@@ -742,6 +740,15 @@ export default function DataEntryScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Success Message Overlay */}
+      {showSuccessMessage && (
+        <View style={styles.successMessageOverlay}>
+          <View style={styles.successMessageContainer}>
+            <Text style={styles.successMessageText}>✓ Saved successfully</Text>
+          </View>
+        </View>
+      )}
 
       {/* Barcode Scanner Modal */}
       <Modal visible={showCamera} transparent animationType="fade">
@@ -1181,5 +1188,36 @@ const styles = StyleSheet.create({
   },
   disabledCalendarButton: {
     opacity: 0.5,
+  },
+  successMessageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  successMessageContainer: {
+    backgroundColor: '#48bb78',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  successMessageText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
