@@ -907,12 +907,12 @@ export default function TemplatesScreen() {
                   </View>
                   {currentField.inputMode === 'select_only' && (
                     <Text style={styles.inputModeDescription}>
-                      Users can only choose from the predefined “Options” list. Manual typing is not allowed.
+                      Users can only choose from the predefined "Options" list. Manual typing is not allowed.
                     </Text>
                   )}
-                  {currentField.inputMode === 'editable' && (
+                  {(currentField.inputMode === 'editable' || !currentField.inputMode) && (
                     <Text style={styles.inputModeDescription}>
-                      Users can select from the “Options” list or manually enter a custom value.
+                      Users can select from the "Options" list or manually enter a custom value.
                       Predefined options act as suggestions or shortcuts.
                     </Text>
                   )}
