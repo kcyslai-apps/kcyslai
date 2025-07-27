@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView, Alert, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -49,6 +49,13 @@ export default function FileDetailsScreen() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Refresh data when the screen comes into focus (e.g., returning from data entry)
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   useEffect(() => {
     if (records.length > 0 && fileName) {
