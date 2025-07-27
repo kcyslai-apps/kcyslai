@@ -56,6 +56,7 @@ export default function DataEntryScreen() {
   const inputRefs = useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
   const [fieldOrder, setFieldOrder] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -446,16 +447,17 @@ export default function DataEntryScreen() {
     }, 100);
   };
 
-  const saveAndExit = async () => {
-    // Exit without saving current entry - just show confirmation
-    Alert.alert(
-      'Exit Data Entry',
-      `You have saved ${recordCount} record(s) to "${currentDataFileName}". Do you want to exit?`,
-      [
-        { text: 'Continue', style: 'cancel' },
-        { text: 'Exit', onPress: () => router.back() }
-      ]
-    );
+  const saveAndExit = () => {
+    setShowExitConfirmModal(true);
+  };
+
+  const confirmExit = () => {
+    setShowExitConfirmModal(false);
+    router.back();
+  };
+
+  const cancelExit = () => {
+    setShowExitConfirmModal(false);
   };
 
   const getFixedFields = () => {
@@ -926,6 +928,39 @@ export default function DataEntryScreen() {
           </TouchableOpacity>
         </Modal>
       )}
+
+      {/* Save & Exit Confirmation Modal */}
+      <Modal visible={showExitConfirmModal} transparent animationType="fade">
+        <View style={styles.exitModalOverlay}>
+          <View style={styles.exitModalContent}>
+            <Text style={styles.exitModalTitle}>Exit Data Entry</Text>
+            
+            <View style={styles.exitModalInfo}>
+              <Text style={styles.exitModalMessage}>
+                You have saved {recordCount} record(s) to "{currentDataFileName}".
+              </Text>
+              <Text style={styles.exitModalSubMessage}>
+                Do you want to exit data entry?
+              </Text>
+            </View>
+
+            <View style={styles.exitModalButtons}>
+              <TouchableOpacity
+                style={styles.exitModalCancelButton}
+                onPress={cancelExit}
+              >
+                <Text style={styles.exitModalCancelButtonText}>Continue</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.exitModalConfirmButton}
+                onPress={confirmExit}
+              >
+                <Text style={styles.exitModalConfirmButtonText}>Exit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -1306,6 +1341,89 @@ const styles = StyleSheet.create({
   successMessageText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  exitModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  exitModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+  },
+  exitModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  exitModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  exitModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  exitModalSubMessage: {
+    fontSize: 15,
+    color: '#2d3748',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  exitModalButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  exitModalCancelButton: {
+    backgroundColor: '#e2e8f0',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+  },
+  exitModalCancelButtonText: {
+    color: '#4a5568',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  exitModalConfirmButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+  },
+  exitModalConfirmButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
