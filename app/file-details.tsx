@@ -169,12 +169,26 @@ export default function FileDetailsScreen() {
       return;
     }
 
-    // Navigate to data entry with the existing template and file name
+    // Extract fixed field values from the first record
+    const fixedFields = templateExists.fields.filter(field => 
+      field.type === 'fixed_data' || field.type === 'fixed_date'
+    );
+    
+    const fixedFieldValues: { [key: string]: string } = {};
+    fixedFields.forEach(field => {
+      if (firstRecord.data[field.id]) {
+        fixedFieldValues[field.id] = firstRecord.data[field.id];
+      }
+    });
+
+    // Navigate to data entry with the existing template, file name, and fixed field values
     router.push({
       pathname: '/data-entry',
       params: {
         templateId: firstRecord.templateId,
-        dataFileName: encodeURIComponent(fileName || 'Unnamed File')
+        dataFileName: encodeURIComponent(fileName || 'Unnamed File'),
+        continueInput: 'true',
+        fixedFieldValues: encodeURIComponent(JSON.stringify(fixedFieldValues))
       }
     });
   };

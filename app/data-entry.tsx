@@ -38,7 +38,7 @@ interface DataRecord {
 }
 
 export default function DataEntryScreen() {
-  const { templateId, dataFileName } = useLocalSearchParams();
+  const { templateId, dataFileName, continueInput, fixedFieldValues } = useLocalSearchParams();
   const [template, setTemplate] = useState<Template | null>(null);
   const [fixedFormData, setFixedFormData] = useState<{ [fieldId: string]: string }>({});
   const [variableFormData, setVariableFormData] = useState<{ [fieldId: string]: string }>({});
@@ -48,6 +48,7 @@ export default function DataEntryScreen() {
   const [currentDataFileName, setCurrentDataFileName] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<'fixed' | 'variable'>('fixed');
   const [recordCount, setRecordCount] = useState(0);
+  const [isContinueInput, setIsContinueInput] = useState<boolean>(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentDateField, setCurrentDateField] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -67,7 +68,12 @@ export default function DataEntryScreen() {
     if (dataFileName && typeof dataFileName === 'string') {
       setCurrentDataFileName(decodeURIComponent(dataFileName));
     }
-  }, [templateId, dataFileName]);
+    
+    // Check if this is a continue input session
+    if (continueInput === 'true') {
+      setIsContinueInput(true);
+    }
+  }, [templateId, dataFileName, continueInput]);
 
   const loadTemplate = async () => {
     try {
@@ -84,9 +90,22 @@ export default function DataEntryScreen() {
           const initialFixedData: { [fieldId: string]: string } = {};
           const initialVariableData: { [fieldId: string]: string } = {};
 
+          // If continuing input, use provided fixed field values
+          let prefilledFixedData: { [fieldId: string]: string } = {};
+          if (isContinueInput && fixedFieldValues && typeof fixedFieldValues === 'string') {
+            try {
+              prefilledFixedData = JSON.parse(decodeURIComponent(fixedFieldValues));
+            } catch (error) {
+              console.error('Error parsing fixed field values:', error);
+            }
+          }
+
           foundTemplate.fields.forEach(field => {
             if (field.type === 'fixed_data' || field.type === 'fixed_date') {
-              if (field.type === 'fixed_date') {
+              // Use prefilled data if available, otherwise use default values
+              if (prefilledFixedData[field.id]) {
+                initialFixedData[field.id] = prefilledFixedData[field.id];
+              } else if (field.type === 'fixed_date') {
                 initialFixedData[field.id] = field.defaultValue || formatDateForField(new Date(), field);
               } else {
                 initialFixedData[field.id] = field.defaultValue || '';
@@ -119,12 +138,12 @@ export default function DataEntryScreen() {
           inputRefs.current = refs;
           setFieldOrder(order);
 
-          // Check if we have fixed fields, if not skip to variable page
+          // If continuing input or no fixed fields, skip to variable page
           const hasFixedFields = foundTemplate.fields.some(field => 
             field.type === 'fixed_data' || field.type === 'fixed_date'
           );
 
-          if (!hasFixedFields) {
+          if (!hasFixedFields || isContinueInput) {
             setCurrentPage('variable');
           }
         } else {
@@ -596,7 +615,11 @@ export default function DataEntryScreen() {
           <View style={styles.fixedValueContainer}>
             <View style={styles.dateContainer}>
               <TextInput
-                style={[styles.input, styles.dateInput]}
+                style={[
+                  styles.input, 
+                  styles.dateInput,
+                  isContinueInput && styles.readOnlyInput
+                ]}
                 placeholder="YYYY-MM-DD"
                 value={value}
                 editable={false}
@@ -605,14 +628,17 @@ export default function DataEntryScreen() {
               <TouchableOpacity
                 style={[
                   styles.calendarButton,
-                  (showDatePicker || isDatePickerBusy) && styles.disabledCalendarButton
+                  (showDatePicker || isDatePickerBusy || isContinueInput) && styles.disabledCalendarButton
                 ]}
-                onPress={() => openDatePicker(field.id)}
-                disabled={showDatePicker || isDatePickerBusy}
+                onPress={() => !isContinueInput && openDatePicker(field.id)}
+                disabled={showDatePicker || isDatePickerBusy || isContinueInput}
               >
                 <Text style={styles.calendarButtonText}>📅</Text>
               </TouchableOpacity>
             </View>
+            {isContinueInput && (
+              <Text style={styles.readOnlyHint}>📌 Fixed value from existing entries</Text>
+            )}
           </View>
         );
 
@@ -631,10 +657,13 @@ export default function DataEntryScreen() {
             <View style={styles.editableUnifiedContainer}>
               <TextInput
                 ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
-                style={styles.input}
+                style={[
+                  styles.input,
+                  isContinueInput && styles.readOnlyInput
+                ]}
                 placeholder="Type or tap to select from options"
                 value={value}
-                onChangeText={(text) => updateFunction(field.id, text)}
+                onChangeText={(text) => !isContinueInput && updateFunction(field.id, text)}
                 onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
                 onFocus={(event) => {
                   if (!isFixedPage) {
@@ -647,8 +676,9 @@ export default function DataEntryScreen() {
                 }}
                 blurOnSubmit={false}
                 selectTextOnFocus={true}
+                editable={!isContinueInput}
               />
-              {allOptions.length > 0 && (
+              {allOptions.length > 0 && !isContinueInput && (
                 <View style={styles.quickSelectContainer}>
                   <Text style={styles.quickSelectLabel}>Quick Select:</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickSelectScroll}>
@@ -664,6 +694,9 @@ export default function DataEntryScreen() {
                   </ScrollView>
                 </View>
               )}
+              {isContinueInput && (
+                <Text style={styles.readOnlyHint}>📌 Fixed value from existing entries</Text>
+              )}
             </View>
           );
         } else {
@@ -671,14 +704,18 @@ export default function DataEntryScreen() {
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={value || field.defaultValue || ''}
-                onValueChange={(itemValue) => updateFunction(field.id, itemValue)}
-                style={styles.picker}
+                onValueChange={(itemValue) => !isContinueInput && updateFunction(field.id, itemValue)}
+                style={[styles.picker, isContinueInput && styles.readOnlyPicker]}
+                enabled={!isContinueInput}
               >
                 <Picker.Item label="Select..." value="" />
                 {allOptions.map((option, index) => (
                   <Picker.Item key={index} label={option} value={option} />
                 ))}
               </Picker>
+              {isContinueInput && (
+                <Text style={styles.readOnlyHint}>📌 Fixed value from existing entries</Text>
+              )}
             </View>
           );
         }
@@ -1425,5 +1462,21 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  readOnlyInput: {
+    backgroundColor: '#f7fafc',
+    color: '#4a5568',
+    opacity: 0.8,
+  },
+  readOnlyPicker: {
+    backgroundColor: '#f7fafc',
+    opacity: 0.8,
+  },
+  readOnlyHint: {
+    fontSize: 12,
+    color: '#48bb78',
+    fontStyle: 'italic',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });
