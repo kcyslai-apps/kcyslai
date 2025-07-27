@@ -983,8 +983,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     marginBottom: 20,
-    ```text
-  textAlign: 'center',
+    textAlign: 'center',
   },
   permissionButton: {
     backgroundColor: '#4299e1',
