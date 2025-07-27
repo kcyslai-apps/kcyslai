@@ -159,12 +159,9 @@ export default function FileDetailsScreen() {
     return (
       <View style={styles.recordItem}>
         <View style={styles.recordHeader}>
-          <View style={styles.inputTimeSection}>
-            <Text style={styles.inputTimeLabel}>Input Time</Text>
-            <Text style={styles.timestamp}>
-              {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
-            </Text>
-          </View>
+          <Text style={styles.inputTimeLabel}>
+            Input Time: {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
+          </Text>
           <TouchableOpacity
             style={styles.deleteRecordButton}
             onPress={() => deleteRecord(item.id)}
@@ -390,25 +387,18 @@ const styles = StyleSheet.create({
   recordHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 12,
     paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  inputTimeSection: {
-    flex: 1,
-    marginRight: 8,
-  },
   inputTimeLabel: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: 2,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#718096',
+    flex: 1,
+    marginRight: 8,
   },
   recordData: {
     marginBottom: 12,
