@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Camera, CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
@@ -47,6 +48,9 @@ export default function DataEntryScreen() {
   const [currentDataFileName, setCurrentDataFileName] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<'fixed' | 'variable'>('fixed');
   const [recordCount, setRecordCount] = useState(0);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentDateField, setCurrentDateField] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -75,9 +79,17 @@ export default function DataEntryScreen() {
           
           foundTemplate.fields.forEach(field => {
             if (field.type === 'fixed_data' || field.type === 'fixed_date') {
-              initialFixedData[field.id] = field.defaultValue || '';
+              if (field.type === 'fixed_date') {
+                initialFixedData[field.id] = field.defaultValue || formatDateForField(new Date(), field);
+              } else {
+                initialFixedData[field.id] = field.defaultValue || '';
+              }
             } else {
-              initialVariableData[field.id] = field.defaultValue || '';
+              if (field.type === 'date') {
+                initialVariableData[field.id] = field.defaultValue || formatDateForField(new Date(), field);
+              } else {
+                initialVariableData[field.id] = field.defaultValue || '';
+              }
             }
           });
           
@@ -116,6 +128,65 @@ export default function DataEntryScreen() {
       ...prev,
       [fieldId]: value
     }));
+  };
+
+  const formatDateForField = (date: Date, field: TemplateField): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    switch (field.dateFormat) {
+      case 'dd/MM/yyyy':
+        return `${day}/${month}/${year}`;
+      case 'MM/dd/yyyy':
+        return `${month}/${day}/${year}`;
+      case 'yyyyMMdd':
+        return `${year}${month}${day}`;
+      case 'dd-MM-yyyy':
+        return `${day}-${month}-${year}`;
+      case 'yyyy.MM.dd':
+        return `${year}.${month}.${day}`;
+      case 'custom':
+        // For custom format, use the custom format or default
+        return field.customDateFormat || `${year}-${month}-${day}`;
+      default:
+        return `${year}-${month}-${day}`;
+    }
+  };
+
+  const openDatePicker = (fieldId: string) => {
+    setCurrentDateField(fieldId);
+    setShowDatePicker(true);
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    const isAndroid = Platform.OS === 'android';
+    
+    if (isAndroid) {
+      setShowDatePicker(false);
+    }
+
+    if (selectedDate && currentDateField) {
+      const field = template?.fields.find(f => f.id === currentDateField);
+      if (field) {
+        const formattedDate = formatDateForField(selectedDate, field);
+        
+        if (field.type === 'fixed_date') {
+          updateFixedFieldValue(currentDateField, formattedDate);
+        } else {
+          updateVariableFieldValue(currentDateField, formattedDate);
+        }
+      }
+    }
+
+    if (!isAndroid) {
+      setCurrentDateField(null);
+    }
+  };
+
+  const closeDatePicker = () => {
+    setShowDatePicker(false);
+    setCurrentDateField(null);
   };
 
   const openBarcodeScanner = (fieldId: string) => {
@@ -225,7 +296,11 @@ export default function DataEntryScreen() {
     );
 
     variableFields.forEach(field => {
-      initialData[field.id] = field.defaultValue || '';
+      if (field.type === 'date') {
+        initialData[field.id] = field.defaultValue || formatDateForField(new Date(), field);
+      } else {
+        initialData[field.id] = field.defaultValue || '';
+      }
     });
     
     setVariableFormData(initialData);
@@ -284,23 +359,39 @@ export default function DataEntryScreen() {
 
       case 'date':
         return (
-          <TextInput
-            style={styles.input}
-            placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
-            value={value}
-            onChangeText={(text) => updateFunction(field.id, text)}
-          />
+          <View style={styles.dateContainer}>
+            <TextInput
+              style={[styles.input, styles.dateInput]}
+              placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
+              value={value}
+              onChangeText={(text) => updateFunction(field.id, text)}
+            />
+            <TouchableOpacity
+              style={styles.calendarButton}
+              onPress={() => openDatePicker(field.id)}
+            >
+              <Text style={styles.calendarButtonText}>📅</Text>
+            </TouchableOpacity>
+          </View>
         );
 
       case 'fixed_date':
         return (
           <View style={styles.fixedValueContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
-              value={value}
-              onChangeText={(text) => updateFunction(field.id, text)}
-            />
+            <View style={styles.dateContainer}>
+              <TextInput
+                style={[styles.input, styles.dateInput]}
+                placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
+                value={value}
+                onChangeText={(text) => updateFunction(field.id, text)}
+              />
+              <TouchableOpacity
+                style={styles.calendarButton}
+                onPress={() => openDatePicker(field.id)}
+              >
+                <Text style={styles.calendarButtonText}>📅</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         );
 
@@ -514,6 +605,43 @@ export default function DataEntryScreen() {
           )}
         </View>
       </Modal>
+
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <Modal visible={showDatePicker} transparent animationType="fade">
+          <View style={styles.datePickerModalOverlay}>
+            <View style={styles.datePickerModalContent}>
+              <Text style={styles.datePickerTitle}>Select Date</Text>
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+                style={styles.datePicker}
+              />
+              {Platform.OS === 'ios' && (
+                <View style={styles.datePickerButtons}>
+                  <TouchableOpacity
+                    style={styles.datePickerCancelButton}
+                    onPress={closeDatePicker}
+                  >
+                    <Text style={styles.datePickerCancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.datePickerConfirmButton}
+                    onPress={() => {
+                      handleDateChange(null, selectedDate);
+                      closeDatePicker();
+                    }}
+                  >
+                    <Text style={styles.datePickerConfirmButtonText}>Confirm</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
+      )}
     </ThemedView>
   );
 }
@@ -781,5 +909,83 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#2d3748',
     fontWeight: '500',
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dateInput: {
+    flex: 1,
+  },
+  calendarButton: {
+    backgroundColor: '#4299e1',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 44,
+    minWidth: 44,
+  },
+  calendarButtonText: {
+    fontSize: 18,
+  },
+  datePickerModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  datePickerModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  datePickerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 15,
+  },
+  datePicker: {
+    width: '100%',
+    height: 200,
+  },
+  datePickerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  datePickerCancelButton: {
+    backgroundColor: '#e2e8f0',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: 'center',
+  },
+  datePickerCancelButtonText: {
+    color: '#4a5568',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  datePickerConfirmButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: 'center',
+  },
+  datePickerConfirmButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
