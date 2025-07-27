@@ -201,7 +201,7 @@ export default function FileDetailsScreen() {
       <View style={styles.fileInfo}>
         <Text style={styles.fileName}>📁 {fileName}</Text>
         <Text style={styles.recordCount}>
-          {filteredRecords.length} of {fileRecords.length} records
+          Total Records: {fileRecords.length}
         </Text>
       </View>
 
