@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, ScrollView } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -202,6 +203,38 @@ export default function DataFilesScreen() {
 
   
 
+  const deleteFileGroup = (fileName: string) => {
+    Alert.alert(
+      'Delete File',
+      `Are you sure you want to delete "${fileName}" and all its data records?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const updatedRecords = records.filter(r => (r.dataFileName || 'Unnamed File') !== fileName);
+              await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
+              setRecords(updatedRecords);
+              Alert.alert('Success', 'File deleted successfully');
+            } catch (error) {
+              console.error('Error deleting file:', error);
+              Alert.alert('Error', 'Failed to delete file');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const viewFileDetails = (fileGroup: FileGroup) => {
+    router.push({
+      pathname: '/file-details',
+      params: { fileName: fileGroup.fileName }
+    });
+  };
+
   const renderFileGroup = ({ item }: { item: FileGroup }) => {
     return (
       <View style={styles.fileGroupContainer}>
@@ -210,12 +243,28 @@ export default function DataFilesScreen() {
           <Text style={styles.fileGroupCount}>{item.totalRecords} records</Text>
         </View>
         
-        <TouchableOpacity
-          style={styles.exportFileButton}
-          onPress={() => exportFileGroupToCSV(item)}
-        >
-          <Text style={styles.exportFileButtonText}>📊 Export File</Text>
-        </TouchableOpacity>
+        <View style={styles.actionButtonsRow}>
+          <TouchableOpacity
+            style={styles.viewButton}
+            onPress={() => viewFileDetails(item)}
+          >
+            <Text style={styles.viewButtonText}>👁️ View</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.deleteFileButton}
+            onPress={() => deleteFileGroup(item.fileName)}
+          >
+            <Text style={styles.deleteFileButtonText}>🗑️ Delete</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.exportFileButton}
+            onPress={() => exportFileGroupToCSV(item)}
+          >
+            <Text style={styles.exportFileButtonText}>📊 Export File</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };
@@ -306,14 +355,45 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontWeight: '600',
   },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 10,
+  },
+  viewButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    flex: 1,
+  },
+  viewButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  deleteFileButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    flex: 1,
+  },
+  deleteFileButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   exportFileButton: {
     backgroundColor: '#48bb78',
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     borderRadius: 6,
     alignItems: 'center',
-    marginBottom: 10,
-    alignSelf: 'flex-end',
+    flex: 1,
   },
   exportFileButtonText: {
     color: 'white',
