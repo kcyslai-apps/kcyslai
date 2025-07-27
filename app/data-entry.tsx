@@ -136,23 +136,8 @@ export default function DataEntryScreen() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
 
-    switch (field.dateFormat) {
-      case 'dd/MM/yyyy':
-        return `${day}/${month}/${year}`;
-      case 'MM/dd/yyyy':
-        return `${month}/${day}/${year}`;
-      case 'yyyyMMdd':
-        return `${year}${month}${day}`;
-      case 'dd-MM-yyyy':
-        return `${day}-${month}-${year}`;
-      case 'yyyy.MM.dd':
-        return `${year}.${month}.${day}`;
-      case 'custom':
-        // For custom format, use the custom format or default
-        return field.customDateFormat || `${year}-${month}-${day}`;
-      default:
-        return `${year}-${month}-${day}`;
-    }
+    // Standardize all date display formats to YYYY-MM-DD
+    return `${year}-${month}-${day}`;
   };
 
   const parseFieldDate = (dateString: string, field: TemplateField): Date | null => {
@@ -474,7 +459,7 @@ export default function DataEntryScreen() {
           <View style={styles.dateContainer}>
             <TextInput
               style={[styles.input, styles.dateInput]}
-              placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
+              placeholder="YYYY-MM-DD"
               value={value}
               editable={false}
               pointerEvents="none"
@@ -498,7 +483,7 @@ export default function DataEntryScreen() {
             <View style={styles.dateContainer}>
               <TextInput
                 style={[styles.input, styles.dateInput]}
-                placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
+                placeholder="YYYY-MM-DD"
                 value={value}
                 editable={false}
                 pointerEvents="none"
