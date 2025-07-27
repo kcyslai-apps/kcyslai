@@ -260,7 +260,13 @@ export default function DataFilesScreen() {
       // Create data rows
       fileGroup.records.forEach(record => {
         const row = fieldsWithPosition.map(field => {
-          const value = record.data[field.id] || '';
+          let value = record.data[field.id] || '';
+          
+          // Apply date formatting for date and fixed_date fields
+          if ((field.type === 'date' || field.type === 'fixed_date') && value) {
+            value = formatDateForExport(value, field);
+          }
+          
           if (csvSettings.includeQuotes) {
             // Escape quotes in the value by doubling them
             const escapedValue = value.replace(/"/g, '""');
