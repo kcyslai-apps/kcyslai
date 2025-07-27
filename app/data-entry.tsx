@@ -484,12 +484,29 @@ export default function DataEntryScreen() {
     const scrollToField = (fieldId: string) => {
     // Delay to allow keyboard to appear
     setTimeout(() => {
-      inputRefs.current[fieldId]?.current?.measure((x, y, width, height, pageX, pageY) => {
-        if (scrollViewRef.current) {
-          scrollViewRef.current.scrollTo({ y: pageY - 100, animated: true }); // Adjust offset as needed
-        }
-      });
-    }, 100);
+      const inputRef = inputRefs.current[fieldId];
+      if (inputRef?.current && scrollViewRef.current) {
+        inputRef.current.measureInWindow((x, y, width, height) => {
+          // Get the screen height and keyboard height estimation
+          const screenHeight = Platform.OS === 'ios' ? 812 : 800; // Approximate screen heights
+          const keyboardHeight = Platform.OS === 'ios' ? 300 : 280; // Approximate keyboard heights
+          const availableHeight = screenHeight - keyboardHeight;
+          
+          // Calculate desired position (field should be in upper third of available space)
+          const desiredTopPosition = availableHeight * 0.2;
+          
+          // Calculate scroll offset needed
+          const currentFieldTop = y;
+          const scrollOffset = currentFieldTop - desiredTopPosition;
+          
+          // Scroll to position the field above the keyboard
+          scrollViewRef.current?.scrollTo({ 
+            y: Math.max(0, scrollOffset), 
+            animated: true 
+          });
+        });
+      }
+    }, 150); // Slightly longer delay for keyboard animation
   };
 
   const renderField = (field: TemplateField, isFixedPage: boolean = false) => {
