@@ -650,10 +650,6 @@ export default function DataEntryScreen() {
         {/* Variable Data Page */}
         {currentPage === 'variable' && (
           <View style={styles.formContainer}>
-            <Text style={styles.pageInstruction}>
-              Enter data for each record. Click "Save & Continue" to add another entry:
-            </Text>
-
             {getVariableFields().map((field) => (
               <View key={field.id} style={styles.fieldContainer}>
                 <Text style={styles.fieldLabel}>
