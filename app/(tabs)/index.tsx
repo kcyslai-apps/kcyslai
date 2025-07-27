@@ -687,18 +687,12 @@ export default function TemplatesScreen() {
                     </View>
                   </View>
 
-                  {/* Column Positioning - Dropdown Selection */}
+                  {/* Column Positioning - Rebuilt Implementation */}
                   <View style={styles.csvSettingGroup}>
                     <Text style={styles.csvSettingTitle}>Column Positioning</Text>
 
                     {templateFields.length > 0 ? (
-                      <ScrollView 
-                        style={styles.positionContainer}
-                        contentContainerStyle={styles.positionScrollContent}
-                        showsVerticalScrollIndicator={true}
-                        persistentScrollbar={true}
-                        nestedScrollEnabled={true}
-                      >
+                      <View style={styles.newPositionContainer}>
                         {templateFields.map((field, index) => {
                           // Get current position or assign default sequential position
                           let currentPosition = csvExportSettings.fieldPositions[field.id];
@@ -725,11 +719,11 @@ export default function TemplatesScreen() {
                           availablePositions.sort((a, b) => a - b);
 
                           return (
-                            <View key={field.id} style={styles.compactPositionRow}>
-                              <Text style={styles.compactFieldName} numberOfLines={1}>
+                            <View key={field.id} style={styles.newPositionRow}>
+                              <Text style={styles.newFieldName} numberOfLines={2}>
                                 {field.name}
                               </Text>
-                              <View style={styles.positionDropdownContainer}>
+                              <View style={styles.newDropdownContainer}>
                                 <Picker
                                   selectedValue={currentPosition}
                                   onValueChange={(value) => {
@@ -737,8 +731,8 @@ export default function TemplatesScreen() {
                                       updateFieldPosition(field.id, value);
                                     }
                                   }}
-                                  style={styles.positionDropdown}
-                                  itemStyle={styles.positionDropdownItem}
+                                  style={styles.newPositionDropdown}
+                                  itemStyle={styles.newDropdownItem}
                                   mode="dropdown"
                                 >
                                   {availablePositions.map((position) => (
@@ -753,7 +747,7 @@ export default function TemplatesScreen() {
                             </View>
                           );
                         })}
-                      </ScrollView>
+                      </View>
                     ) : (
                       <Text style={styles.noFieldsText}>
                         Add fields in the Fields tab to configure positions
@@ -1970,78 +1964,71 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: 'white',
   },
-  positionContainer: {
+  newPositionContainer: {
     backgroundColor: 'white',
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    maxHeight: 200,
-    overflow: 'visible',
+    padding: 12,
+    width: '100%',
   },
-  positionScrollContent: {
-    padding: 8,
-  },
-  compactPositionRow: {
+  newPositionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    marginBottom: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    marginBottom: 10,
     backgroundColor: '#f8fafc',
-    borderRadius: 4,
+    borderRadius: 6,
     minHeight: 60,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
-  compactFieldName: {
-    fontSize: 13,
+  newFieldName: {
+    fontSize: 14,
     fontWeight: '600',
     color: '#2d3748',
     flex: 1,
-    marginRight: 8,
+    marginRight: 12,
+    lineHeight: 18,
   },
-  compactPositionInput: {
-    width: 50,
-  },
-  positionNumberInput: {
+  newDropdownContainer: {
+    width: 90,
     borderWidth: 1,
     borderColor: '#cbd5e0',
-    borderRadius: 4,
-    padding: 6,
-    fontSize: 13,
+    borderRadius: 6,
     backgroundColor: 'white',
-    fontWeight: '600',
+    justifyContent: 'center',
+    minHeight: 45,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  newPositionDropdown: {
+    height: 45,
+    width: '100%',
+    color: '#2d3748',
+    fontSize: 16,
+    fontWeight: '700',
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+  },
+  newDropdownItem: {
+    fontSize: 16,
+    color: '#2d3748',
+    textAlign: 'center',
+    height: 45,
+    fontWeight: '700',
   },
   noFieldsText: {
     fontSize: 13,
     color: '#a0aec0',
     textAlign: 'center',
     fontStyle: 'italic',
-    padding: 16,
-  },
-  positionDropdownContainer: {
-    width: 80,
-    borderWidth: 1,
-    borderColor: '#cbd5e0',
-    borderRadius: 4,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    minHeight: 50,
-    overflow: 'visible',
-  },
-  positionDropdown: {
-    height: 50,
-    width: '100%',
-    color: '#2d3748',
-    fontSize: 16,
-    fontWeight: '600',
-    backgroundColor: 'transparent',
-  },
-  positionDropdownItem: {
-    fontSize: 14,
-    color: '#2d3748',
-    textAlign: 'center',
-    height: 50,
-    fontWeight: '600',
+    padding: 20,
   },
   defaultValueSection: {
     marginBottom: 15,
