@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView, Alert, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView, Alert, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
@@ -39,6 +39,8 @@ export default function FileDetailsScreen() {
   const [fileRecords, setFileRecords] = useState<DataRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filteredRecords, setFilteredRecords] = useState<DataRecord[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -125,27 +127,30 @@ export default function FileDetailsScreen() {
   };
 
   const deleteRecord = (recordId: string) => {
-    Alert.alert(
-      'Delete Record',
-      'Are you sure you want to delete this record?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const updatedRecords = records.filter(r => r.id !== recordId);
-              await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
-              setRecords(updatedRecords);
-            } catch (error) {
-              console.error('Error deleting record:', error);
-              Alert.alert('Error', 'Failed to delete record');
-            }
-          }
-        }
-      ]
-    );
+    setRecordToDelete(recordId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteRecord = async () => {
+    if (recordToDelete) {
+      try {
+        const updatedRecords = records.filter(r => r.id !== recordToDelete);
+        await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
+        setRecords(updatedRecords);
+        setShowDeleteModal(false);
+        setRecordToDelete(null);
+      } catch (error) {
+        console.error('Error deleting record:', error);
+        Alert.alert('Error', 'Failed to delete record');
+        setShowDeleteModal(false);
+        setRecordToDelete(null);
+      }
+    }
+  };
+
+  const cancelDeleteRecord = () => {
+    setShowDeleteModal(false);
+    setRecordToDelete(null);
   };
 
   const renderRecord = ({ item }: { item: DataRecord }) => {
@@ -237,6 +242,39 @@ export default function FileDetailsScreen() {
           </View>
         }
       />
+
+      {/* Delete Record Confirmation Modal */}
+      <Modal visible={showDeleteModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <Text style={styles.deleteModalTitle}>🗑️ Delete Entry</Text>
+
+            <View style={styles.deleteModalInfo}>
+              <Text style={styles.deleteModalMessage}>
+                Are you sure you want to delete this entry?
+              </Text>
+              <Text style={styles.deleteModalWarning}>
+                This action cannot be undone. The data record will be permanently deleted.
+              </Text>
+            </View>
+
+            <View style={styles.deleteModalButtons}>
+              <TouchableOpacity
+                style={styles.deleteModalCancelButton}
+                onPress={cancelDeleteRecord}
+              >
+                <Text style={styles.deleteModalCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteModalConfirmButton}
+                onPress={confirmDeleteRecord}
+              >
+                <Text style={styles.deleteModalConfirmButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -393,5 +431,82 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#718096',
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#fc8181',
+  },
+  deleteModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  deleteModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  deleteModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 15,
+  },
+  deleteModalWarning: {
+    fontSize: 14,
+    color: '#e53e3e',
+    textAlign: 'center',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  deleteModalButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  deleteModalCancelButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    minWidth: 80,
+  },
+  deleteModalCancelButtonText: {
+    color: '#718096',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  deleteModalConfirmButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  deleteModalConfirmButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
