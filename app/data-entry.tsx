@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -15,6 +16,8 @@ interface TemplateField {
   defaultValue?: string;
   options?: string[];
   inputMode?: 'select_only' | 'editable';
+  dateFormat?: string;
+  customDateFormat?: string;
 }
 
 interface Template {
@@ -36,17 +39,17 @@ interface DataRecord {
 export default function DataEntryScreen() {
   const { templateId, dataFileName } = useLocalSearchParams();
   const [template, setTemplate] = useState<Template | null>(null);
-  const [formData, setFormData] = useState<{ [fieldId: string]: string }>({});
+  const [fixedFormData, setFixedFormData] = useState<{ [fieldId: string]: string }>({});
+  const [variableFormData, setVariableFormData] = useState<{ [fieldId: string]: string }>({});
   const [showCamera, setShowCamera] = useState(false);
   const [currentBarcodeField, setCurrentBarcodeField] = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [currentDataFileName, setCurrentDataFileName] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<'fixed' | 'variable'>('fixed');
+  const [recordCount, setRecordCount] = useState(0);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
-
-  const [isFixedFieldModal, setIsFixedFieldModal] = useState(false);
-  const [fixedFormData, setFixedFormData] = useState<{ [fieldId: string]: string }>({});
 
   useEffect(() => {
     loadTemplate();
@@ -65,25 +68,30 @@ export default function DataEntryScreen() {
 
         if (foundTemplate) {
           setTemplate(foundTemplate);
-          // Initialize form data with default values
-          const initialData: { [fieldId: string]: string } = {};
+          
+          // Initialize fixed data form
           const initialFixedData: { [fieldId: string]: string } = {};
+          const initialVariableData: { [fieldId: string]: string } = {};
+          
           foundTemplate.fields.forEach(field => {
             if (field.type === 'fixed_data' || field.type === 'fixed_date') {
-              if (field.defaultValue) {
-                initialFixedData[field.id] = field.defaultValue;
-              } else {
-                initialFixedData[field.id] = '';
-              }
-            }
-            else if (field.defaultValue) {
-              initialData[field.id] = field.defaultValue;
+              initialFixedData[field.id] = field.defaultValue || '';
             } else {
-              initialData[field.id] = '';
+              initialVariableData[field.id] = field.defaultValue || '';
             }
           });
-          setFormData(initialData);
+          
           setFixedFormData(initialFixedData);
+          setVariableFormData(initialVariableData);
+
+          // Check if we have fixed fields, if not skip to variable page
+          const hasFixedFields = foundTemplate.fields.some(field => 
+            field.type === 'fixed_data' || field.type === 'fixed_date'
+          );
+          
+          if (!hasFixedFields) {
+            setCurrentPage('variable');
+          }
         } else {
           Alert.alert('Error', 'Template not found');
           router.back();
@@ -96,15 +104,15 @@ export default function DataEntryScreen() {
     }
   };
 
-  const updateFieldValue = (fieldId: string, value: string) => {
-    setFormData(prev => ({
+  const updateFixedFieldValue = (fieldId: string, value: string) => {
+    setFixedFormData(prev => ({
       ...prev,
       [fieldId]: value
     }));
   };
 
-  const updateFixedFieldValue = (fieldId: string, value: string) => {
-    setFixedFormData(prev => ({
+  const updateVariableFieldValue = (fieldId: string, value: string) => {
+    setVariableFormData(prev => ({
       ...prev,
       [fieldId]: value
     }));
@@ -117,17 +125,21 @@ export default function DataEntryScreen() {
 
   const handleBarcodeScanned = ({ data }: BarcodeScanningResult) => {
     if (currentBarcodeField) {
-      updateFieldValue(currentBarcodeField, data);
+      updateVariableFieldValue(currentBarcodeField, data);
       setCurrentBarcodeField(null);
       setShowCamera(false);
     }
   };
 
-  const validateForm = (): boolean => {
+  const validateFixedForm = (): boolean => {
     if (!template) return false;
 
-    for (const field of template.fields) {
-      if (field.required && !formData[field.id]?.trim()) {
+    const fixedFields = template.fields.filter(field => 
+      field.type === 'fixed_data' || field.type === 'fixed_date'
+    );
+
+    for (const field of fixedFields) {
+      if (field.required && !fixedFormData[field.id]?.trim()) {
         Alert.alert('Validation Error', `${field.name} is required`);
         return false;
       }
@@ -135,8 +147,29 @@ export default function DataEntryScreen() {
     return true;
   };
 
+  const validateVariableForm = (): boolean => {
+    if (!template) return false;
+
+    const variableFields = template.fields.filter(field => 
+      field.type !== 'fixed_data' && field.type !== 'fixed_date'
+    );
+
+    for (const field of variableFields) {
+      if (field.required && !variableFormData[field.id]?.trim()) {
+        Alert.alert('Validation Error', `${field.name} is required`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const proceedToVariablePage = () => {
+    if (!validateFixedForm()) return;
+    setCurrentPage('variable');
+  };
+
   const saveDataRecord = async () => {
-    if (!validateForm() || !template) return;
+    if (!validateVariableForm() || !template) return;
 
     try {
       // Load existing records
@@ -147,12 +180,15 @@ export default function DataEntryScreen() {
         existingRecords = JSON.parse(content);
       }
 
+      // Combine fixed and variable data
+      const combinedData = { ...fixedFormData, ...variableFormData };
+
       // Create new record
       const newRecord: DataRecord = {
         id: Date.now().toString(),
         templateId: template.id,
         templateName: template.name,
-        data: { ...formData, ...fixedFormData },
+        data: combinedData,
         timestamp: new Date()
       };
 
@@ -160,16 +196,18 @@ export default function DataEntryScreen() {
       const updatedRecords = [...existingRecords, newRecord];
       await FileSystem.writeAsStringAsync(DATA_RECORDS_FILE, JSON.stringify(updatedRecords));
 
+      const newCount = recordCount + 1;
+      setRecordCount(newCount);
+
       const successMessage = currentDataFileName
-        ? `Data saved to "${currentDataFileName}" successfully!`
-        : 'Data saved successfully!';
+        ? `Record ${newCount} saved to "${currentDataFileName}" successfully!`
+        : `Record ${newCount} saved successfully!`;
 
       Alert.alert(
         'Success',
         successMessage,
         [
-          { text: 'Add Another Entry', onPress: resetForm },
-          { text: 'Back to Templates', onPress: () => router.back() }
+          { text: 'Add Another Entry', onPress: resetVariableForm },
         ]
       );
     } catch (error) {
@@ -178,50 +216,47 @@ export default function DataEntryScreen() {
     }
   };
 
-  const getSortedFields = () => {
-    if (!template) return [];
-
-    // Separate fixed fields from other fields
-    const fixedFields = template.fields.filter(field =>
-      field.type === 'fixed_data' || field.type === 'fixed_date'
-    );
-    const otherFields = template.fields.filter(field =>
-      field.type !== 'fixed_data' && field.type !== 'fixed_date'
-    );
-
-    // Return fixed fields first, then other fields
-    return [...fixedFields, ...otherFields];
-  };
-
-  const resetForm = () => {
+  const resetVariableForm = () => {
     if (!template) return;
 
     const initialData: { [fieldId: string]: string } = {};
-    template.fields.forEach(field => {
-      if (field.type === 'fixed_data' || field.type === 'fixed_date') {
-        // Keep existing values for fixed fields, or set default if empty
-        const currentValue = formData[field.id];
-        if (currentValue) {
-          initialData[field.id] = currentValue;
-        } else if (field.defaultValue) {
-          initialData[field.id] = field.defaultValue;
-        } else {
-          initialData[field.id] = '';
-        }
-      } else if (field.defaultValue) {
-        // Reset non-fixed fields to their default values
-        initialData[field.id] = field.defaultValue;
-      } else {
-        // Clear non-fixed fields
-        initialData[field.id] = '';
-      }
+    const variableFields = template.fields.filter(field => 
+      field.type !== 'fixed_data' && field.type !== 'fixed_date'
+    );
+
+    variableFields.forEach(field => {
+      initialData[field.id] = field.defaultValue || '';
     });
-    setFormData(initialData);
+    
+    setVariableFormData(initialData);
   };
 
-  const renderField = (field: TemplateField) => {
-    const value = formData[field.id] || '';
-    const fixedValue = fixedFormData[field.id] || '';
+  const exitDataEntry = () => {
+    Alert.alert(
+      'Exit Data Entry',
+      `You have saved ${recordCount} record(s). Do you want to exit?`,
+      [
+        { text: 'Continue', style: 'cancel' },
+        { text: 'Exit', onPress: () => router.back() }
+      ]
+    );
+  };
+
+  const getFixedFields = () => {
+    return template?.fields.filter(field => 
+      field.type === 'fixed_data' || field.type === 'fixed_date'
+    ) || [];
+  };
+
+  const getVariableFields = () => {
+    return template?.fields.filter(field => 
+      field.type !== 'fixed_data' && field.type !== 'fixed_date'
+    ) || [];
+  };
+
+  const renderField = (field: TemplateField, isFixedPage: boolean = false) => {
+    const value = isFixedPage ? (fixedFormData[field.id] || '') : (variableFormData[field.id] || '');
+    const updateFunction = isFixedPage ? updateFixedFieldValue : updateVariableFieldValue;
 
     switch (field.type) {
       case 'free_text':
@@ -230,7 +265,7 @@ export default function DataEntryScreen() {
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
-            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
+            onChangeText={(text) => updateFunction(field.id, text)}
             multiline={true}
             numberOfLines={3}
           />
@@ -242,7 +277,7 @@ export default function DataEntryScreen() {
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
-            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
+            onChangeText={(text) => updateFunction(field.id, text)}
             keyboardType="numeric"
           />
         );
@@ -251,32 +286,32 @@ export default function DataEntryScreen() {
         return (
           <TextInput
             style={styles.input}
-            placeholder="YYYY-MM-DD"
+            placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
             value={value}
-            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
+            onChangeText={(text) => updateFunction(field.id, text)}
           />
         );
 
       case 'fixed_date':
         return (
           <View style={styles.fixedValueContainer}>
-            <Text style={styles.fixedValue}>{field.defaultValue || 'No date set'}</Text>
-            <Text style={styles.fixedFormatHint}>yyyyMMdd (e.g., 20250727)</Text>
-            <Text style={styles.fixedFormatHint}>dd/MM/yyyy (e.g., 27/07/2025)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={field.dateFormat === 'custom' ? field.customDateFormat || 'Enter date' : field.dateFormat || 'YYYY-MM-DD'}
+              value={value}
+              onChangeText={(text) => updateFunction(field.id, text)}
+            />
           </View>
         );
 
       case 'fixed_data':
-        // Ensure default value is always available as an option
         const allOptions = field.options || [];
         const defaultValue = field.defaultValue;
 
-        // Add default value to options if it exists and isn't already in the options
         if (defaultValue && !allOptions.includes(defaultValue)) {
           allOptions.unshift(defaultValue);
         }
 
-        // Check input mode - default to 'select_only' for backward compatibility
         const inputMode = field.inputMode || 'select_only';
 
         if (inputMode === 'editable') {
@@ -286,7 +321,7 @@ export default function DataEntryScreen() {
                 style={styles.input}
                 placeholder="Type or tap to select from options"
                 value={value}
-                onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
+                onChangeText={(text) => updateFunction(field.id, text)}
               />
               {allOptions.length > 0 && (
                 <View style={styles.quickSelectContainer}>
@@ -296,7 +331,7 @@ export default function DataEntryScreen() {
                       <TouchableOpacity
                         key={index}
                         style={styles.quickSelectOption}
-                        onPress={() => updateFieldValue(field.id, option)}
+                        onPress={() => updateFunction(field.id, option)}
                       >
                         <Text style={styles.quickSelectOptionText}>{option}</Text>
                       </TouchableOpacity>
@@ -307,12 +342,11 @@ export default function DataEntryScreen() {
             </View>
           );
         } else {
-          // Select only mode
           return (
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={value || field.defaultValue || ''}
-                onValueChange={(itemValue) => updateFieldValue(field.id, itemValue)}
+                onValueChange={(itemValue) => updateFunction(field.id, itemValue)}
                 style={styles.picker}
               >
                 <Picker.Item label="Select..." value="" />
@@ -331,7 +365,7 @@ export default function DataEntryScreen() {
               style={[styles.input, styles.barcodeInput]}
               placeholder="Scan or enter barcode"
               value={value}
-              onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
+              onChangeText={(text) => updateFunction(field.id, text)}
             />
             <TouchableOpacity
               style={styles.scanButton}
@@ -348,7 +382,7 @@ export default function DataEntryScreen() {
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
-            onChangeText={(text) => isFixedFieldModal ? updateFixedFieldValue(field.id, text) : updateFieldValue(field.id, text)}
+            onChangeText={(text) => updateFunction(field.id, text)}
           />
         );
     }
@@ -362,31 +396,6 @@ export default function DataEntryScreen() {
     );
   }
 
-  const renderFixedFieldsModal = () => {
-    if (!template) return null;
-
-    const fixedFields = template.fields.filter(field => field.type === 'fixed_data' || field.type === 'fixed_date');
-
-    return (
-      <Modal visible={isFixedFieldModal} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Enter Fixed Data</Text>
-            {fixedFields.map(field => (
-              <View key={field.id} style={styles.modalFieldContainer}>
-                <Text style={styles.modalFieldLabel}>{field.name}</Text>
-                {renderField(field)}
-              </View>
-            ))}
-            <TouchableOpacity style={styles.modalButton} onPress={() => setIsFixedFieldModal(false)}>
-              <Text style={styles.modalButtonText}>Continue</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-
   return (
     <ThemedView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -394,7 +403,9 @@ export default function DataEntryScreen() {
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
-          <ThemedText type="title" style={styles.title}>Data Entry</ThemedText>
+          <ThemedText type="title" style={styles.title}>
+            {currentPage === 'fixed' ? 'Fixed Data Entry' : 'Data Entry'}
+          </ThemedText>
         </View>
 
         <View style={styles.templateInfo}>
@@ -403,48 +414,66 @@ export default function DataEntryScreen() {
           {currentDataFileName && (
             <Text style={styles.dataFileName}>📂 Data File: {currentDataFileName}</Text>
           )}
+          {currentPage === 'variable' && recordCount > 0 && (
+            <Text style={styles.recordCount}>📊 Records Saved: {recordCount}</Text>
+          )}
         </View>
 
-        <View style={styles.formContainer}>
-          {getSortedFields().map((field, index) => {
-            const isFixedField = field.type === 'fixed_data' || field.type === 'fixed_date';
-            const nextField = getSortedFields()[index + 1];
-            const isLastFixedField = isFixedField && nextField && nextField.type !== 'fixed_data' && nextField.type !== 'fixed_date';
-
-            return (
-              <View key={field.id}>
-                <View style={[
-                  styles.fieldContainer,
-                  isFixedField && styles.fixedFieldContainer
-                ]}>
-                  <Text style={[
-                    styles.fieldLabel,
-                    isFixedField && styles.fixedFieldLabel
-                  ]}>
-                    {field.name}
-                    {field.required && <Text style={styles.required}> *</Text>}
-                    {isFixedField && <Text style={styles.fixedFieldIndicator}> 📌</Text>}
-                  </Text>
-                  {renderField(field)}
-                </View>
-                {isLastFixedField && (
-                  <View style={styles.fieldSeparator}>
-                    <Text style={styles.separatorText}>━━━ Variable Fields ━━━</Text>
-                  </View>
-                )}
+        {/* Fixed Data Page */}
+        {currentPage === 'fixed' && (
+          <View style={styles.formContainer}>
+            <Text style={styles.pageInstruction}>
+              Enter the fixed data that will be used for all entries:
+            </Text>
+            
+            {getFixedFields().map((field) => (
+              <View key={field.id} style={styles.fieldContainer}>
+                <Text style={styles.fieldLabel}>
+                  {field.name}
+                  {field.required && <Text style={styles.required}> *</Text>}
+                  <Text style={styles.fixedFieldIndicator}> 📌</Text>
+                </Text>
+                {renderField(field, true)}
               </View>
-            );
-          })}
-        </View>
+            ))}
 
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.resetButton} onPress={resetForm}>
-            <Text style={styles.resetButtonText}>New Entry</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton} onPress={saveDataRecord}>
-            <Text style={styles.saveButtonText}>Save Data</Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.fixedPageButtons}>
+              <TouchableOpacity style={styles.proceedButton} onPress={proceedToVariablePage}>
+                <Text style={styles.proceedButtonText}>
+                  Proceed to Data Entry →
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Variable Data Page */}
+        {currentPage === 'variable' && (
+          <View style={styles.formContainer}>
+            <Text style={styles.pageInstruction}>
+              Enter data for each record. Click "Save & Continue" to add another entry:
+            </Text>
+
+            {getVariableFields().map((field) => (
+              <View key={field.id} style={styles.fieldContainer}>
+                <Text style={styles.fieldLabel}>
+                  {field.name}
+                  {field.required && <Text style={styles.required}> *</Text>}
+                </Text>
+                {renderField(field, false)}
+              </View>
+            ))}
+
+            <View style={styles.variablePageButtons}>
+              <TouchableOpacity style={styles.exitButton} onPress={exitDataEntry}>
+                <Text style={styles.exitButtonText}>Exit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={saveDataRecord}>
+                <Text style={styles.saveButtonText}>Save & Continue</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Barcode Scanner Modal */}
@@ -485,7 +514,6 @@ export default function DataEntryScreen() {
           )}
         </View>
       </Modal>
-      {renderFixedFieldsModal()}
     </ThemedView>
   );
 }
@@ -516,69 +544,64 @@ const styles = StyleSheet.create({
   },
   templateInfo: {
     backgroundColor: '#f7fafc',
-    padding: 10,
+    padding: 15,
     marginHorizontal: 15,
-    marginBottom: 8,
-    borderRadius: 6,
-    borderLeftWidth: 3,
+    marginBottom: 15,
+    borderRadius: 8,
+    borderLeftWidth: 4,
     borderLeftColor: '#4299e1',
   },
   templateName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: 1,
+    marginBottom: 4,
   },
   templateDescription: {
     fontSize: 14,
     color: '#4a5568',
-    marginBottom: 2,
+    marginBottom: 8,
   },
   dataFileName: {
     fontSize: 14,
     color: '#2d3748',
     fontWeight: '600',
-    marginTop: 1,
-    paddingTop: 3,
+    marginBottom: 4,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',
+  },
+  recordCount: {
+    fontSize: 14,
+    color: '#48bb78',
+    fontWeight: 'bold',
   },
   formContainer: {
     padding: 15,
   },
-  fieldContainer: {
-    marginBottom: 12,
-  },
-  fixedFieldContainer: {
-    backgroundColor: '#f8fafc',
+  pageInstruction: {
+    fontSize: 16,
+    color: '#4a5568',
+    backgroundColor: '#e6fffa',
     padding: 12,
     borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#48bb78',
-    marginBottom: 12,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#38b2ac',
+    fontWeight: '500',
+  },
+  fieldContainer: {
+    marginBottom: 15,
   },
   fieldLabel: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: 6,
-  },
-  fixedFieldLabel: {
-    color: '#2d5016',
+    marginBottom: 8,
   },
   fixedFieldIndicator: {
     color: '#48bb78',
     fontSize: 14,
-  },
-  fieldSeparator: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  separatorText: {
-    fontSize: 14,
-    color: '#718096',
-    fontWeight: '600',
-    letterSpacing: 1,
   },
   required: {
     color: '#e53e3e',
@@ -586,12 +609,12 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#cbd5e0',
-    borderRadius: 6,
-    padding: 10,
-    fontSize: 15,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
     backgroundColor: '#ffffff',
     textAlignVertical: 'top',
-    minHeight: 40,
+    minHeight: 44,
   },
   pickerContainer: {
     borderWidth: 1,
@@ -600,74 +623,73 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   picker: {
-    height: 44,
+    height: 50,
   },
   fixedValueContainer: {
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 6,
-    padding: 10,
-    backgroundColor: '#f7fafc',
-    minHeight: 40,
-  },
-  fixedValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2d5016',
-    textAlign: 'center',
-  },
-  fixedFormatHint: {
-    fontSize: 12,
-    color: '#4a5568',
-    textAlign: 'center',
-    fontStyle: 'italic',
-    marginTop: 4,
+    marginBottom: 0,
   },
   barcodeContainer: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   barcodeInput: {
     flex: 1,
   },
   scanButton: {
     backgroundColor: '#4299e1',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
     justifyContent: 'center',
-    minHeight: 40,
+    minHeight: 44,
   },
   scanButtonText: {
     color: 'white',
     fontWeight: 'bold',
+    fontSize: 14,
   },
-  actionButtons: {
-    flexDirection: 'row',
-    padding: 15,
+  fixedPageButtons: {
+    marginTop: 20,
     paddingBottom: 20,
-    gap: 10,
   },
-  resetButton: {
-    flex: 1,
-    backgroundColor: '#a0aec0',
-    paddingVertical: 12,
-    borderRadius: 6,
+  proceedButton: {
+    backgroundColor: '#48bb78',
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    minHeight: 44,
+    minHeight: 50,
   },
-  resetButtonText: {
+  proceedButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  variablePageButtons: {
+    flexDirection: 'row',
+    marginTop: 20,
+    paddingBottom: 20,
+    gap: 12,
+  },
+  exitButton: {
+    flex: 1,
+    backgroundColor: '#e53e3e',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    minHeight: 50,
+  },
+  exitButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
   saveButton: {
-    flex: 1,
+    flex: 2,
     backgroundColor: '#48bb78',
-    paddingVertical: 12,
-    borderRadius: 6,
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    minHeight: 44,
+    minHeight: 50,
   },
   saveButtonText: {
     color: 'white',
@@ -699,7 +721,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e53e3e',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 8,
   },
   closeButtonText: {
     color: 'white',
@@ -741,17 +763,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#4a5568',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   quickSelectScroll: {
     flexDirection: 'row',
   },
   quickSelectOption: {
     backgroundColor: '#e2e8f0',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    marginRight: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
     borderWidth: 1,
     borderColor: '#cbd5e0',
   },
@@ -759,41 +781,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#2d3748',
     fontWeight: '500',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-  modalFieldContainer: {
-    marginBottom: 10,
-  },
-  modalFieldLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  modalButton: {
-    backgroundColor: '#4299e1',
-    paddingVertical: 12,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  modalButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
