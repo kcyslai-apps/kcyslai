@@ -51,6 +51,7 @@ export default function DataEntryScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentDateField, setCurrentDateField] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [tempDate, setTempDate] = useState(new Date());
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -154,7 +155,96 @@ export default function DataEntryScreen() {
     }
   };
 
+  const parseFieldDate = (dateString: string, field: TemplateField): Date | null => {
+    if (!dateString) return null;
+    
+    try {
+      let year = 0, month = 0, day = 0;
+      
+      switch (field.dateFormat) {
+        case 'dd/MM/yyyy':
+          const ddMMyyyy = dateString.split('/');
+          if (ddMMyyyy.length === 3) {
+            day = parseInt(ddMMyyyy[0]);
+            month = parseInt(ddMMyyyy[1]) - 1; // Month is 0-based
+            year = parseInt(ddMMyyyy[2]);
+          }
+          break;
+        case 'MM/dd/yyyy':
+          const MMddyyyy = dateString.split('/');
+          if (MMddyyyy.length === 3) {
+            month = parseInt(MMddyyyy[0]) - 1; // Month is 0-based
+            day = parseInt(MMddyyyy[1]);
+            year = parseInt(MMddyyyy[2]);
+          }
+          break;
+        case 'yyyyMMdd':
+          if (dateString.length === 8) {
+            year = parseInt(dateString.substring(0, 4));
+            month = parseInt(dateString.substring(4, 6)) - 1; // Month is 0-based
+            day = parseInt(dateString.substring(6, 8));
+          }
+          break;
+        case 'dd-MM-yyyy':
+          const ddMMyyyy2 = dateString.split('-');
+          if (ddMMyyyy2.length === 3) {
+            day = parseInt(ddMMyyyy2[0]);
+            month = parseInt(ddMMyyyy2[1]) - 1; // Month is 0-based
+            year = parseInt(ddMMyyyy2[2]);
+          }
+          break;
+        case 'yyyy.MM.dd':
+          const yyyyMMdd = dateString.split('.');
+          if (yyyyMMdd.length === 3) {
+            year = parseInt(yyyyMMdd[0]);
+            month = parseInt(yyyyMMdd[1]) - 1; // Month is 0-based
+            day = parseInt(yyyyMMdd[2]);
+          }
+          break;
+        default:
+          // Default format YYYY-MM-DD
+          const defaultParts = dateString.split('-');
+          if (defaultParts.length === 3) {
+            year = parseInt(defaultParts[0]);
+            month = parseInt(defaultParts[1]) - 1; // Month is 0-based
+            day = parseInt(defaultParts[2]);
+          }
+          break;
+      }
+      
+      if (year > 0 && month >= 0 && day > 0) {
+        return new Date(year, month, day);
+      }
+    } catch (error) {
+      console.log('Error parsing date:', error);
+    }
+    
+    return null;
+  };
+
   const openDatePicker = (fieldId: string) => {
+    // Get current field value or use today's date
+    const field = template?.fields.find(f => f.id === fieldId);
+    const currentValue = field?.type === 'fixed_date' 
+      ? fixedFormData[fieldId] 
+      : variableFormData[fieldId];
+    
+    // Parse current date value or use today
+    let initialDate = new Date();
+    if (currentValue && field) {
+      try {
+        // Try to parse the current value back to a date
+        const parsedDate = parseFieldDate(currentValue, field);
+        if (parsedDate && !isNaN(parsedDate.getTime())) {
+          initialDate = parsedDate;
+        }
+      } catch (error) {
+        console.log('Could not parse current date value, using today');
+      }
+    }
+    
+    setSelectedDate(initialDate);
+    setTempDate(initialDate);
     setCurrentDateField(fieldId);
     setShowDatePicker(true);
   };
@@ -162,14 +252,26 @@ export default function DataEntryScreen() {
   const handleDateChange = (event: any, selectedDate?: Date) => {
     const isAndroid = Platform.OS === 'android';
     
-    if (isAndroid) {
-      setShowDatePicker(false);
+    if (selectedDate) {
+      setTempDate(selectedDate);
+      setSelectedDate(selectedDate);
+      
+      // For Android, immediately apply the change and close
+      if (isAndroid) {
+        applyDateChange(selectedDate);
+        closeDatePicker();
+      }
+    } else if (isAndroid) {
+      // User cancelled on Android
+      closeDatePicker();
     }
+  };
 
-    if (selectedDate && currentDateField) {
-      const field = template?.fields.find(f => f.id === currentDateField);
+  const applyDateChange = (date: Date) => {
+    if (currentDateField && template) {
+      const field = template.fields.find(f => f.id === currentDateField);
       if (field) {
-        const formattedDate = formatDateForField(selectedDate, field);
+        const formattedDate = formatDateForField(date, field);
         
         if (field.type === 'fixed_date') {
           updateFixedFieldValue(currentDateField, formattedDate);
@@ -178,15 +280,13 @@ export default function DataEntryScreen() {
         }
       }
     }
-
-    if (!isAndroid) {
-      setCurrentDateField(null);
-    }
   };
 
   const closeDatePicker = () => {
     setShowDatePicker(false);
     setCurrentDateField(null);
+    // Reset temp date to current selected date
+    setTempDate(selectedDate);
   };
 
   const openBarcodeScanner = (fieldId: string) => {
@@ -615,7 +715,7 @@ export default function DataEntryScreen() {
             <View style={styles.datePickerModalContent}>
               <Text style={styles.datePickerTitle}>Select Date</Text>
               <DateTimePicker
-                value={selectedDate}
+                value={tempDate}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={handleDateChange}
@@ -632,7 +732,7 @@ export default function DataEntryScreen() {
                   <TouchableOpacity
                     style={styles.datePickerConfirmButton}
                     onPress={() => {
-                      handleDateChange(null, selectedDate);
+                      applyDateChange(tempDate);
                       closeDatePicker();
                     }}
                   >
