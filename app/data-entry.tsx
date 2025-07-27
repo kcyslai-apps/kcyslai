@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, createRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Camera, CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
@@ -52,6 +52,8 @@ export default function DataEntryScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [tempDate, setTempDate] = useState(new Date());
   const [isDatePickerBusy, setIsDatePickerBusy] = useState(false);
+  const inputRefs = useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
+  const [fieldOrder, setFieldOrder] = useState<string[]>([]);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -96,6 +98,22 @@ export default function DataEntryScreen() {
 
           setFixedFormData(initialFixedData);
           setVariableFormData(initialVariableData);
+
+          // Initialize input refs and field order for variable fields
+          const variableFields = foundTemplate.fields.filter(field => 
+            field.type !== 'fixed_data' && field.type !== 'fixed_date'
+          );
+          
+          const refs: { [fieldId: string]: React.RefObject<TextInput> } = {};
+          const order: string[] = [];
+          
+          variableFields.forEach(field => {
+            refs[field.id] = createRef<TextInput>();
+            order.push(field.id);
+          });
+          
+          inputRefs.current = refs;
+          setFieldOrder(order);
 
           // Check if we have fixed fields, if not skip to variable page
           const hasFixedFields = foundTemplate.fields.some(field => 
@@ -336,6 +354,14 @@ export default function DataEntryScreen() {
   const proceedToVariablePage = () => {
     if (!validateFixedForm()) return;
     setCurrentPage('variable');
+    
+    // Focus first field after page transition
+    setTimeout(() => {
+      if (fieldOrder.length > 0) {
+        const firstFieldId = fieldOrder[0];
+        inputRefs.current[firstFieldId]?.current?.focus();
+      }
+    }, 100);
   };
 
   const saveDataRecord = async () => {
@@ -403,6 +429,14 @@ export default function DataEntryScreen() {
     });
 
     setVariableFormData(initialData);
+    
+    // Focus first field after reset
+    setTimeout(() => {
+      if (fieldOrder.length > 0) {
+        const firstFieldId = fieldOrder[0];
+        inputRefs.current[firstFieldId]?.current?.focus();
+      }
+    }, 100);
   };
 
   const exitDataEntry = () => {
@@ -428,6 +462,20 @@ export default function DataEntryScreen() {
     ) || [];
   };
 
+  const moveToNextField = (currentFieldId: string) => {
+    const currentIndex = fieldOrder.indexOf(currentFieldId);
+    if (currentIndex >= 0 && currentIndex < fieldOrder.length - 1) {
+      const nextFieldId = fieldOrder[currentIndex + 1];
+      const nextRef = inputRefs.current[nextFieldId];
+      if (nextRef?.current) {
+        // Small delay to ensure the field is ready for focus
+        setTimeout(() => {
+          nextRef.current?.focus();
+        }, 50);
+      }
+    }
+  };
+
   const renderField = (field: TemplateField, isFixedPage: boolean = false) => {
     const value = isFixedPage ? (fixedFormData[field.id] || '') : (variableFormData[field.id] || '');
     const updateFunction = isFixedPage ? updateFixedFieldValue : updateVariableFieldValue;
@@ -436,23 +484,29 @@ export default function DataEntryScreen() {
       case 'free_text':
         return (
           <TextInput
+            ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
             multiline={true}
             numberOfLines={3}
+            onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            blurOnSubmit={false}
           />
         );
 
       case 'number':
         return (
           <TextInput
+            ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
             keyboardType="numeric"
+            onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            blurOnSubmit={false}
           />
         );
 
@@ -518,10 +572,13 @@ export default function DataEntryScreen() {
           return (
             <View style={styles.editableUnifiedContainer}>
               <TextInput
+                ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
                 style={styles.input}
                 placeholder="Type or tap to select from options"
                 value={value}
                 onChangeText={(text) => updateFunction(field.id, text)}
+                onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+                blurOnSubmit={false}
               />
               {allOptions.length > 0 && (
                 <View style={styles.quickSelectContainer}>
@@ -562,10 +619,13 @@ export default function DataEntryScreen() {
         return (
           <View style={styles.barcodeContainer}>
             <TextInput
+              ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
               style={[styles.input, styles.barcodeInput]}
               placeholder="Scan or enter barcode"
               value={value}
               onChangeText={(text) => updateFunction(field.id, text)}
+              onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+              blurOnSubmit={false}
             />
             <TouchableOpacity
               style={styles.scanButton}
@@ -579,10 +639,13 @@ export default function DataEntryScreen() {
       default:
         return (
           <TextInput
+            ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
+            onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            blurOnSubmit={false}
           />
         );
     }
@@ -649,7 +712,15 @@ export default function DataEntryScreen() {
 
         {/* Variable Data Page */}
         {currentPage === 'variable' && (
-          <View style={styles.formContainer}>
+          <View style={styles.formContainer} onLayout={() => {
+            // Auto-focus first field when page loads
+            if (fieldOrder.length > 0) {
+              setTimeout(() => {
+                const firstFieldId = fieldOrder[0];
+                inputRefs.current[firstFieldId]?.current?.focus();
+              }, 300);
+            }
+          }}>
             {getVariableFields().map((field) => (
               <View key={field.id} style={styles.fieldContainer}>
                 <Text style={styles.fieldLabel}>
