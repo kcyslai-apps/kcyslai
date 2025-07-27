@@ -487,9 +487,13 @@ export default function DataEntryScreen() {
       const inputRef = inputRefs.current[fieldId];
       if (inputRef?.current && scrollViewRef.current) {
         inputRef.current.measure((x, y, width, height, pageX, pageY) => {
-          // Calculate the position where we want the field to appear
-          // This should be well above the keyboard (about 100px from top of visible area)
-          const targetPosition = 100;
+          // Get the field type to determine if it's a numeric field
+          const field = template?.fields.find(f => f.id === fieldId);
+          const isNumericField = field?.type === 'number';
+          
+          // Numeric keypad is typically larger than regular keyboard
+          // Position numeric fields higher to ensure visibility above numpad
+          const targetPosition = isNumericField ? 80 : 120;
           
           // Calculate how much we need to scroll
           // pageY is the absolute position of the field on screen
@@ -502,7 +506,7 @@ export default function DataEntryScreen() {
           });
         });
       }
-    }, 200); // Allow more time for keyboard animation
+    }, 250); // Slightly longer delay for numeric keypad animation
   };
 
   const renderField = (field: TemplateField, isFixedPage: boolean = false) => {
