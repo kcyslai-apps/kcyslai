@@ -64,14 +64,14 @@ export default function DataEntryScreen() {
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
 
   useEffect(() => {
+    // Check if this is a continue input session first
+    if (continueInput === 'true') {
+      setIsContinueInput(true);
+    }
+    
     loadTemplate();
     if (dataFileName && typeof dataFileName === 'string') {
       setCurrentDataFileName(decodeURIComponent(dataFileName));
-    }
-    
-    // Check if this is a continue input session
-    if (continueInput === 'true') {
-      setIsContinueInput(true);
     }
   }, [templateId, dataFileName, continueInput]);
 
@@ -92,9 +92,10 @@ export default function DataEntryScreen() {
 
           // If continuing input, use provided fixed field values
           let prefilledFixedData: { [fieldId: string]: string } = {};
-          if (isContinueInput && fixedFieldValues && typeof fixedFieldValues === 'string') {
+          if (continueInput === 'true' && fixedFieldValues && typeof fixedFieldValues === 'string') {
             try {
               prefilledFixedData = JSON.parse(decodeURIComponent(fixedFieldValues));
+              console.log('Parsed prefilled fixed data:', prefilledFixedData);
             } catch (error) {
               console.error('Error parsing fixed field values:', error);
             }
@@ -121,6 +122,9 @@ export default function DataEntryScreen() {
 
           setFixedFormData(initialFixedData);
           setVariableFormData(initialVariableData);
+
+          // Debug log to verify data is loaded correctly
+          console.log('Loading fixed data for continue input:', initialFixedData);
 
           // Initialize input refs and field order for variable fields
           const variableFields = foundTemplate.fields.filter(field => 
