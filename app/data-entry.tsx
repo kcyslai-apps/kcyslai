@@ -915,7 +915,7 @@ export default function DataEntryScreen() {
             <View style={styles.permissionContainer}>
               <Text style={styles.permissionText}>Camera permission required</Text>
               <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-                <Text style={The code has been modified to improve the focus behavior of input fields by adding a delay to the `scrollToField` function, ensuring that the keyboard is fully visible before scrolling.styles.permissionButtonText}>Grant Permission</Text>
+                <Text style={styles.permissionButtonText}>Grant Permission</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.closeButton}
