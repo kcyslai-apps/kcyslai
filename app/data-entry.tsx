@@ -138,12 +138,12 @@ export default function DataEntryScreen() {
           inputRefs.current = refs;
           setFieldOrder(order);
 
-          // If continuing input or no fixed fields, skip to variable page
+          // Only skip to variable page if there are no fixed fields
           const hasFixedFields = foundTemplate.fields.some(field => 
             field.type === 'fixed_data' || field.type === 'fixed_date'
           );
 
-          if (!hasFixedFields || isContinueInput) {
+          if (!hasFixedFields) {
             setCurrentPage('variable');
           }
         } else {
