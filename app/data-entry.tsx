@@ -865,7 +865,7 @@ export default function DataEntryScreen() {
 
             <View style={styles.variablePageButtons}>
               <TouchableOpacity style={styles.exitButton} onPress={saveAndExit}>
-                <Text style={styles.exitButtonText}>Save & Exit</Text>
+                <Text style={styles.exitButtonText}>Exit</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={saveDataRecord}>
                 <Text style={styles.saveButtonText}>Save</Text>
