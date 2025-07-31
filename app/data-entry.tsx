@@ -539,7 +539,33 @@ export default function DataEntryScreen() {
     const scrollDelay = Platform.OS === 'android' ? 350 : 250;
     
     setTimeout(() => {
-      const inputRef = inputRefs.current[fieldId];
+      // Try to find the input reference first (for variable page fields)
+      let inputRef = inputRefs.current[fieldId];
+      
+      // For fixed page fields, we need to find the input differently since they don't have refs
+      if (!inputRef?.current && scrollViewRef.current) {
+        // For fixed page fields, scroll to a reasonable position based on field order
+        const field = template?.fields.find(f => f.id === fieldId);
+        if (field) {
+          const fieldIndex = template.fields.indexOf(field);
+          const estimatedFieldPosition = 200 + (fieldIndex * 100); // Approximate field position
+          
+          // Calculate visible screen height when keyboard is open
+          const screenHeight = Platform.OS === 'ios' ? 812 : 800;
+          const availableHeight = screenHeight - keyboardHeight - 100;
+          const targetPosition = availableHeight * 0.3;
+          
+          const scrollOffset = estimatedFieldPosition - targetPosition;
+          
+          scrollViewRef.current?.scrollTo({ 
+            y: Math.max(0, scrollOffset), 
+            animated: true 
+          });
+        }
+        return;
+      }
+
+      // For variable page fields with refs
       if (inputRef?.current && scrollViewRef.current) {
         inputRef.current.measureInWindow((x, y, width, height) => {
           // Get the field type to determine if it's a numeric field
@@ -586,13 +612,11 @@ export default function DataEntryScreen() {
             numberOfLines={3}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onFocus={(event) => {
-              if (!isFixedPage) {
-                // Delay scroll slightly to ensure focus is fully established
-                setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus
-                if (value) {
-                  event.target.setSelection(0, value.length);
-                }
+              // Apply scroll logic for both fixed and variable pages
+              setTimeout(() => scrollToField(field.id), 50);
+              // Auto-select text on focus
+              if (value) {
+                event.target.setSelection(0, value.length);
               }
             }}
             blurOnSubmit={false}
@@ -611,13 +635,11 @@ export default function DataEntryScreen() {
             keyboardType="numeric"
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onFocus={(event) => {
-              if (!isFixedPage) {
-                // Delay scroll slightly to ensure focus is fully established
-                setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus
-                if (value) {
-                  event.target.setSelection(0, value.length);
-                }
+              // Apply scroll logic for both fixed and variable pages
+              setTimeout(() => scrollToField(field.id), 50);
+              // Auto-select text on focus
+              if (value) {
+                event.target.setSelection(0, value.length);
               }
             }}
             blurOnSubmit={false}
@@ -704,8 +726,8 @@ export default function DataEntryScreen() {
                 onChangeText={(text) => !isContinueInput && updateFunction(field.id, text)}
                 onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
                 onFocus={(event) => {
-                  if (!isFixedPage) {
-                    // Delay scroll slightly to ensure focus is fully established
+                  // Apply scroll logic for both fixed and variable pages
+                  if (!isContinueInput) {
                     setTimeout(() => scrollToField(field.id), 50);
                     // Auto-select text on focus
                     if (value) {
@@ -770,13 +792,11 @@ export default function DataEntryScreen() {
               onChangeText={(text) => updateFunction(field.id, text)}
               onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
               onFocus={(event) => {
-                if (!isFixedPage) {
-                  // Delay scroll slightly to ensure focus is fully established
-                  setTimeout(() => scrollToField(field.id), 50);
-                  // Auto-select text on focus
-                  if (value) {
-                    event.target.setSelection(0, value.length);
-                  }
+                // Apply scroll logic for both fixed and variable pages
+                setTimeout(() => scrollToField(field.id), 50);
+                // Auto-select text on focus
+                if (value) {
+                  event.target.setSelection(0, value.length);
                 }
               }}
               blurOnSubmit={false}
@@ -801,13 +821,11 @@ export default function DataEntryScreen() {
             onChangeText={(text) => updateFunction(field.id, text)}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onFocus={(event) => {
-              if (!isFixedPage) {
-                // Delay scroll slightly to ensure focus is fully established
-                setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus
-                if (value) {
-                  event.target.setSelection(0, value.length);
-                }
+              // Apply scroll logic for both fixed and variable pages
+              setTimeout(() => scrollToField(field.id), 50);
+              // Auto-select text on focus
+              if (value) {
+                event.target.setSelection(0, value.length);
               }
             }}
             blurOnSubmit={false}
