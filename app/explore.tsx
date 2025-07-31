@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity, Alert, FlatList, Text } from 'react-nativ
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Link } from 'expo-router';
