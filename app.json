@@ -42,7 +42,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access camera for barcode scanning."
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
         }
       ],
       "expo-web-browser"
