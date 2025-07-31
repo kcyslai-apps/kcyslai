@@ -17,10 +17,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "statusBarHidden": true,
-      "navigationBarHidden": true,
-      "fullScreen": true,
       "permissions": [
         "CAMERA",
         "android.permission.CAMERA",
