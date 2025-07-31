@@ -40,6 +40,7 @@ export default function FileDetailsScreen() {
   const [filteredRecords, setFilteredRecords] = useState<DataRecord[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
+  const [showMissingTemplateModal, setShowMissingTemplateModal] = useState(false);
   
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
@@ -160,6 +161,10 @@ export default function FileDetailsScreen() {
     setRecordToDelete(null);
   };
 
+  const closeMissingTemplateModal = () => {
+    setShowMissingTemplateModal(false);
+  };
+
   const continueInput = () => {
     if (fileRecords.length === 0) {
       Alert.alert('No Records', 'Cannot continue input - no records found in this file');
@@ -171,7 +176,7 @@ export default function FileDetailsScreen() {
     const templateExists = templates.find(t => t.id === firstRecord.templateId);
 
     if (!templateExists) {
-      Alert.alert('Missing Template ID', 'The original template used for this file has been deleted or is missing.');
+      setShowMissingTemplateModal(true);
       return;
     }
 
@@ -330,7 +335,30 @@ export default function FileDetailsScreen() {
         </View>
       </Modal>
 
-      
+      {/* Missing Template Modal */}
+      <Modal visible={showMissingTemplateModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.missingTemplateModalContent}>
+            <Text style={styles.missingTemplateModalTitle}>⚠️ Missing Template ID</Text>
+
+            <View style={styles.missingTemplateModalInfo}>
+              <Text style={styles.missingTemplateModalMessage}>
+                The original template used for this file has been deleted or is missing.
+              </Text>
+              <Text style={styles.missingTemplateModalWarning}>
+                Cannot continue input without the original template.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.missingTemplateModalButton}
+              onPress={closeMissingTemplateModal}
+            >
+              <Text style={styles.missingTemplateModalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -594,5 +622,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  
+  missingTemplateModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
+    borderWidth: 2,
+    borderColor: '#fbb6ce',
+  },
+  missingTemplateModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  missingTemplateModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  missingTemplateModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 15,
+  },
+  missingTemplateModalWarning: {
+    fontSize: 14,
+    color: '#e53e3e',
+    textAlign: 'center',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  missingTemplateModalButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  missingTemplateModalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
