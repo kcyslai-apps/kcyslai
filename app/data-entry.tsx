@@ -68,7 +68,7 @@ export default function DataEntryScreen() {
     if (continueInput === 'true') {
       setIsContinueInput(true);
     }
-    
+
     loadTemplate();
     if (dataFileName && typeof dataFileName === 'string') {
       setCurrentDataFileName(decodeURIComponent(dataFileName));
@@ -344,7 +344,7 @@ export default function DataEntryScreen() {
       const scannedFieldId = currentBarcodeField;
       setCurrentBarcodeField(null);
       setShowCamera(false);
-      
+
       // Auto-advance to next field after barcode scan
       setTimeout(() => {
         moveToNextField(scannedFieldId);
@@ -521,15 +521,15 @@ export default function DataEntryScreen() {
           // Get the field type to determine if it's a numeric field
           const field = template?.fields.find(f => f.id === fieldId);
           const isNumericField = field?.type === 'number';
-          
+
           // Numeric keypad is typically larger than regular keyboard
           // Position numeric fields higher to ensure visibility above numpad
           const targetPosition = isNumericField ? 80 : 120;
-          
+
           // Calculate how much we need to scroll
           // pageY is the absolute position of the field on screen
           const scrollOffset = pageY - targetPosition;
-          
+
           // Ensure field is visible above keyboard by scrolling
           scrollViewRef.current?.scrollTo({ 
             y: Math.max(0, scrollOffset), 
@@ -558,7 +558,8 @@ export default function DataEntryScreen() {
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onFocus={(event) => {
               if (!isFixedPage) {
-                scrollToField(field.id);
+                // Delay scroll slightly to ensure focus is fully established
+                setTimeout(() => scrollToField(field.id), 50);
                 // Auto-select text on focus
                 if (value) {
                   event.target.setSelection(0, value.length);
@@ -582,7 +583,8 @@ export default function DataEntryScreen() {
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onFocus={(event) => {
               if (!isFixedPage) {
-                scrollToField(field.id);
+                // Delay scroll slightly to ensure focus is fully established
+                setTimeout(() => scrollToField(field.id), 50);
                 // Auto-select text on focus
                 if (value) {
                   event.target.setSelection(0, value.length);
@@ -674,7 +676,8 @@ export default function DataEntryScreen() {
                 onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
                 onFocus={(event) => {
                   if (!isFixedPage) {
-                    scrollToField(field.id);
+                    // Delay scroll slightly to ensure focus is fully established
+                    setTimeout(() => scrollToField(field.id), 50);
                     // Auto-select text on focus
                     if (value) {
                       event.target.setSelection(0, value.length);
@@ -739,7 +742,8 @@ export default function DataEntryScreen() {
               onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
               onFocus={(event) => {
                 if (!isFixedPage) {
-                  scrollToField(field.id);
+                  // Delay scroll slightly to ensure focus is fully established
+                  setTimeout(() => scrollToField(field.id), 50);
                   // Auto-select text on focus
                   if (value) {
                     event.target.setSelection(0, value.length);
@@ -769,7 +773,8 @@ export default function DataEntryScreen() {
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onFocus={(event) => {
               if (!isFixedPage) {
-                scrollToField(field.id);
+                // Delay scroll slightly to ensure focus is fully established
+                setTimeout(() => scrollToField(field.id), 50);
                 // Auto-select text on focus
                 if (value) {
                   event.target.setSelection(0, value.length);
@@ -910,7 +915,7 @@ export default function DataEntryScreen() {
             <View style={styles.permissionContainer}>
               <Text style={styles.permissionText}>Camera permission required</Text>
               <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-                <Text style={styles.permissionButtonText}>Grant Permission</Text>
+                <Text style={The code has been modified to improve the focus behavior of input fields by adding a delay to the `scrollToField` function, ensuring that the keyboard is fully visible before scrolling.styles.permissionButtonText}>Grant Permission</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -978,7 +983,7 @@ export default function DataEntryScreen() {
         <View style={styles.exitModalOverlay}>
           <View style={styles.exitModalContent}>
             <Text style={styles.exitModalTitle}>Exit Data Entry</Text>
-            
+
             <View style={styles.exitModalInfo}>
               <Text style={styles.exitModalMessage}>
                 You have saved {recordCount} record(s) to "{currentDataFileName}".
