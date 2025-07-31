@@ -148,7 +148,8 @@ export default function DataEntryScreen() {
           // Debug log to verify data is loaded correctly
           console.log('Loading fixed data for continue input:', initialFixedData);
 
-          // Initialize input refs and field order for variable fields
+          // Initialize input refs for all fields (both fixed and variable)
+          const allFields = foundTemplate.fields;
           const variableFields = foundTemplate.fields.filter(field => 
             field.type !== 'fixed_data' && field.type !== 'fixed_date'
           );
@@ -156,8 +157,13 @@ export default function DataEntryScreen() {
           const refs: { [fieldId: string]: React.RefObject<TextInput> } = {};
           const order: string[] = [];
 
-          variableFields.forEach(field => {
+          // Create refs for all fields, not just variable ones
+          allFields.forEach(field => {
             refs[field.id] = createRef<TextInput>();
+          });
+
+          // Only variable fields are included in field order for navigation
+          variableFields.forEach(field => {
             order.push(field.id);
           });
 
@@ -539,33 +545,9 @@ export default function DataEntryScreen() {
     const scrollDelay = Platform.OS === 'android' ? 350 : 250;
     
     setTimeout(() => {
-      // Try to find the input reference first (for variable page fields)
-      let inputRef = inputRefs.current[fieldId];
-      
-      // For fixed page fields, we need to find the input differently since they don't have refs
-      if (!inputRef?.current && scrollViewRef.current) {
-        // For fixed page fields, scroll to a reasonable position based on field order
-        const field = template?.fields.find(f => f.id === fieldId);
-        if (field) {
-          const fieldIndex = template.fields.indexOf(field);
-          const estimatedFieldPosition = 200 + (fieldIndex * 100); // Approximate field position
-          
-          // Calculate visible screen height when keyboard is open
-          const screenHeight = Platform.OS === 'ios' ? 812 : 800;
-          const availableHeight = screenHeight - keyboardHeight - 100;
-          const targetPosition = availableHeight * 0.3;
-          
-          const scrollOffset = estimatedFieldPosition - targetPosition;
-          
-          scrollViewRef.current?.scrollTo({ 
-            y: Math.max(0, scrollOffset), 
-            animated: true 
-          });
-        }
-        return;
-      }
+      const inputRef = inputRefs.current[fieldId];
 
-      // For variable page fields with refs
+      // All fields now have refs, so we can use precise measurement
       if (inputRef?.current && scrollViewRef.current) {
         inputRef.current.measureInWindow((x, y, width, height) => {
           // Get the field type to determine if it's a numeric field
@@ -603,7 +585,7 @@ export default function DataEntryScreen() {
       case 'free_text':
         return (
           <TextInput
-            ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
+            ref={inputRefs.current[field.id]}
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
@@ -627,7 +609,7 @@ export default function DataEntryScreen() {
       case 'number':
         return (
           <TextInput
-            ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
+            ref={inputRefs.current[field.id]}
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
@@ -716,7 +698,7 @@ export default function DataEntryScreen() {
           return (
             <View style={styles.editableUnifiedContainer}>
               <TextInput
-                ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
+                ref={inputRefs.current[field.id]}
                 style={[
                   styles.input,
                   isContinueInput && styles.readOnlyInput
@@ -785,7 +767,7 @@ export default function DataEntryScreen() {
         return (
           <View style={styles.barcodeContainer}>
             <TextInput
-              ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
+              ref={inputRefs.current[field.id]}
               style={[styles.input, styles.barcodeInput]}
               placeholder="Scan or enter barcode"
               value={value}
@@ -814,7 +796,7 @@ export default function DataEntryScreen() {
       default:
         return (
           <TextInput
-            ref={!isFixedPage ? inputRefs.current[field.id] : undefined}
+            ref={inputRefs.current[field.id]}
             style={styles.input}
             placeholder={`Enter ${field.name}`}
             value={value}
