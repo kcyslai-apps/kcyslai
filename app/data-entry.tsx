@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal, Platform, Keyboard } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Camera, CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -58,6 +58,8 @@ export default function DataEntryScreen() {
   const [fieldOrder, setFieldOrder] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -73,6 +75,26 @@ export default function DataEntryScreen() {
     if (dataFileName && typeof dataFileName === 'string') {
       setCurrentDataFileName(decodeURIComponent(dataFileName));
     }
+
+    // Add keyboard event listeners
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+      setIsKeyboardVisible(true);
+    });
+
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+      setIsKeyboardVisible(false);
+      // Reset scroll position when keyboard hides
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      }, 100);
+    });
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
   }, [templateId, dataFileName, continueInput]);
 
   const loadTemplate = async () => {
@@ -513,31 +535,38 @@ export default function DataEntryScreen() {
   };
 
     const scrollToField = (fieldId: string) => {
-    // Delay to allow keyboard to appear
+    // Wait for keyboard to appear before calculating scroll position
+    const scrollDelay = Platform.OS === 'android' ? 350 : 250;
+    
     setTimeout(() => {
       const inputRef = inputRefs.current[fieldId];
       if (inputRef?.current && scrollViewRef.current) {
-        inputRef.current.measure((x, y, width, height, pageX, pageY) => {
+        inputRef.current.measureInWindow((x, y, width, height) => {
           // Get the field type to determine if it's a numeric field
           const field = template?.fields.find(f => f.id === fieldId);
           const isNumericField = field?.type === 'number';
 
-          // Numeric keypad is typically larger than regular keyboard
-          // Position numeric fields higher to ensure visibility above numpad
-          const targetPosition = isNumericField ? 80 : 120;
+          // Calculate visible screen height when keyboard is open
+          const screenHeight = Platform.OS === 'ios' ? 812 : 800; // Approximate screen heights
+          const availableHeight = screenHeight - keyboardHeight - 100; // Buffer space
 
-          // Calculate how much we need to scroll
-          // pageY is the absolute position of the field on screen
-          const scrollOffset = pageY - targetPosition;
+          // Target position should be in the upper portion of visible area
+          const targetPosition = isNumericField ? availableHeight * 0.2 : availableHeight * 0.3;
 
-          // Ensure field is visible above keyboard by scrolling
-          scrollViewRef.current?.scrollTo({ 
-            y: Math.max(0, scrollOffset), 
-            animated: true 
-          });
+          // Calculate scroll offset needed to position field at target
+          const fieldCurrentPosition = y;
+          const scrollOffset = fieldCurrentPosition - targetPosition;
+
+          // Only scroll if the field is not already visible in the target area
+          if (fieldCurrentPosition > targetPosition || fieldCurrentPosition < 50) {
+            scrollViewRef.current?.scrollTo({ 
+              y: Math.max(0, scrollOffset), 
+              animated: true 
+            });
+          }
         });
       }
-    }, 250); // Slightly longer delay for numeric keypad animation
+    }, scrollDelay);
   };
 
   const renderField = (field: TemplateField, isFixedPage: boolean = false) => {
@@ -798,7 +827,15 @@ export default function DataEntryScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} ref={scrollViewRef}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        ref={scrollViewRef}
+        contentContainerStyle={[
+          styles.scrollContainer,
+          isKeyboardVisible && { paddingBottom: keyboardHeight + 20 }
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Text style={styles.backButtonText}>← Back</Text>
@@ -1018,6 +1055,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+  scrollContainer: {
+    flexGrow: 1,
   },
   header: {
     flexDirection: 'row',
