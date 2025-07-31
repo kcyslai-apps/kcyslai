@@ -351,6 +351,9 @@ export default function DataEntryScreen() {
   const validateFixedForm = (): boolean => {
     if (!template) return false;
 
+    // Skip validation during continue input since fixed fields are read-only
+    if (isContinueInput) return true;
+
     const fixedFields = template.fields.filter(field => 
       field.type === 'fixed_data' || field.type === 'fixed_date'
     );
