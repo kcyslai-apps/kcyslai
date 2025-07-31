@@ -673,4 +673,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  deletedTemplateIndicator: {
+    fontSize: 11,
+    color: '#e53e3e',
+    fontStyle: 'italic',
+    marginRight: 8,
+    backgroundColor: '#fed7d7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
 });
