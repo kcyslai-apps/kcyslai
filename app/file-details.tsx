@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView, Alert, TextInput, Modal } from 'react-native';
 import * as FileSystem from 'expo-file-system';
@@ -76,27 +75,27 @@ export default function FileDetailsScreen() {
     } else {
       const filtered = fileRecords.filter(record => {
         const template = templates.find(t => t.id === record.templateId);
-        
+
         // Search in template name
         if (record.templateName.toLowerCase().includes(searchQuery.toLowerCase())) {
           return true;
         }
-        
+
         // Search in all field values
         return Object.entries(record.data).some(([fieldId, value]) => {
           const field = template?.fields.find(f => f.id === fieldId);
           if (!field || !value) return false;
-          
+
           // Search in field name
           if (field.name.toLowerCase().includes(searchQuery.toLowerCase())) {
             return true;
           }
-          
+
           // Search in field value
           return value.toLowerCase().includes(searchQuery.toLowerCase());
         });
       });
-      
+
       setFilteredRecords(filtered);
     }
   }, [searchQuery, fileRecords, templates]);
@@ -180,7 +179,7 @@ export default function FileDetailsScreen() {
     const fixedFields = templateExists.fields.filter(field => 
       field.type === 'fixed_data' || field.type === 'fixed_date'
     );
-    
+
     const fixedFieldValues: { [key: string]: string } = {};
     fixedFields.forEach(field => {
       if (firstRecord.data[field.id]) {
@@ -206,7 +205,7 @@ export default function FileDetailsScreen() {
 
   const renderRecord = ({ item }: { item: DataRecord }) => {
     const template = templates.find(t => t.id === item.templateId);
-    
+
     return (
       <View style={styles.recordItem}>
         <View style={styles.recordHeader}>
@@ -220,12 +219,12 @@ export default function FileDetailsScreen() {
             <Text style={styles.deleteRecordText}>🗑️</Text>
           </TouchableOpacity>
         </View>
-        
+
         <ScrollView style={styles.recordData} showsVerticalScrollIndicator={false}>
           {Object.entries(item.data).map(([fieldId, value]) => {
             const field = template?.fields.find(f => f.id === fieldId);
             if (!field || !value) return null;
-            
+
             return (
               <View key={fieldId} style={styles.dataRow}>
                 <Text style={styles.fieldName}>{field.name}:</Text>
@@ -443,11 +442,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: '#ffffff',
     paddingRight: 36,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)',
   },
   clearSearchButton: {
     position: 'absolute',
@@ -477,11 +472,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)',
     overflow: 'hidden',
   },
   recordHeader: {
@@ -564,11 +555,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
     borderWidth: 2,
     borderColor: '#fc8181',
   },
@@ -639,11 +626,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
     borderWidth: 2,
     borderColor: '#fbb6ce',
   },

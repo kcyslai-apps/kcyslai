@@ -261,12 +261,12 @@ export default function DataFilesScreen() {
       fileGroup.records.forEach(record => {
         const row = fieldsWithPosition.map(field => {
           let value = record.data[field.id] || '';
-          
+
           // Apply date formatting for date and fixed_date fields
           if ((field.type === 'date' || field.type === 'fixed_date') && value) {
             value = formatDateForExport(value, field);
           }
-          
+
           if (csvSettings.includeQuotes) {
             // Escape quotes in the value by doubling them
             const escapedValue = value.replace(/"/g, '""');
@@ -684,10 +684,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#68d391',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.25)',
     elevation: 6,
   },
   successMessageText: {
