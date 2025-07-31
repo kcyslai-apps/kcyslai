@@ -12,6 +12,7 @@ interface DataRecord {
   data: { [fieldId: string]: string };
   timestamp: Date;
   dataFileName?: string;
+  preservedTemplateFields?: TemplateField[];
 }
 
 interface Template {
@@ -41,7 +42,7 @@ export default function FileDetailsScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
   const [showMissingTemplateModal, setShowMissingTemplateModal] = useState(false);
-  
+
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -204,7 +205,7 @@ export default function FileDetailsScreen() {
     });
   };
 
-  
+
 
   const renderRecord = ({ item }: { item: DataRecord }) => {
     const template = templates.find(t => t.id === item.templateId);

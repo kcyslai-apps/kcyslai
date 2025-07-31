@@ -202,10 +202,22 @@ export default function DataFilesScreen() {
 
       // Get the template from the first record (all records in a file use the same template)
       const firstRecord = fileGroup.records[0];
-      const template = templates.find(t => t.id === firstRecord.templateId);
+      let template = templates.find(t => t.id === firstRecord.templateId);
+
+      // If template not found, check if record has preserved template info
+      if (!template && firstRecord.preservedTemplateFields) {
+        template = {
+          id: firstRecord.templateId,
+          name: firstRecord.templateName,
+          description: '',
+          fields: firstRecord.preservedTemplateFields,
+          csvExportSettings: firstRecord.preservedCsvSettings,
+          createdAt: new Date()
+        };
+      }
 
       if (!template) {
-        Alert.alert('Error', 'Template not found for this file');
+        Alert.alert('Error', 'Template not found and no preserved template data available for this file');
         return;
       }
 
@@ -366,10 +378,18 @@ export default function DataFilesScreen() {
   };
 
   const renderFileGroup = ({ item }: { item: FileGroup }) => {
+    // Check if any records in this file have deleted templates
+    const hasDeletedTemplate = item.records.some(record => record.templateDeleted);
+    
     return (
       <View style={styles.fileGroupContainer}>
         <View style={styles.fileGroupHeader}>
-          <Text style={styles.fileGroupName}>📁 {item.fileName}</Text>
+          <View style={styles.fileGroupNameContainer}>
+            <Text style={styles.fileGroupName}>📁 {item.fileName}</Text>
+            {hasDeletedTemplate && (
+              <Text style={styles.deletedTemplateIndicator}>⚠️ Template deleted</Text>
+            )}
+          </View>
           <Text style={styles.fileGroupCount}>{item.totalRecords} records</Text>
         </View>
 
@@ -515,11 +535,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#cbd5e0',
   },
+  fileGroupNameContainer: {
+    flex: 1,
+  },
   fileGroupName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#2d3748',
-    flex: 1,
+  },
+  deletedTemplateIndicator: {
+    fontSize: 12,
+    color: '#e53e3e',
+    fontStyle: 'italic',
+    marginTop: 2,
   },
   fileGroupCount: {
     fontSize: 14,

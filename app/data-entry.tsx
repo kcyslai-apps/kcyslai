@@ -103,7 +103,45 @@ export default function DataEntryScreen() {
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
         const templates: Template[] = JSON.parse(content);
-        const foundTemplate = templates.find(t => t.id === templateId);
+        let foundTemplate = templates.find(t => t.id === templateId);
+
+        // If template not found, check if we can reconstruct it from preserved data records
+        if (!foundTemplate && isContinueInput && currentDataFileName) {
+          try {
+            const dataFileExists = await FileSystem.getInfoAsync(DATA_RECORDS_FILE);
+            if (dataFileExists.exists) {
+              const dataContent = await FileSystem.readAsStringAsync(DATA_RECORDS_FILE);
+              const dataRecords = JSON.parse(dataContent);
+              
+              // Find a record from this data file that has preserved template info
+              const recordWithPreservedTemplate = dataRecords.find((record: any) => 
+                record.dataFileName === currentDataFileName && 
+                record.templateId === templateId &&
+                record.preservedTemplateFields
+              );
+              
+              if (recordWithPreservedTemplate) {
+                foundTemplate = {
+                  id: recordWithPreservedTemplate.templateId,
+                  name: recordWithPreservedTemplate.templateName,
+                  description: '(Template was deleted, using preserved data)',
+                  fields: recordWithPreservedTemplate.preservedTemplateFields,
+                  csvExportSettings: recordWithPreservedTemplate.preservedCsvSettings || {
+                    includeHeader: false,
+                    delimiter: 'comma',
+                    customDelimiter: '',
+                    fieldPositions: {},
+                    fileExtension: 'csv',
+                    includeQuotes: true
+                  },
+                  createdAt: new Date()
+                };
+              }
+            }
+          } catch (error) {
+            console.error('Error loading preserved template info:', error);
+          }
+        }
 
         if (foundTemplate) {
           setTemplate(foundTemplate);

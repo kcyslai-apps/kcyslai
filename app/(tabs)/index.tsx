@@ -329,8 +329,41 @@ export default function TemplatesScreen() {
     }
   };
 
-  const confirmDeleteTemplate = () => {
+  const confirmDeleteTemplate = async () => {
     if (selectedTemplateForDelete) {
+      try {
+        // Load existing data records to preserve template field information
+        const dataRecordsFile = FileSystem.documentDirectory + 'dataRecords.json';
+        const fileExists = await FileSystem.getInfoAsync(dataRecordsFile);
+        
+        if (fileExists.exists) {
+          const content = await FileSystem.readAsStringAsync(dataRecordsFile);
+          const dataRecords = JSON.parse(content);
+          
+          // Update records that use this template to preserve field definitions
+          const updatedRecords = dataRecords.map((record: any) => {
+            if (record.templateId === selectedTemplateForDelete.id) {
+              return {
+                ...record,
+                // Preserve template field definitions for future use
+                preservedTemplateFields: selectedTemplateForDelete.fields,
+                preservedCsvSettings: selectedTemplateForDelete.csvExportSettings,
+                // Mark as orphaned for reference
+                templateDeleted: true,
+                templateDeletedAt: new Date().toISOString()
+              };
+            }
+            return record;
+          });
+          
+          // Save updated records with preserved template info
+          await FileSystem.writeAsStringAsync(dataRecordsFile, JSON.stringify(updatedRecords));
+        }
+      } catch (error) {
+        console.error('Error preserving template info in data records:', error);
+      }
+
+      // Remove the template
       const updatedTemplates = templates.filter(t => t.id !== selectedTemplateForDelete.id);
       setTemplates(updatedTemplates);
       saveTemplates(updatedTemplates);
