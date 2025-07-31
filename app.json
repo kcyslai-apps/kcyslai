@@ -22,8 +22,11 @@
       "navigationBarHidden": true,
       "fullScreen": true,
       "permissions": [
-        "CAMERA"
-      ]
+        "CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.kcyslai.expoonreplit"
     },
     "web": {
       "bundler": "metro",
@@ -51,6 +54,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "35a63ef5-ab12-4dd2-8447-a8dc29ffd8b8"
+      }
     }
   }
 }
