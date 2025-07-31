@@ -40,7 +40,7 @@ export default function FileDetailsScreen() {
   const [filteredRecords, setFilteredRecords] = useState<DataRecord[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
-  const [showTemplateNotFoundModal, setShowTemplateNotFoundModal] = useState(false);
+  
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -171,7 +171,7 @@ export default function FileDetailsScreen() {
     const templateExists = templates.find(t => t.id === firstRecord.templateId);
 
     if (!templateExists) {
-      setShowTemplateNotFoundModal(true);
+      Alert.alert('Missing Template ID', 'The original template used for this file has been deleted or is missing.');
       return;
     }
 
@@ -199,9 +199,7 @@ export default function FileDetailsScreen() {
     });
   };
 
-  const closeTemplateNotFoundModal = () => {
-    setShowTemplateNotFoundModal(false);
-  };
+  
 
   const renderRecord = ({ item }: { item: DataRecord }) => {
     const template = templates.find(t => t.id === item.templateId);
@@ -332,30 +330,7 @@ export default function FileDetailsScreen() {
         </View>
       </Modal>
 
-      {/* Template Not Found Modal */}
-      <Modal visible={showTemplateNotFoundModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.templateNotFoundModalContent}>
-            <Text style={styles.templateNotFoundModalTitle}>⚠️ Template Not Available</Text>
-
-            <View style={styles.templateNotFoundModalInfo}>
-              <Text style={styles.templateNotFoundModalMessage}>
-                Template no longer available. Unable to continue input.
-              </Text>
-              <Text style={styles.templateNotFoundModalSubMessage}>
-                The original template used for this file has been deleted or is missing.
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={styles.templateNotFoundModalButton}
-              onPress={closeTemplateNotFoundModal}
-            >
-              <Text style={styles.templateNotFoundModalButtonText}>OK</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      
     </ThemedView>
   );
 }
@@ -619,55 +594,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  templateNotFoundModalContent: {
-    backgroundColor: 'white',
-    padding: 30,
-    borderRadius: 16,
-    width: '100%',
-    maxWidth: 400,
-    alignItems: 'center',
-    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
-    borderWidth: 2,
-    borderColor: '#fbb6ce',
-  },
-  templateNotFoundModalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 25,
-    color: '#2d3748',
-    textAlign: 'center',
-  },
-  templateNotFoundModalInfo: {
-    alignItems: 'center',
-    marginBottom: 30,
-    width: '100%',
-  },
-  templateNotFoundModalMessage: {
-    fontSize: 16,
-    color: '#e53e3e',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 15,
-    fontWeight: 'bold',
-  },
-  templateNotFoundModalSubMessage: {
-    fontSize: 14,
-    color: '#4a5568',
-    textAlign: 'center',
-    lineHeight: 20,
-    fontStyle: 'italic',
-  },
-  templateNotFoundModalButton: {
-    backgroundColor: '#4299e1',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    minWidth: 80,
-  },
-  templateNotFoundModalButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  
 });
