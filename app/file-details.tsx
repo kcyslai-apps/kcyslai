@@ -76,7 +76,18 @@ export default function FileDetailsScreen() {
       setFilteredRecords(fileRecords);
     } else {
       const filtered = fileRecords.filter(record => {
-        const template = templates.find(t => t.id === record.templateId);
+        let template = templates.find(t => t.id === record.templateId);
+        
+        // Use preserved template fields if original template is deleted
+        if (!template && record.preservedTemplateFields) {
+          template = {
+            id: record.templateId,
+            name: record.templateName,
+            description: 'Deleted Template',
+            fields: record.preservedTemplateFields,
+            createdAt: new Date()
+          };
+        }
 
         // Search in template name
         if (record.templateName.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -174,15 +185,19 @@ export default function FileDetailsScreen() {
 
     // Get the template ID from the first record (all records in a file should use the same template)
     const firstRecord = fileRecords[0];
-    const templateExists = templates.find(t => t.id === firstRecord.templateId);
+    let templateExists = templates.find(t => t.id === firstRecord.templateId);
 
-    if (!templateExists) {
+    // If template not found but record has preserved template fields, we can still continue
+    if (!templateExists && !firstRecord.preservedTemplateFields) {
       setShowMissingTemplateModal(true);
       return;
     }
 
+    // Use preserved template fields if original template is deleted
+    const templateFields = templateExists?.fields || firstRecord.preservedTemplateFields || [];
+
     // Extract fixed field values from the first record
-    const fixedFields = templateExists.fields.filter(field => 
+    const fixedFields = templateFields.filter(field => 
       field.type === 'fixed_data' || field.type === 'fixed_date'
     );
 
@@ -208,14 +223,32 @@ export default function FileDetailsScreen() {
 
 
   const renderRecord = ({ item }: { item: DataRecord }) => {
-    const template = templates.find(t => t.id === item.templateId);
+    let template = templates.find(t => t.id === item.templateId);
+    let isTemplateDeleted = false;
+
+    // If template not found but record has preserved template fields, use those
+    if (!template && item.preservedTemplateFields) {
+      template = {
+        id: item.templateId,
+        name: item.templateName,
+        description: 'Deleted Template',
+        fields: item.preservedTemplateFields,
+        createdAt: new Date()
+      };
+      isTemplateDeleted = true;
+    }
 
     return (
       <View style={styles.recordItem}>
         <View style={styles.recordHeader}>
-          <Text style={styles.inputTimeLabel}>
-            Input Time: {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
-          </Text>
+          <View style={styles.recordHeaderLeft}>
+            {isTemplateDeleted && (
+              <Text style={styles.deletedTemplateIndicator}>⚠️ Template deleted</Text>
+            )}
+            <Text style={styles.inputTimeLabel}>
+              Input Time: {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
+            </Text>
+          </View>
           <TouchableOpacity
             style={styles.deleteRecordButton}
             onPress={() => deleteRecord(item.id)}
@@ -482,11 +515,15 @@ const styles = StyleSheet.create({
   recordHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 6,
     paddingBottom: 4,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+  },
+  recordHeaderLeft: {
+    flex: 1,
+    marginRight: 8,
   },
   inputTimeLabel: {
     fontSize: 13,
