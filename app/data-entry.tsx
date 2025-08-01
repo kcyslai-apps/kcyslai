@@ -622,7 +622,11 @@ export default function DataEntryScreen() {
             onChangeText={(text) => updateFunction(field.id, text)}
             multiline={true}
             numberOfLines={3}
-            onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onSubmitEditing={() => {
+              if (!isFixedPage) {
+                moveToNextField(field.id);
+              }
+            }}
             onPressIn={() => {
               // Only apply scroll behavior on variable page
               if (!isFixedPage) {
@@ -655,7 +659,11 @@ export default function DataEntryScreen() {
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
             keyboardType="numeric"
-            onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onSubmitEditing={() => {
+              if (!isFixedPage) {
+                moveToNextField(field.id);
+              }
+            }}
             onPressIn={() => {
               // Only apply scroll behavior on variable page
               if (!isFixedPage) {
@@ -756,7 +764,11 @@ export default function DataEntryScreen() {
                 placeholder="Type or tap to select from options"
                 value={value}
                 onChangeText={(text) => !isContinueInput && updateFunction(field.id, text)}
-                onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+                onSubmitEditing={() => {
+                  if (!isFixedPage) {
+                    moveToNextField(field.id);
+                  }
+                }}
                 onPressIn={() => {
                   // Only apply scroll behavior on variable page
                   if (!isFixedPage) {
@@ -833,7 +845,11 @@ export default function DataEntryScreen() {
               placeholder="Scan or enter barcode"
               value={value}
               onChangeText={(text) => updateFunction(field.id, text)}
-              onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+              onSubmitEditing={() => {
+                if (!isFixedPage) {
+                  moveToNextField(field.id);
+                }
+              }}
               onPressIn={() => {
                 // Only apply scroll behavior on variable page
                 if (!isFixedPage) {
@@ -872,7 +888,11 @@ export default function DataEntryScreen() {
             placeholder={`Enter ${field.name}`}
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
-            onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onSubmitEditing={() => {
+              if (!isFixedPage) {
+                moveToNextField(field.id);
+              }
+            }}
             onPressIn={() => {
               // Only apply scroll behavior on variable page
               if (!isFixedPage) {
@@ -913,6 +933,7 @@ export default function DataEntryScreen() {
         ref={scrollViewRef}
         contentContainerStyle={[
           styles.scrollContainer,
+```text
           isKeyboardVisible && { paddingBottom: keyboardHeight + 20 }
         ]}
         keyboardShouldPersistTaps="handled"
