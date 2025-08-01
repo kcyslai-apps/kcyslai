@@ -45,10 +45,10 @@ export default function DataEntryScreen() {
   const [showCamera, setShowCamera] = useState(false);
   const [currentBarcodeField, setCurrentBarcodeField] = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const [currentDataFileName, setCurrentDataFileName = useState<string>('');
-  const [currentPage, setCurrentPage = useState<'fixed' | 'variable'>('fixed');
-  const [recordCount, setRecordCount = useState(0);
-  const [isContinueInput, setIsContinueInput = useState<boolean>(false);
+  const [currentDataFileName, setCurrentDataFileName] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<'fixed' | 'variable'>('fixed');
+  const [recordCount, setRecordCount] = useState(0);
+  const [isContinueInput, setIsContinueInput] = useState<boolean>(false);
   const [showDatePicker, setShowDatePicker = useState(false);
   const [currentDateField, setCurrentDateField = useState<string | null>(null);
   const [selectedDate, setSelectedDate = useState(new Date());
