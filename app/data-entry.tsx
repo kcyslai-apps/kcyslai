@@ -40,10 +40,10 @@ interface DataRecord {
 export default function DataEntryScreen() {
   const { templateId, dataFileName, continueInput, fixedFieldValues } = useLocalSearchParams();
   const [template, setTemplate] = useState<Template | null>(null);
-  const [fixedFormData, setFixedFormData = useState<{ [fieldId: string]: string }>({});
-  const [variableFormData, setVariableFormData = useState<{ [fieldId: string]: string }>({});
-  const [showCamera, setShowCamera = useState(false);
-  const [currentBarcodeField, setCurrentBarcodeField = useState<string | null>(null);
+  const [fixedFormData, setFixedFormData] = useState<{ [fieldId: string]: string }>({});
+  const [variableFormData, setVariableFormData] = useState<{ [fieldId: string]: string }>({});
+  const [showCamera, setShowCamera] = useState(false);
+  const [currentBarcodeField, setCurrentBarcodeField] = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [currentDataFileName, setCurrentDataFileName = useState<string>('');
   const [currentPage, setCurrentPage = useState<'fixed' | 'variable'>('fixed');
