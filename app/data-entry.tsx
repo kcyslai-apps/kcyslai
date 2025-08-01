@@ -631,6 +631,10 @@ export default function DataEntryScreen() {
             multiline={true}
             numberOfLines={3}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onPressIn={() => {
+              // Ensure scroll happens on every press, even if already focused
+              setTimeout(() => scrollToField(field.id), 50);
+            }}
             onFocus={(event) => {
               // Apply scroll logic for both fixed and variable pages
               setTimeout(() => scrollToField(field.id), 50);
@@ -656,6 +660,10 @@ export default function DataEntryScreen() {
             onChangeText={(text) => updateFunction(field.id, text)}
             keyboardType="numeric"
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onPressIn={() => {
+              // Ensure scroll happens on every press, even if already focused
+              setTimeout(() => scrollToField(field.id), 50);
+            }}
             onFocus={(event) => {
               // Apply scroll logic for both fixed and variable pages
               setTimeout(() => scrollToField(field.id), 50);
@@ -749,6 +757,12 @@ export default function DataEntryScreen() {
                 value={value}
                 onChangeText={(text) => !isContinueInput && updateFunction(field.id, text)}
                 onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+                onPressIn={() => {
+                  // Ensure scroll happens on every press, even if already focused
+                  if (!isContinueInput) {
+                    setTimeout(() => scrollToField(field.id), 50);
+                  }
+                }}
                 onFocus={(event) => {
                   // Apply scroll logic for both fixed and variable pages
                   if (!isContinueInput) {
@@ -817,6 +831,10 @@ export default function DataEntryScreen() {
               value={value}
               onChangeText={(text) => updateFunction(field.id, text)}
               onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+              onPressIn={() => {
+                // Ensure scroll happens on every press, even if already focused
+                setTimeout(() => scrollToField(field.id), 50);
+              }}
               onFocus={(event) => {
               // Apply scroll logic for both fixed and variable pages
               setTimeout(() => scrollToField(field.id), 50);
@@ -848,6 +866,10 @@ export default function DataEntryScreen() {
             value={value}
             onChangeText={(text) => updateFunction(field.id, text)}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
+            onPressIn={() => {
+              // Ensure scroll happens on every press, even if already focused
+              setTimeout(() => scrollToField(field.id), 50);
+            }}
             onFocus={(event) => {
               // Apply scroll logic for both fixed and variable pages
               setTimeout(() => scrollToField(field.id), 50);
