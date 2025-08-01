@@ -252,9 +252,6 @@ export default function FileDetailsScreen() {
       <View style={styles.recordItem}>
         <View style={styles.recordHeader}>
           <View style={styles.recordHeaderLeft}>
-            {isTemplateDeleted && (
-              <Text style={styles.deletedTemplateIndicator}>⚠️ Template deleted</Text>
-            )}
             <Text style={styles.inputTimeLabel}>
               Input Time: {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
             </Text>
@@ -297,7 +294,7 @@ export default function FileDetailsScreen() {
         Total Records: {fileRecords.length}
       </Text>
       {hasDeletedTemplate && (
-        <Text style={styles.deletedTemplateWarning}>⚠️ Some records use deleted templates</Text>
+        <Text style={styles.deletedTemplateWarning}>⚠️ Template Deleted</Text>
       )}
       {fileRecords.length > 0 && (
         <TouchableOpacity
