@@ -456,14 +456,6 @@ export default function DataEntryScreen() {
   const proceedToVariablePage = () => {
     if (!validateFixedForm()) return;
     setCurrentPage('variable');
-
-    // Focus first field after page transition
-    setTimeout(() => {
-      if (fieldOrder.length > 0) {
-        const firstFieldId = fieldOrder[0];
-        inputRefs.current[firstFieldId]?.current?.focus();
-      }
-    }, 100);
   };
 
   const saveDataRecord = async () => {
@@ -956,15 +948,7 @@ export default function DataEntryScreen() {
 
         {/* Variable Data Page */}
         {currentPage === 'variable' && (
-          <View style={styles.formContainer} onLayout={() => {
-            // Auto-focus first field when page loads
-            if (fieldOrder.length > 0) {
-              setTimeout(() => {
-                const firstFieldId = fieldOrder[0];
-                inputRefs.current[firstFieldId]?.current?.focus();
-              }, 300);
-            }
-          }}>
+          <View style={styles.formContainer}>
             {getVariableFields().map((field) => (
               <View key={field.id} style={styles.fieldContainer}>
                 <Text style={styles.fieldLabel}>
