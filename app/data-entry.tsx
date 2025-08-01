@@ -921,7 +921,7 @@ export default function DataEntryScreen() {
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
-          <ThemedTexttype="title" style={styles.title}>
+          <ThemedText type="title" style={styles.title}>
             {currentPage === 'fixed' ? 'Fixed Data Entry' : 'Data Entry'}
           </ThemedText>
         </View>
