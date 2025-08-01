@@ -40,26 +40,26 @@ interface DataRecord {
 export default function DataEntryScreen() {
   const { templateId, dataFileName, continueInput, fixedFieldValues } = useLocalSearchParams();
   const [template, setTemplate] = useState<Template | null>(null);
-  const [fixedFormData, setFixedFormData] = useState<{ [fieldId: string]: string }>({});
-  const [variableFormData, setVariableFormData] = useState<{ [fieldId: string]: string }>({});
-  const [showCamera, setShowCamera] = useState(false);
-  const [currentBarcodeField, setCurrentBarcodeField] = useState<string | null>(null);
+  const [fixedFormData, setFixedFormData = useState<{ [fieldId: string]: string }>({});
+  const [variableFormData, setVariableFormData = useState<{ [fieldId: string]: string }>({});
+  const [showCamera, setShowCamera = useState(false);
+  const [currentBarcodeField, setCurrentBarcodeField = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const [currentDataFileName, setCurrentDataFileName] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState<'fixed' | 'variable'>('fixed');
-  const [recordCount, setRecordCount] = useState(0);
-  const [isContinueInput, setIsContinueInput] = useState<boolean>(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [currentDateField, setCurrentDateField] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [tempDate, setTempDate] = useState(new Date());
-  const [isDatePickerBusy, setIsDatePickerBusy] = useState(false);
+  const [currentDataFileName, setCurrentDataFileName = useState<string>('');
+  const [currentPage, setCurrentPage = useState<'fixed' | 'variable'>('fixed');
+  const [recordCount, setRecordCount = useState(0);
+  const [isContinueInput, setIsContinueInput = useState<boolean>(false);
+  const [showDatePicker, setShowDatePicker = useState(false);
+  const [currentDateField, setCurrentDateField = useState<string | null>(null);
+  const [selectedDate, setSelectedDate = useState(new Date());
+  const [tempDate, setTempDate = useState(new Date());
+  const [isDatePickerBusy, setIsDatePickerBusy = useState(false);
   const inputRefs = useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
-  const [fieldOrder, setFieldOrder] = useState<string[]>([]);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [fieldOrder, setFieldOrder = useState<string[]>([]);
+  const [showSuccessMessage, setShowSuccessMessage = useState(false);
+  const [showExitConfirmModal, setShowExitConfirmModal = useState(false);
+  const [keyboardHeight, setKeyboardHeight = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -112,14 +112,14 @@ export default function DataEntryScreen() {
             if (dataFileExists.exists) {
               const dataContent = await FileSystem.readAsStringAsync(DATA_RECORDS_FILE);
               const dataRecords = JSON.parse(dataContent);
-              
+
               // Find a record from this data file that has preserved template info
               const recordWithPreservedTemplate = dataRecords.find((record: any) => 
                 record.dataFileName === currentDataFileName && 
                 record.templateId === templateId &&
                 record.preservedTemplateFields
               );
-              
+
               if (recordWithPreservedTemplate) {
                 foundTemplate = {
                   id: recordWithPreservedTemplate.templateId,
@@ -581,7 +581,7 @@ export default function DataEntryScreen() {
     const scrollToField = (fieldId: string) => {
     // Wait for keyboard to appear before calculating scroll position
     const scrollDelay = Platform.OS === 'android' ? 350 : 250;
-    
+
     setTimeout(() => {
       const inputRef = inputRefs.current[fieldId];
 
@@ -634,9 +634,11 @@ export default function DataEntryScreen() {
             onFocus={(event) => {
               // Apply scroll logic for both fixed and variable pages
               setTimeout(() => scrollToField(field.id), 50);
-              // Auto-select text on focus
+              // Auto-select text on focus with a small delay to ensure it works
               if (value) {
-                event.target.setSelection(0, value.length);
+                setTimeout(() => {
+                  event.target.setSelection?.(0, value.length);
+                }, 100);
               }
             }}
             blurOnSubmit={false}
@@ -657,9 +659,11 @@ export default function DataEntryScreen() {
             onFocus={(event) => {
               // Apply scroll logic for both fixed and variable pages
               setTimeout(() => scrollToField(field.id), 50);
-              // Auto-select text on focus
+              // Auto-select text on focus with a small delay to ensure it works
               if (value) {
-                event.target.setSelection(0, value.length);
+                setTimeout(() => {
+                  event.target.setSelection?.(0, value.length);
+                }, 100);
               }
             }}
             blurOnSubmit={false}
@@ -749,9 +753,11 @@ export default function DataEntryScreen() {
                   // Apply scroll logic for both fixed and variable pages
                   if (!isContinueInput) {
                     setTimeout(() => scrollToField(field.id), 50);
-                    // Auto-select text on focus
+                    // Auto-select text on focus with a small delay to ensure it works
                     if (value) {
-                      event.target.setSelection(0, value.length);
+                      setTimeout(() => {
+                        event.target.setSelection?.(0, value.length);
+                      }, 100);
                     }
                   }
                 }}
@@ -812,13 +818,15 @@ export default function DataEntryScreen() {
               onChangeText={(text) => updateFunction(field.id, text)}
               onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
               onFocus={(event) => {
-                // Apply scroll logic for both fixed and variable pages
-                setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus
-                if (value) {
-                  event.target.setSelection(0, value.length);
-                }
-              }}
+              // Apply scroll logic for both fixed and variable pages
+              setTimeout(() => scrollToField(field.id), 50);
+              // Auto-select text on focus with a small delay to ensure it works
+              if (value) {
+                setTimeout(() => {
+                  event.target.setSelection?.(0, value.length);
+                }, 100);
+              }
+            }}
               blurOnSubmit={false}
               selectTextOnFocus={true}
             />
@@ -843,9 +851,11 @@ export default function DataEntryScreen() {
             onFocus={(event) => {
               // Apply scroll logic for both fixed and variable pages
               setTimeout(() => scrollToField(field.id), 50);
-              // Auto-select text on focus
+              // Auto-select text on focus with a small delay to ensure it works
               if (value) {
-                event.target.setSelection(0, value.length);
+                setTimeout(() => {
+                  event.target.setSelection?.(0, value.length);
+                }, 100);
               }
             }}
             blurOnSubmit={false}
