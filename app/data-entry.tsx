@@ -933,7 +933,6 @@ export default function DataEntryScreen() {
         ref={scrollViewRef}
         contentContainerStyle={[
           styles.scrollContainer,
-```text
           isKeyboardVisible && { paddingBottom: keyboardHeight + 20 }
         ]}
         keyboardShouldPersistTaps="handled"
