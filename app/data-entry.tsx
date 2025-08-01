@@ -49,17 +49,17 @@ export default function DataEntryScreen() {
   const [currentPage, setCurrentPage] = useState<'fixed' | 'variable'>('fixed');
   const [recordCount, setRecordCount] = useState(0);
   const [isContinueInput, setIsContinueInput] = useState<boolean>(false);
-  const [showDatePicker, setShowDatePicker = useState(false);
-  const [currentDateField, setCurrentDateField = useState<string | null>(null);
-  const [selectedDate, setSelectedDate = useState(new Date());
-  const [tempDate, setTempDate = useState(new Date());
-  const [isDatePickerBusy, setIsDatePickerBusy = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentDateField, setCurrentDateField] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [tempDate, setTempDate] = useState(new Date());
+  const [isDatePickerBusy, setIsDatePickerBusy] = useState(false);
   const inputRefs = useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
-  const [fieldOrder, setFieldOrder = useState<string[]>([]);
-  const [showSuccessMessage, setShowSuccessMessage = useState(false);
-  const [showExitConfirmModal, setShowExitConfirmModal = useState(false);
-  const [keyboardHeight, setKeyboardHeight = useState(0);
-  const [isKeyboardVisible, setIsKeyboardVisible = useState(false);
+  const [fieldOrder, setFieldOrder] = useState<string[]>([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
