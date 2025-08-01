@@ -40,26 +40,26 @@ interface DataRecord {
 export default function DataEntryScreen() {
   const { templateId, dataFileName, continueInput, fixedFieldValues } = useLocalSearchParams();
   const [template, setTemplate] = useState<Template | null>(null);
-  const [fixedFormData, setFixedFormData] = useState<{ [fieldId: string]: string }>({});
-  const [variableFormData, setVariableFormData] = useState<{ [fieldId: string]: string }>({});
-  const [showCamera, setShowCamera] = useState(false);
-  const [currentBarcodeField, setCurrentBarcodeField] = useState<string | null>(null);
+  const [fixedFormData, setFixedFormData = useState<{ [fieldId: string]: string }>({});
+  const [variableFormData, setVariableFormData<{ [fieldId: string]: string }>({});
+  const [showCamera, setShowCamera: useState<boolean>(false);
+  const [currentBarcodeField, setCurrentBarcodeField: useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const [currentDataFileName, setCurrentDataFileName] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState<'fixed' | 'variable'>('fixed');
-  const [recordCount, setRecordCount] = useState(0);
-  const [isContinueInput, setIsContinueInput] = useState<boolean>(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [currentDateField, setCurrentDateField] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [tempDate, setTempDate] = useState(new Date());
-  const [isDatePickerBusy, setIsDatePickerBusy] = useState(false);
-  const inputRefs = useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
-  const [fieldOrder, setFieldOrder] = useState<string[]>([]);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [currentDataFileName, setCurrentDataFileName: useState<string>('');
+  const [currentPage, setCurrentPage<'' | 'variable'>('fixed');
+  const [recordCount, setRecordCount: useState<number>(0);
+  const [isContinueInput, setIsContinueInput: useState<boolean>(false);
+  const [showDatePicker, setShowDatePicker: useState<boolean>(false);
+  const [currentDateField, setCurrentDateField: useState<string | null>(null);
+  const [selectedDate, setSelectedDate: useState<Date>(new Date());
+  const [tempDate, setTempDate: useState<Date>(new Date());
+  const [isDatePickerBusy, setIsDatePickerBusy: useState<boolean>(false);
+  const inputRefs: useRef<{ [fieldId: string]: React.RefObject<TextInput> }>({});
+  const [fieldOrder, setFieldOrder: useState<string[]>([ ]);
+  const [showSuccessMessage, setShowSuccessMessage: useState<boolean>(false);
+  const [showExitConfirmModal, setShowExitConfirmModal: useState<boolean>(false);
+  const [keyboardHeight, setKeyboardHeight: useState<number>(0);
+  const [isKeyboardVisible, setIsKeyboardVisible: useState<boolean>(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -624,17 +624,21 @@ export default function DataEntryScreen() {
             numberOfLines={3}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onPressIn={() => {
-              // Ensure scroll happens on every press, even if already focused
-              setTimeout(() => scrollToField(field.id), 50);
+              // Only apply scroll behavior on variable page
+              if (!isFixedPage) {
+                setTimeout(() => scrollToField(field.id), 50);
+              }
             }}
             onFocus={(event) => {
-              // Apply scroll logic for both fixed and variable pages
-              setTimeout(() => scrollToField(field.id), 50);
-              // Auto-select text on focus with a small delay to ensure it works
-              if (value) {
-                setTimeout(() => {
-                  event.target.setSelection?.(0, value.length);
-                }, 100);
+              // Only apply scroll and selection logic on variable page
+              if (!isFixedPage) {
+                setTimeout(() => scrollToField(field.id), 50);
+                // Auto-select text on focus with a small delay to ensure it works
+                if (value) {
+                  setTimeout(() => {
+                    event.target.setSelection?.(0, value.length);
+                  }, 100);
+                }
               }
             }}
             blurOnSubmit={false}
@@ -653,17 +657,21 @@ export default function DataEntryScreen() {
             keyboardType="numeric"
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onPressIn={() => {
-              // Ensure scroll happens on every press, even if already focused
-              setTimeout(() => scrollToField(field.id), 50);
+              // Only apply scroll behavior on variable page
+              if (!isFixedPage) {
+                setTimeout(() => scrollToField(field.id), 50);
+              }
             }}
             onFocus={(event) => {
-              // Apply scroll logic for both fixed and variable pages
-              setTimeout(() => scrollToField(field.id), 50);
-              // Auto-select text on focus with a small delay to ensure it works
-              if (value) {
-                setTimeout(() => {
-                  event.target.setSelection?.(0, value.length);
-                }, 100);
+              // Only apply scroll and selection logic on variable page
+              if (!isFixedPage) {
+                setTimeout(() => scrollToField(field.id), 50);
+                // Auto-select text on focus with a small delay to ensure it works
+                if (value) {
+                  setTimeout(() => {
+                    event.target.setSelection?.(0, value.length);
+                  }, 100);
+                }
               }
             }}
             blurOnSubmit={false}
@@ -750,20 +758,23 @@ export default function DataEntryScreen() {
                 onChangeText={(text) => !isContinueInput && updateFunction(field.id, text)}
                 onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
                 onPressIn={() => {
-                  // Ensure scroll happens on every press, even if already focused
-                  if (!isContinueInput) {
+                  // Only apply scroll behavior on variable page
+                  if (!isFixedPage) {
                     setTimeout(() => scrollToField(field.id), 50);
                   }
                 }}
                 onFocus={(event) => {
-                  // Apply scroll logic for both fixed and variable pages
+                  // Only apply scroll and selection logic on variable page
                   if (!isContinueInput) {
-                    setTimeout(() => scrollToField(field.id), 50);
-                    // Auto-select text on focus with a small delay to ensure it works
-                    if (value) {
-                      setTimeout(() => {
-                        event.target.setSelection?.(0, value.length);
-                      }, 100);
+                  // Only apply scroll and selection logic on variable page
+                    if (!isFixedPage) {
+                      setTimeout(() => scrollToField(field.id), 50);
+                      // Auto-select text on focus with a small delay to ensure it works
+                      if (value) {
+                        setTimeout(() => {
+                          event.target.setSelection?.(0, value.length);
+                        }, 100);
+                      }
                     }
                   }
                 }}
@@ -824,19 +835,23 @@ export default function DataEntryScreen() {
               onChangeText={(text) => updateFunction(field.id, text)}
               onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
               onPressIn={() => {
-                // Ensure scroll happens on every press, even if already focused
-                setTimeout(() => scrollToField(field.id), 50);
+                // Only apply scroll behavior on variable page
+                if (!isFixedPage) {
+                  setTimeout(() => scrollToField(field.id), 50);
+                }
               }}
               onFocus={(event) => {
-              // Apply scroll logic for both fixed and variable pages
-              setTimeout(() => scrollToField(field.id), 50);
-              // Auto-select text on focus with a small delay to ensure it works
-              if (value) {
-                setTimeout(() => {
-                  event.target.setSelection?.(0, value.length);
-                }, 100);
-              }
-            }}
+              // Only apply scroll and selection logic on variable page
+                if (!isFixedPage) {
+                  setTimeout(() => scrollToField(field.id), 50);
+                  // Auto-select text on focus with a small delay to ensure it works
+                  if (value) {
+                    setTimeout(() => {
+                      event.target.setSelection?.(0, value.length);
+                    }, 100);
+                  }
+                }
+              }}
               blurOnSubmit={false}
               selectTextOnFocus={true}
             />
@@ -859,17 +874,21 @@ export default function DataEntryScreen() {
             onChangeText={(text) => updateFunction(field.id, text)}
             onSubmitEditing={() => !isFixedPage && moveToNextField(field.id)}
             onPressIn={() => {
-              // Ensure scroll happens on every press, even if already focused
-              setTimeout(() => scrollToField(field.id), 50);
+              // Only apply scroll behavior on variable page
+              if (!isFixedPage) {
+                setTimeout(() => scrollToField(field.id), 50);
+              }
             }}
             onFocus={(event) => {
-              // Apply scroll logic for both fixed and variable pages
-              setTimeout(() => scrollToField(field.id), 50);
-              // Auto-select text on focus with a small delay to ensure it works
-              if (value) {
-                setTimeout(() => {
-                  event.target.setSelection?.(0, value.length);
-                }, 100);
+              // Only apply scroll and selection logic on variable page
+              if (!isFixedPage) {
+                setTimeout(() => scrollToField(field.id), 50);
+                // Auto-select text on focus with a small delay to ensure it works
+                if (value) {
+                  setTimeout(() => {
+                    event.target.setSelection?.(0, value.length);
+                  }, 100);
+                }
               }
             }}
             blurOnSubmit={false}
@@ -902,7 +921,7 @@ export default function DataEntryScreen() {
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
-          <ThemedText type="title" style={styles.title}>
+          <ThemedTexttype="title" style={styles.title}>
             {currentPage === 'fixed' ? 'Fixed Data Entry' : 'Data Entry'}
           </ThemedText>
         </View>
