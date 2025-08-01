@@ -77,7 +77,7 @@ export default function FileDetailsScreen() {
     } else {
       const filtered = fileRecords.filter(record => {
         let template = templates.find(t => t.id === record.templateId);
-        
+
         // Use preserved template fields if original template is deleted
         if (!template && record.preservedTemplateFields) {
           template = {
@@ -192,6 +192,16 @@ export default function FileDetailsScreen() {
       setShowMissingTemplateModal(true);
       return;
     }
+    
+     if (!templateExists && firstRecord.preservedTemplateFields) {
+          setShowMissingTemplateModal(true);
+          return;
+     }
+    
+    if(!templateExists){
+          setShowMissingTemplateModal(true);
+          return;
+    }
 
     // Use preserved template fields if original template is deleted
     const templateFields = templateExists?.fields || firstRecord.preservedTemplateFields || [];
@@ -274,6 +284,32 @@ export default function FileDetailsScreen() {
     );
   };
 
+  // Check if any records have deleted templates
+  const hasDeletedTemplate = fileRecords.length > 0 && fileRecords.some(record => {
+    const template = templates.find(t => t.id === record.templateId);
+    return !template && record.preservedTemplateFields;
+  });
+
+  const fileInfo = (
+    <View style={styles.fileInfo}>
+      <Text style={styles.fileName}>📁 {fileName}</Text>
+      <Text style={styles.recordCount}>
+        Total Records: {fileRecords.length}
+      </Text>
+      {hasDeletedTemplate && (
+        <Text style={styles.deletedTemplateWarning}>⚠️ Some records use deleted templates</Text>
+      )}
+      {fileRecords.length > 0 && (
+        <TouchableOpacity
+          style={styles.continueInputButton}
+          onPress={continueInput}
+        >
+          <Text style={styles.continueInputButtonText}>🔄 Continue Input</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
@@ -283,20 +319,7 @@ export default function FileDetailsScreen() {
         <ThemedText type="title" style={styles.title}>File Details</ThemedText>
       </View>
 
-      <View style={styles.fileInfo}>
-        <Text style={styles.fileName}>📁 {fileName}</Text>
-        <Text style={styles.recordCount}>
-          Total Records: {fileRecords.length}
-        </Text>
-        {fileRecords.length > 0 && (
-          <TouchableOpacity
-            style={styles.continueInputButton}
-            onPress={continueInput}
-          >
-            <Text style={styles.continueInputButtonText}>🔄 Continue Input</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {fileInfo}
 
       <View style={styles.searchContainer}>
         <TextInput
@@ -719,5 +742,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
+  },
+  deletedTemplateWarning: {
+    fontSize: 14,
+    color: '#e53e3e',
+    textAlign: 'center',
+    lineHeight: 20,
+    fontStyle: 'italic',
+    marginBottom: 8,
   },
 });
