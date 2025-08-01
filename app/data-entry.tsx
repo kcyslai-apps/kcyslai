@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal, Platform, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, Modal, Platform, Keyboard, Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Camera, CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -1144,10 +1144,21 @@ export default function DataEntryScreen() {
   );
 }
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const isWeb = Platform.OS === 'web';
+const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+    ...(isWeb && {
+      maxWidth: 400,
+      marginHorizontal: 'auto',
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: '#e2e8f0',
+    }),
   },
   scrollContainer: {
     flexGrow: 1,
@@ -1243,7 +1254,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#ffffff',
     textAlignVertical: 'top',
-    minHeight: 44,
+    minHeight: Platform.select({
+      ios: 44,
+      android: 48,
+      web: 40,
+    }),
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+      },
+    }),
   },
   pickerContainer: {
     borderWidth: 1,
