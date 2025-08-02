@@ -4,13 +4,6 @@ modules = ["nodejs-20"]
 [nix]
 channel = "stable-24_05"
 
-[[ports]]
-localPort = 8081
-
-[[ports]]
-localPort = 8082
-externalPort = 3000
-
 [workflows]
 runButton = "Dev Server"
 
@@ -53,3 +46,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npx eas build --platform android --profile preview"
+
+[[ports]]
+localPort = 8081
+externalPort = 80
+
+[[ports]]
+localPort = 8082
+externalPort = 3000
+
+[[ports]]
+localPort = 8083
+externalPort = 3001
