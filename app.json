@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "expo-on-replit",
+    "name": "Expo on Replit",
     "slug": "expo-on-replit",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,7 +21,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.kcyslai.expoonreplit"
+      "package": "com.kcyslai.expo_on_replit"
     },
     "web": {
       "bundler": "metro",
