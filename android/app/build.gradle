@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.expoonreplit"
+    namespace "com.kcyslai.expo_on_replit"
     defaultConfig {
-        applicationId "com.expoonreplit"
+        applicationId "com.kcyslai.expo_on_replit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
