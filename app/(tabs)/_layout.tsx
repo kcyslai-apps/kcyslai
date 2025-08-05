@@ -18,6 +18,7 @@ export default function TabLayout() {
           bottom: 40,
           left: 0,
           right: 0,
+          boxShadow: '0px -2px 8px rgba(0, 0, 0, 0.1)',
         },
         tabBarActiveTintColor: '#4299e1',
         tabBarInactiveTintColor: '#718096',
