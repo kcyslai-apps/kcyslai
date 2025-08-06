@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, StyleSheet, Animated, Dimensions, Image } from 'react-native';
 import { ThemedText } from './ThemedText';
 
 const { width, height } = Dimensions.get('window');
@@ -33,7 +33,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
     // Start rotation animation (one full rotation)
     Animated.timing(rotateAnim, {
       toValue: 1,
-      duration: 4000, // Slower rotation - 4 seconds
+      duration: 3000, // Faster rotation - 3 seconds
       useNativeDriver: true,
     }).start(() => {
       // After rotation completes, fade out and transition
@@ -66,28 +66,11 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
           },
         ]}
       >
-        {/* Barcode Icon SVG recreation */}
-        <View style={styles.barcodeIcon}>
-          <View style={styles.orangeBackground}>
-            {/* White circle */}
-            <View style={styles.whiteCircle}>
-              <View style={styles.orangeInnerCircle} />
-            </View>
-            
-            {/* Barcode lines */}
-            <View style={styles.barcodeLines}>
-              <View style={[styles.line, { width: 4, height: 30 }]} />
-              <View style={[styles.line, { width: 2, height: 25 }]} />
-              <View style={[styles.line, { width: 3, height: 35 }]} />
-              <View style={[styles.line, { width: 2, height: 20 }]} />
-              <View style={[styles.line, { width: 4, height: 32 }]} />
-              <View style={[styles.line, { width: 2, height: 28 }]} />
-              <View style={[styles.line, { width: 3, height: 22 }]} />
-              <View style={[styles.line, { width: 2, height: 30 }]} />
-              <View style={[styles.line, { width: 4, height: 26 }]} />
-            </View>
-          </View>
-        </View>
+        <Image 
+          source={require('../assets/images/barcode-icon.png')} 
+          style={styles.barcodeIcon}
+          resizeMode="contain"
+        />
       </Animated.View>
       
       <Animated.View style={[styles.textContainer, { opacity: opacityAnim }]}>
@@ -111,44 +94,6 @@ const styles = StyleSheet.create({
   barcodeIcon: {
     width: 120,
     height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  orangeBackground: {
-    width: 120,
-    height: 120,
-    backgroundColor: '#FF6B35',
-    borderRadius: 26,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  whiteCircle: {
-    width: 32,
-    height: 32,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    position: 'absolute',
-    top: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  orangeInnerCircle: {
-    width: 16,
-    height: 16,
-    backgroundColor: '#FF6B35',
-    borderRadius: 8,
-  },
-  barcodeLines: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    position: 'absolute',
-    bottom: 20,
-    gap: 2,
-  },
-  line: {
-    backgroundColor: '#1a1a1a',
   },
   textContainer: {
     alignItems: 'center',
