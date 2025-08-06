@@ -2,7 +2,7 @@
   "expo": {
     "name": "Barcode2File",
     "slug": "expo-on-replit",
-    "version": "1.0.0",
+    "version": "1.0.16",
     "scheme": "barcode2file",
     "web": {
       "bundler": "metro",
