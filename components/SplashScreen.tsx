@@ -13,9 +13,10 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const scaleAnim = new Animated.Value(0.8);
   const opacityAnim = new Animated.Value(0);
   const rotateAnim = new Animated.Value(0);
+  const fadeOutAnim = new Animated.Value(1);
 
   useEffect(() => {
-    // Start animations
+    // Start initial animations
     Animated.parallel([
       Animated.timing(scaleAnim, {
         toValue: 1,
@@ -27,21 +28,23 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         duration: 600,
         useNativeDriver: true,
       }),
-      Animated.loop(
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 3000,
-          useNativeDriver: true,
-        })
-      ),
     ]).start();
 
-    // Navigate to main app after 5 seconds
-    const timer = setTimeout(() => {
-      onFinish();
-    }, 5000);
-
-    return () => clearTimeout(timer);
+    // Start rotation animation (one full rotation)
+    Animated.timing(rotateAnim, {
+      toValue: 1,
+      duration: 4000, // Slower rotation - 4 seconds
+      useNativeDriver: true,
+    }).start(() => {
+      // After rotation completes, fade out and transition
+      Animated.timing(fadeOutAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        onFinish();
+      });
+    });
   }, []);
 
   const spin = rotateAnim.interpolate({
@@ -50,7 +53,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   });
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeOutAnim }]}>
       <Animated.View
         style={[
           styles.iconContainer,
@@ -91,7 +94,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         <ThemedText type="title" style={styles.appName}>Barcode2File</ThemedText>
         <ThemedText style={styles.tagline}>Scan • Save • Organize</ThemedText>
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
 
