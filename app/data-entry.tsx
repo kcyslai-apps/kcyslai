@@ -58,12 +58,19 @@ export default function DataEntryScreen() {
   const [fieldOrder, setFieldOrder] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   const [showExitConfirmModal, setShowExitConfirmModal] = useState<boolean>(false);
+  const [showValidationModal, setShowValidationModal] = useState<boolean>(false);
+  const [validationError, setValidationError] = useState<string>('');
   const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
+
+  const showValidationError = (message: string) => {
+    setValidationError(message);
+    setShowValidationModal(true);
+  };
 
   useEffect(() => {
     // Check if this is a continue input session first
@@ -430,7 +437,7 @@ export default function DataEntryScreen() {
 
     for (const field of fixedFields) {
       if (field.required && !fixedFormData[field.id]?.trim()) {
-        Alert.alert('Validation Error', `${field.name} is required`);
+        showValidationError(`${field.name} is required`);
         return false;
       }
     }
@@ -446,7 +453,7 @@ export default function DataEntryScreen() {
 
     for (const field of variableFields) {
       if (field.required && !variableFormData[field.id]?.trim()) {
-        Alert.alert('Validation Error', `${field.name} is required`);
+        showValidationError(`${field.name} is required`);
         return false;
       }
     }
@@ -1108,6 +1115,33 @@ export default function DataEntryScreen() {
         </Modal>
       )}
 
+      {/* Validation Error Modal */}
+      <Modal visible={showValidationModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.validationModalContent}>
+            <Text style={styles.validationModalTitle}>⚠️ Validation Error</Text>
+
+            <View style={styles.validationModalInfo}>
+              <Text style={styles.validationModalMessage}>
+                {validationError}
+              </Text>
+            </View>
+
+            <View style={styles.validationModalButtons}>
+              <TouchableOpacity
+                style={styles.validationModalOkButton}
+                onPress={() => {
+                  setShowValidationModal(false);
+                  setValidationError('');
+                }}
+              >
+                <Text style={styles.validationModalOkButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Save & Exit Confirmation Modal */}
       <Modal visible={showExitConfirmModal} transparent animationType="fade">
         <View style={styles.exitModalOverlay}>
@@ -1644,5 +1678,77 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 4,
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  validationModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 340,
+    alignItems: 'center',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  validationModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  validationModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  validationModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#fed7d7',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#fc8181',
+    minWidth: '80%',
+  },
+  validationModalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  validationModalOkButton: {
+    backgroundColor: '#4299e1',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 100,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  validationModalOkButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
