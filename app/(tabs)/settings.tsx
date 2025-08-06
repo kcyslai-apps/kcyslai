@@ -44,6 +44,8 @@ export default function SettingsScreen() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showExportSelectionModal, setShowExportSelectionModal] = useState(false);
+  const [selectedTemplatesForExport, setSelectedTemplatesForExport] = useState<string[]>([]);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
 
@@ -75,15 +77,44 @@ export default function SettingsScreen() {
     }
   };
 
-  const exportTemplates = async () => {
+  const showExportSelection = () => {
+    if (templates.length === 0) {
+      showError('No templates available to export');
+      return;
+    }
+    setSelectedTemplatesForExport([]);
+    setShowExportSelectionModal(true);
+  };
+
+  const toggleTemplateSelection = (templateId: string) => {
+    setSelectedTemplatesForExport(prev => {
+      if (prev.includes(templateId)) {
+        return prev.filter(id => id !== templateId);
+      } else {
+        return [...prev, templateId];
+      }
+    });
+  };
+
+  const selectAllTemplates = () => {
+    if (selectedTemplatesForExport.length === templates.length) {
+      setSelectedTemplatesForExport([]);
+    } else {
+      setSelectedTemplatesForExport(templates.map(t => t.id));
+    }
+  };
+
+  const exportSelectedTemplates = async () => {
     try {
-      if (templates.length === 0) {
-        showError('No templates available to export');
+      if (selectedTemplatesForExport.length === 0) {
+        showError('Please select at least one template to export');
         return;
       }
 
+      const selectedTemplates = templates.filter(t => selectedTemplatesForExport.includes(t.id));
+      
       const exportData = {
-        templates: templates,
+        templates: selectedTemplates,
         exportDate: new Date().toISOString(),
         appVersion: appVersion
       };
@@ -93,18 +124,25 @@ export default function SettingsScreen() {
       
       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(exportData, null, 2));
       
+      setShowExportSelectionModal(false);
+      
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           dialogTitle: 'Export Templates',
           mimeType: 'application/json'
         });
       } else {
-        Alert.alert('Export Complete', `Templates exported to: ${fileName}`);
+        Alert.alert('Export Complete', `${selectedTemplates.length} template(s) exported to: ${fileName}`);
       }
     } catch (error) {
       showError('Failed to export templates. Please try again.');
       console.log('Export error:', error);
     }
+  };
+
+  const cancelExportSelection = () => {
+    setShowExportSelectionModal(false);
+    setSelectedTemplatesForExport([]);
   };
 
   const importTemplates = async () => {
@@ -202,7 +240,7 @@ export default function SettingsScreen() {
             <Text style={styles.settingValue}>{templates.length}</Text>
           </View>
           
-          <TouchableOpacity style={styles.actionButton} onPress={exportTemplates}>
+          <TouchableOpacity style={styles.actionButton} onPress={showExportSelection}>
             <Text style={styles.actionButtonText}>📤 Export Templates</Text>
           </TouchableOpacity>
           
@@ -226,6 +264,78 @@ export default function SettingsScreen() {
             >
               <Text style={styles.errorModalButtonText}>OK</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Export Selection Modal */}
+      <Modal visible={showExportSelectionModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.exportSelectionModalContent}>
+            <Text style={styles.exportSelectionModalTitle}>📤 Select Templates to Export</Text>
+            
+            <TouchableOpacity style={styles.selectAllButton} onPress={selectAllTemplates}>
+              <Text style={styles.selectAllButtonText}>
+                {selectedTemplatesForExport.length === templates.length ? '☑️ Deselect All' : '☑️ Select All'}
+              </Text>
+            </TouchableOpacity>
+
+            <ScrollView style={styles.templateSelectionList} showsVerticalScrollIndicator={false}>
+              {templates.map((template) => (
+                <TouchableOpacity
+                  key={template.id}
+                  style={[
+                    styles.templateSelectionItem,
+                    selectedTemplatesForExport.includes(template.id) && styles.selectedTemplateItem
+                  ]}
+                  onPress={() => toggleTemplateSelection(template.id)}
+                >
+                  <View style={styles.templateSelectionContent}>
+                    <Text style={styles.templateSelectionCheckbox}>
+                      {selectedTemplatesForExport.includes(template.id) ? '☑️' : '☐'}
+                    </Text>
+                    <View style={styles.templateSelectionInfo}>
+                      <Text style={[
+                        styles.templateSelectionName,
+                        selectedTemplatesForExport.includes(template.id) && styles.selectedTemplateName
+                      ]}>
+                        {template.name}
+                      </Text>
+                      <Text style={styles.templateSelectionDescription}>
+                        {template.description || 'No description'}
+                      </Text>
+                      <Text style={styles.templateSelectionFields}>
+                        {template.fields.length} field(s)
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <View style={styles.exportSelectionModalButtons}>
+              <TouchableOpacity
+                style={styles.exportSelectionCancelButton}
+                onPress={cancelExportSelection}
+              >
+                <Text style={styles.exportSelectionCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.exportSelectionConfirmButton,
+                  selectedTemplatesForExport.length === 0 && styles.disabledButton
+                ]}
+                onPress={exportSelectedTemplates}
+                disabled={selectedTemplatesForExport.length === 0}
+              >
+                <Text style={[
+                  styles.exportSelectionConfirmButtonText,
+                  selectedTemplatesForExport.length === 0 && styles.disabledButtonText
+                ]}>
+                  Export ({selectedTemplatesForExport.length})
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -373,5 +483,134 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  exportSelectionModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    width: '95%',
+    maxWidth: 500,
+    maxHeight: '80%',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: '#4299e1',
+  },
+  exportSelectionModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    padding: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  selectAllButton: {
+    backgroundColor: '#f8fafc',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+  },
+  selectAllButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#4a5568',
+  },
+  templateSelectionList: {
+    flex: 1,
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  templateSelectionItem: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: 'white',
+  },
+  selectedTemplateItem: {
+    borderColor: '#4299e1',
+    backgroundColor: '#f0f8ff',
+  },
+  templateSelectionContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 15,
+  },
+  templateSelectionCheckbox: {
+    fontSize: 18,
+    marginRight: 12,
+    marginTop: 2,
+  },
+  templateSelectionInfo: {
+    flex: 1,
+  },
+  templateSelectionName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 4,
+  },
+  selectedTemplateName: {
+    color: '#2b6cb0',
+  },
+  templateSelectionDescription: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 4,
+  },
+  templateSelectionFields: {
+    fontSize: 12,
+    color: '#a0aec0',
+    fontStyle: 'italic',
+  },
+  exportSelectionModalButtons: {
+    flexDirection: 'row',
+    padding: 20,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    gap: 10,
+  },
+  exportSelectionCancelButton: {
+    flex: 1,
+    backgroundColor: '#e2e8f0',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  exportSelectionCancelButtonText: {
+    color: '#4a5568',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  exportSelectionConfirmButton: {
+    flex: 1,
+    backgroundColor: '#4299e1',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  exportSelectionConfirmButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#cbd5e0',
+  },
+  disabledButtonText: {
+    color: '#a0aec0',
   },
 });
