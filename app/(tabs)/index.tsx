@@ -128,7 +128,7 @@ export default function TemplatesScreen() {
     setCurrentField({
       name: '',
       type: 'free_text',
-      required: false,
+      required: true,
       defaultValue: '',
       options: [],
       dateFormat: 'YYYY-MM-DD',
@@ -155,7 +155,7 @@ export default function TemplatesScreen() {
       id: currentField.id || Date.now().toString(),
       name: currentField.name.trim(),
       type: currentField.type || 'free_text',
-      required: currentField.required || false,
+      required: true,
       defaultValue: currentField.defaultValue || '',
       options: currentField.options || [],
       inputMode: currentField.inputMode || 'select_only',
@@ -505,7 +505,7 @@ export default function TemplatesScreen() {
       <View style={styles.fieldInfo}>
         <Text style={styles.fieldName}>{item.name}</Text>
         <Text style={styles.fieldType}>Type: {fieldTypes.find(t => t.value === item.type)?.label}</Text>
-        <Text style={styles.fieldRequired}>Required: {item.required ? 'Yes' : 'No'}</Text>
+        <Text style={styles.fieldRequired}>Required: Yes</Text>
         {(item.type === 'date' || item.type === 'fixed_date') && (
           <Text style={styles.fieldFormat}>
             Format: {item.dateFormat === 'custom' ? item.customDateFormat || 'Custom' : item.dateFormat || 'YYYY-MM-DD'}
@@ -861,21 +861,7 @@ export default function TemplatesScreen() {
                 </Picker>
               </View>
 
-              {editingTemplateId && (
-                    <View style={styles.checkboxContainer}>
-                      <TouchableOpacity
-                        style={styles.checkbox}
-                        onPress={() => setCurrentField({ ...currentField, required: !currentField.required })}
-                      >
-                        <Text style={styles.checkboxIcon}>
-                          {currentField.required ? '☑' : '☐'}
-                        </Text>
-                        <Text style={styles.checkboxText}>
-                          Required Field
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
+              
 
 
               {(currentField.type === 'free_text' || currentField.type === 'number') && (
