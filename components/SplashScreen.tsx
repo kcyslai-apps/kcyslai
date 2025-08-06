@@ -45,7 +45,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         }).start(() => {
           onFinish();
         });
-      }, 5000); // Wait 5 seconds before starting fade out (extended by 4 seconds)
+      }, 8000); // Wait 8 seconds before starting fade out (extended by 7 seconds total)
     });
   }, []);
 
