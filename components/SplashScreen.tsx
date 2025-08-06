@@ -30,7 +30,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
       Animated.loop(
         Animated.timing(rotateAnim, {
           toValue: 1,
-          duration: 2000,
+          duration: 3000,
           useNativeDriver: true,
         })
       ),
@@ -98,7 +98,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appName: {
-    color: 'white',
+    color: '#1a1a1a',
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 8,
