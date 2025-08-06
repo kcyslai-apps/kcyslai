@@ -174,9 +174,22 @@ export default function SettingsScreen() {
             createdAt: new Date(template.createdAt)
           }));
 
-          // Check for duplicate names
+          // Get the most current templates from file system for accurate duplicate checking
+          const fileExists = await FileSystem.getInfoAsync(TEMPLATES_FILE);
+          let currentTemplates: Template[] = [];
+          
+          if (fileExists.exists) {
+            const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
+            const loadedTemplates = JSON.parse(content);
+            currentTemplates = loadedTemplates.map((template: any) => ({
+              ...template,
+              createdAt: new Date(template.createdAt)
+            }));
+          }
+
+          // Check for duplicate names against current file system data
           const duplicateNames: string[] = [];
-          const existingNames = templates.map(t => t.name.toLowerCase());
+          const existingNames = currentTemplates.map(t => t.name.toLowerCase());
           
           importedTemplates.forEach((template: Template) => {
             if (existingNames.includes(template.name.toLowerCase())) {
@@ -189,8 +202,8 @@ export default function SettingsScreen() {
             return;
           }
 
-          // Import templates
-          const updatedTemplates = [...templates, ...importedTemplates];
+          // Import templates using current file system data
+          const updatedTemplates = [...currentTemplates, ...importedTemplates];
           setTemplates(updatedTemplates);
           await saveTemplates(updatedTemplates);
 
