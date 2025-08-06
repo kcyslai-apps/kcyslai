@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Alert, FlatList, Modal, TextI
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as FileSystem from 'expo-file-system';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -64,6 +64,13 @@ export default function TemplatesScreen() {
   useEffect(() => {
     loadTemplates();
   }, []);
+
+  // Reload templates when the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTemplates();
+    }, [])
+  );
 
   const loadTemplates = async () => {
     try {
