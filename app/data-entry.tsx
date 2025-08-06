@@ -624,13 +624,24 @@ export default function DataEntryScreen() {
           <TextInput
             ref={inputRefs.current[field.id]}
             style={styles.input}
-            placeholder={`Enter ${field.name}`}
+            placeholder={`Enter ${field.name} (max 30 chars)`}
             value={value}
-            onChangeText={(text) => updateFunction(field.id, text)}
-            multiline={true}
-            numberOfLines={3}
+            onChangeText={(text) => {
+              // Limit to 30 characters
+              const limitedText = text.slice(0, 30);
+              updateFunction(field.id, limitedText);
+            }}
+            multiline={false}
+            maxLength={30}
             onSubmitEditing={() => {
               if (!isFixedPage) {
+                moveToNextField(field.id);
+              }
+            }}
+            onKeyPress={(event) => {
+              // Handle TAB key for navigation
+              if (event.nativeEvent.key === 'Tab' && !isFixedPage) {
+                event.preventDefault();
                 moveToNextField(field.id);
               }
             }}
@@ -654,6 +665,7 @@ export default function DataEntryScreen() {
             }}
             blurOnSubmit={false}
             selectTextOnFocus={true}
+            returnKeyType="next"
           />
         );
 
