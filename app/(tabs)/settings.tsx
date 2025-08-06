@@ -83,7 +83,11 @@ export default function SettingsScreen() {
     }
   };
 
-  const showExportSelection = () => {
+  const showExportSelection = async () => {
+    // Reload templates to ensure we have the latest data
+    await loadTemplates();
+    
+    // Check again after loading
     if (templates.length === 0) {
       showError('No templates available to export');
       return;
@@ -265,10 +269,19 @@ export default function SettingsScreen() {
       </Modal>
 
       {/* Export Selection Modal */}
-      <Modal visible={showExportSelectionModal} transparent animationType="slide">
+      <Modal 
+        visible={showExportSelectionModal} 
+        transparent 
+        animationType="slide"
+        onShow={() => {
+          console.log('Export modal opened, templates count:', templates.length);
+          console.log('Templates:', templates.map(t => t.name));
+        }}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.exportSelectionModalContent}>
             <Text style={styles.exportSelectionModalTitle}>📤 Select Template to Export</Text>
+            <Text style={styles.debugText}>Found {templates.length} templates</Text>
 
             <ScrollView style={styles.templateSelectionList} showsVerticalScrollIndicator={false}>
               {templates.length === 0 ? (
@@ -610,5 +623,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#a0aec0',
     textAlign: 'center',
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#718096',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontStyle: 'italic',
   },
 });
