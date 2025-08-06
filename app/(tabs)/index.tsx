@@ -373,7 +373,11 @@ export default function TemplatesScreen() {
       // Remove the template
       const updatedTemplates = templates.filter(t => t.id !== selectedTemplateForDelete.id);
       setTemplates(updatedTemplates);
-      saveTemplates(updatedTemplates);
+      await saveTemplates(updatedTemplates);
+      
+      // Reload templates from file system to ensure state consistency
+      await loadTemplates();
+      
       setShowDeleteTemplateModal(false);
       setSelectedTemplateForDelete(null);
     }

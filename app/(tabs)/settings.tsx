@@ -55,7 +55,7 @@ export default function SettingsScreen() {
     loadTemplates();
   }, []);
 
-  const loadTemplates = async () => {
+  const loadTemplates = async (forceReload = false) => {
     try {
       const fileExists = await FileSystem.getInfoAsync(TEMPLATES_FILE);
       if (fileExists.exists) {
@@ -149,6 +149,9 @@ export default function SettingsScreen() {
 
   const importTemplates = async () => {
     try {
+      // Force reload templates to ensure we have the latest state
+      await loadTemplates(true);
+      
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/json',
         copyToCacheDirectory: true
@@ -190,6 +193,9 @@ export default function SettingsScreen() {
           const updatedTemplates = [...templates, ...importedTemplates];
           setTemplates(updatedTemplates);
           await saveTemplates(updatedTemplates);
+
+          // Reload templates from file system to ensure state consistency
+          await loadTemplates();
 
           Alert.alert('Success', `Successfully imported ${importedTemplates.length} template(s)`);
         } catch (parseError) {
