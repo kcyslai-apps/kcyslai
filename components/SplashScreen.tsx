@@ -12,7 +12,7 @@ interface SplashScreenProps {
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const scaleAnim = new Animated.Value(0.8);
   const opacityAnim = new Animated.Value(0);
-  const rotateAnim = new Animated.Value(0);
+  const iconFadeAnim = new Animated.Value(0);
   const fadeOutAnim = new Animated.Value(1);
 
   useEffect(() => {
@@ -30,27 +30,24 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
       }),
     ]).start();
 
-    // Start rotation animation (one full rotation)
-    Animated.timing(rotateAnim, {
+    // Start fade-in animation for the icon
+    Animated.timing(iconFadeAnim, {
       toValue: 1,
-      duration: 3000, // Faster rotation - 3 seconds
+      duration: 2000, // 2 seconds fade-in
       useNativeDriver: true,
     }).start(() => {
-      // After rotation completes, fade out and transition
-      Animated.timing(fadeOutAnim, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(() => {
-        onFinish();
-      });
+      // After fade-in completes, wait a moment then fade out and transition
+      setTimeout(() => {
+        Animated.timing(fadeOutAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start(() => {
+          onFinish();
+        });
+      }, 1000); // Wait 1 second before starting fade out
     });
   }, []);
-
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeOutAnim }]}>
@@ -58,17 +55,14 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         style={[
           styles.iconContainer,
           {
-            transform: [
-              { scale: scaleAnim },
-              { rotate: spin }
-            ],
+            transform: [{ scale: scaleAnim }],
             opacity: opacityAnim,
           },
         ]}
       >
-        <Image 
+        <Animated.Image 
           source={require('../assets/images/barcode-icon.png')} 
-          style={styles.barcodeIcon}
+          style={[styles.barcodeIcon, { opacity: iconFadeAnim }]}
           resizeMode="contain"
         />
       </Animated.View>
