@@ -651,14 +651,16 @@ export default function DataEntryScreen() {
                 setTimeout(() => scrollToField(field.id), 50);
               }
             }}
-            onFocus={(event) => {
+            onFocus={() => {
               // Only apply scroll and selection logic on variable page
               if (!isFixedPage) {
                 setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus with a small delay to ensure it works
-                if (value) {
+                // Auto-select text on focus using the ref
+                if (value && inputRefs.current[field.id]?.current) {
                   setTimeout(() => {
-                    event.target.setSelection?.(0, value.length);
+                    inputRefs.current[field.id]?.current?.setNativeProps({
+                      selection: { start: 0, end: value.length }
+                    });
                   }, 100);
                 }
               }
@@ -689,14 +691,16 @@ export default function DataEntryScreen() {
                 setTimeout(() => scrollToField(field.id), 50);
               }
             }}
-            onFocus={(event) => {
+            onFocus={() => {
               // Only apply scroll and selection logic on variable page
               if (!isFixedPage) {
                 setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus with a small delay to ensure it works
-                if (value) {
+                // Auto-select text on focus using the ref
+                if (value && inputRefs.current[field.id]?.current) {
                   setTimeout(() => {
-                    event.target.setSelection?.(0, value.length);
+                    inputRefs.current[field.id]?.current?.setNativeProps({
+                      selection: { start: 0, end: value.length }
+                    });
                   }, 100);
                 }
               }
@@ -794,16 +798,18 @@ export default function DataEntryScreen() {
                     setTimeout(() => scrollToField(field.id), 50);
                   }
                 }}
-                onFocus={(event) => {
+                onFocus={() => {
                   // Only apply scroll and selection logic on variable page
                   if (!isContinueInput) {
                   // Only apply scroll and selection logic on variable page
                     if (!isFixedPage) {
                       setTimeout(() => scrollToField(field.id), 50);
-                      // Auto-select text on focus with a small delay to ensure it works
-                      if (value) {
+                      // Auto-select text on focus using the ref
+                      if (value && inputRefs.current[field.id]?.current) {
                         setTimeout(() => {
-                          event.target.setSelection?.(0, value.length);
+                          inputRefs.current[field.id]?.current?.setNativeProps({
+                            selection: { start: 0, end: value.length }
+                          });
                         }, 100);
                       }
                     }
@@ -875,14 +881,16 @@ export default function DataEntryScreen() {
                   setTimeout(() => scrollToField(field.id), 50);
                 }
               }}
-              onFocus={(event) => {
+              onFocus={() => {
               // Only apply scroll and selection logic on variable page
                 if (!isFixedPage) {
                   setTimeout(() => scrollToField(field.id), 50);
-                  // Auto-select text on focus with a small delay to ensure it works
-                  if (value) {
+                  // Auto-select text on focus using the ref
+                  if (value && inputRefs.current[field.id]?.current) {
                     setTimeout(() => {
-                      event.target.setSelection?.(0, value.length);
+                      inputRefs.current[field.id]?.current?.setNativeProps({
+                        selection: { start: 0, end: value.length }
+                      });
                     }, 100);
                   }
                 }
@@ -918,14 +926,16 @@ export default function DataEntryScreen() {
                 setTimeout(() => scrollToField(field.id), 50);
               }
             }}
-            onFocus={(event) => {
+            onFocus={() => {
               // Only apply scroll and selection logic on variable page
               if (!isFixedPage) {
                 setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus with a small delay to ensure it works
-                if (value) {
+                // Auto-select text on focus using the ref
+                if (value && inputRefs.current[field.id]?.current) {
                   setTimeout(() => {
-                    event.target.setSelection?.(0, value.length);
+                    inputRefs.current[field.id]?.current?.setNativeProps({
+                      selection: { start: 0, end: value.length }
+                    });
                   }, 100);
                 }
               }
