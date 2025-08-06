@@ -28,14 +28,7 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Additional Settings Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>General</Text>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Build</Text>
-            <Text style={styles.settingValue}>Production</Text>
-          </View>
-        </View>
+        
       </ScrollView>
     </ThemedView>
   );
