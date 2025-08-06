@@ -283,41 +283,42 @@ export default function SettingsScreen() {
             <Text style={styles.exportSelectionModalTitle}>📤 Select Template to Export</Text>
 
             <ScrollView style={styles.templateSelectionList} showsVerticalScrollIndicator={false}>
-              {templates.map((template) => (
-                <TouchableOpacity
-                  key={template.id}
-                  style={[
-                    styles.templateSelectionItem,
-                    selectedTemplateForExport === template.id && styles.selectedTemplateItem
-                  ]}
-                  onPress={() => selectTemplate(template.id)}
-                >
-                  <View style={styles.templateSelectionContent}>
-                    <Text style={styles.templateSelectionCheckbox}>
-                      {selectedTemplateForExport === template.id ? '🔘' : '⚪'}
-                    </Text>
-                    <View style={styles.templateSelectionInfo}>
-                      <Text style={[
-                        styles.templateSelectionName,
-                        selectedTemplateForExport === template.id && styles.selectedTemplateName
-                      ]}>
-                        {template.name}
-                      </Text>
-                      <Text style={styles.templateSelectionDescription}>
-                        {template.description || 'No description'}
-                      </Text>
-                      <Text style={styles.templateSelectionFields}>
-                        {template.fields.length} field(s)
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-              {templates.length === 0 && (
+              {templates.length === 0 ? (
                 <View style={styles.noTemplatesContainer}>
                   <Text style={styles.noTemplatesText}>No templates available</Text>
                   <Text style={styles.noTemplatesSubtext}>Create templates first to export them</Text>
                 </View>
+              ) : (
+                templates.map((template) => (
+                  <TouchableOpacity
+                    key={template.id}
+                    style={[
+                      styles.templateSelectionItem,
+                      selectedTemplateForExport === template.id && styles.selectedTemplateItem
+                    ]}
+                    onPress={() => selectTemplate(template.id)}
+                  >
+                    <View style={styles.templateSelectionContent}>
+                      <Text style={styles.templateSelectionCheckbox}>
+                        {selectedTemplateForExport === template.id ? '🔘' : '⚪'}
+                      </Text>
+                      <View style={styles.templateSelectionInfo}>
+                        <Text style={[
+                          styles.templateSelectionName,
+                          selectedTemplateForExport === template.id && styles.selectedTemplateName
+                        ]}>
+                          {template.name}
+                        </Text>
+                        <Text style={styles.templateSelectionDescription}>
+                          {template.description || 'No description'}
+                        </Text>
+                        <Text style={styles.templateSelectionFields}>
+                          {template.fields.length} field(s)
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))
               )}
             </ScrollView>
 
@@ -523,7 +524,8 @@ const styles = StyleSheet.create({
   templateSelectionList: {
     flex: 1,
     paddingHorizontal: 20,
-    marginTop: 10,
+    paddingVertical: 10,
+    minHeight: 200,
   },
   templateSelectionItem: {
     borderWidth: 1,
