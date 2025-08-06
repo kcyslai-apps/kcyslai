@@ -217,7 +217,7 @@ export default function TemplatesScreen() {
       return;
     }
 
-    
+
 
     // Check for duplicate template names (excluding the current template if editing)
     const trimmedName = newTemplateName.trim();
@@ -335,11 +335,11 @@ export default function TemplatesScreen() {
         // Load existing data records to preserve template field information
         const dataRecordsFile = FileSystem.documentDirectory + 'dataRecords.json';
         const fileExists = await FileSystem.getInfoAsync(dataRecordsFile);
-        
+
         if (fileExists.exists) {
           const content = await FileSystem.readAsStringAsync(dataRecordsFile);
           const dataRecords = JSON.parse(content);
-          
+
           // Update records that use this template to preserve field definitions
           const updatedRecords = dataRecords.map((record: any) => {
             if (record.templateId === selectedTemplateForDelete.id) {
@@ -355,7 +355,7 @@ export default function TemplatesScreen() {
             }
             return record;
           });
-          
+
           // Save updated records with preserved template info
           await FileSystem.writeAsStringAsync(dataRecordsFile, JSON.stringify(updatedRecords));
         }
@@ -425,21 +425,21 @@ export default function TemplatesScreen() {
   const updateFieldPosition = (fieldId: string, position: number | null) => {
     setCsvExportSettings(prev => {
       const newPosition = position === null ? 0 : position;
-      
+
       // If this position is already taken by another field, swap them
       const currentFieldWithPosition = Object.entries(prev.fieldPositions)
         .find(([id, pos]) => id !== fieldId && pos === newPosition);
-      
+
       let updatedPositions = { ...prev.fieldPositions };
-      
+
       if (currentFieldWithPosition) {
         // Swap positions: give the other field the current field's old position
         const currentFieldOldPosition = prev.fieldPositions[fieldId] || 0;
         updatedPositions[currentFieldWithPosition[0]] = currentFieldOldPosition;
       }
-      
+
       updatedPositions[fieldId] = newPosition;
-      
+
       return {
         ...prev,
         fieldPositions: updatedPositions
@@ -447,7 +447,7 @@ export default function TemplatesScreen() {
     });
   };
 
-  
+
 
   const getDelimiterSymbol = (delimiter: string, customDelimiter?: string) => {
     switch (delimiter) {
@@ -734,7 +734,7 @@ export default function TemplatesScreen() {
                             // Update the position in the state to ensure consistency
                             updateFieldPosition(field.id, currentPosition);
                           }
-                          
+
                           // Get all assigned positions except for the current field
                           const assignedPositions = Object.entries(csvExportSettings.fieldPositions)
                             .filter(([fieldId, position]) => fieldId !== field.id && position > 0)
@@ -861,19 +861,22 @@ export default function TemplatesScreen() {
                 </Picker>
               </View>
 
-              <View style={styles.checkboxContainer}>
-                <TouchableOpacity
-                  style={styles.checkbox}
-                  onPress={() => setCurrentField({ ...currentField, required: !currentField.required })}
-                >
-                  <Text style={styles.checkboxIcon}>
-                    {currentField.required ? '☑' : '☐'}
-                  </Text>
-                  <Text style={styles.checkboxText}>
-                    Required Field
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              {editingTemplateId && (
+                    <View style={styles.checkboxContainer}>
+                      <TouchableOpacity
+                        style={styles.checkbox}
+                        onPress={() => setCurrentField({ ...currentField, required: !currentField.required })}
+                      >
+                        <Text style={styles.checkboxIcon}>
+                          {currentField.required ? '☑' : '☐'}
+                        </Text>
+                        <Text style={styles.checkboxText}>
+                          Required Field
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
 
               {(currentField.type === 'free_text' || currentField.type === 'number') && (
                 <View style={styles.defaultValueSection}>
