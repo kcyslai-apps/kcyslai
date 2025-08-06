@@ -45,7 +45,7 @@ export default function SettingsScreen() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showExportSelectionModal, setShowExportSelectionModal] = useState(false);
-  const [selectedTemplatesForExport, setSelectedTemplatesForExport] = useState<string[]>([]);
+  const [selectedTemplateForExport, setSelectedTemplateForExport] = useState<string>('');
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
 
@@ -82,44 +82,34 @@ export default function SettingsScreen() {
       showError('No templates available to export');
       return;
     }
-    setSelectedTemplatesForExport([]);
+    setSelectedTemplateForExport('');
     setShowExportSelectionModal(true);
   };
 
-  const toggleTemplateSelection = (templateId: string) => {
-    setSelectedTemplatesForExport(prev => {
-      if (prev.includes(templateId)) {
-        return prev.filter(id => id !== templateId);
-      } else {
-        return [...prev, templateId];
-      }
-    });
+  const selectTemplate = (templateId: string) => {
+    setSelectedTemplateForExport(templateId);
   };
 
-  const selectAllTemplates = () => {
-    if (selectedTemplatesForExport.length === templates.length) {
-      setSelectedTemplatesForExport([]);
-    } else {
-      setSelectedTemplatesForExport(templates.map(t => t.id));
-    }
-  };
-
-  const exportSelectedTemplates = async () => {
+  const exportSelectedTemplate = async () => {
     try {
-      if (selectedTemplatesForExport.length === 0) {
-        showError('Please select at least one template to export');
+      if (!selectedTemplateForExport) {
+        showError('Please select a template to export');
         return;
       }
 
-      const selectedTemplates = templates.filter(t => selectedTemplatesForExport.includes(t.id));
+      const selectedTemplate = templates.find(t => t.id === selectedTemplateForExport);
+      if (!selectedTemplate) {
+        showError('Template not found');
+        return;
+      }
       
       const exportData = {
-        templates: selectedTemplates,
+        templates: [selectedTemplate],
         exportDate: new Date().toISOString(),
         appVersion: appVersion
       };
 
-      const fileName = `barcode2file_templates_${new Date().toISOString().split('T')[0]}.json`;
+      const fileName = `barcode2file_template_${selectedTemplate.name.replace(/[^a-zA-Z0-9_-]/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
       const fileUri = FileSystem.documentDirectory + fileName;
       
       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(exportData, null, 2));
@@ -128,21 +118,21 @@ export default function SettingsScreen() {
       
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
-          dialogTitle: 'Export Templates',
+          dialogTitle: 'Export Template',
           mimeType: 'application/json'
         });
       } else {
-        Alert.alert('Export Complete', `${selectedTemplates.length} template(s) exported to: ${fileName}`);
+        Alert.alert('Export Complete', `Template "${selectedTemplate.name}" exported to: ${fileName}`);
       }
     } catch (error) {
-      showError('Failed to export templates. Please try again.');
+      showError('Failed to export template. Please try again.');
       console.log('Export error:', error);
     }
   };
 
   const cancelExportSelection = () => {
     setShowExportSelectionModal(false);
-    setSelectedTemplatesForExport([]);
+    setSelectedTemplateForExport('');
   };
 
   const importTemplates = async () => {
@@ -272,13 +262,7 @@ export default function SettingsScreen() {
       <Modal visible={showExportSelectionModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.exportSelectionModalContent}>
-            <Text style={styles.exportSelectionModalTitle}>📤 Select Templates to Export</Text>
-            
-            <TouchableOpacity style={styles.selectAllButton} onPress={selectAllTemplates}>
-              <Text style={styles.selectAllButtonText}>
-                {selectedTemplatesForExport.length === templates.length ? '☑️ Deselect All' : '☑️ Select All'}
-              </Text>
-            </TouchableOpacity>
+            <Text style={styles.exportSelectionModalTitle}>📤 Select Template to Export</Text>
 
             <ScrollView style={styles.templateSelectionList} showsVerticalScrollIndicator={false}>
               {templates.map((template) => (
@@ -286,18 +270,18 @@ export default function SettingsScreen() {
                   key={template.id}
                   style={[
                     styles.templateSelectionItem,
-                    selectedTemplatesForExport.includes(template.id) && styles.selectedTemplateItem
+                    selectedTemplateForExport === template.id && styles.selectedTemplateItem
                   ]}
-                  onPress={() => toggleTemplateSelection(template.id)}
+                  onPress={() => selectTemplate(template.id)}
                 >
                   <View style={styles.templateSelectionContent}>
                     <Text style={styles.templateSelectionCheckbox}>
-                      {selectedTemplatesForExport.includes(template.id) ? '☑️' : '☐'}
+                      {selectedTemplateForExport === template.id ? '🔘' : '⚪'}
                     </Text>
                     <View style={styles.templateSelectionInfo}>
                       <Text style={[
                         styles.templateSelectionName,
-                        selectedTemplatesForExport.includes(template.id) && styles.selectedTemplateName
+                        selectedTemplateForExport === template.id && styles.selectedTemplateName
                       ]}>
                         {template.name}
                       </Text>
@@ -323,16 +307,16 @@ export default function SettingsScreen() {
               <TouchableOpacity
                 style={[
                   styles.exportSelectionConfirmButton,
-                  selectedTemplatesForExport.length === 0 && styles.disabledButton
+                  !selectedTemplateForExport && styles.disabledButton
                 ]}
-                onPress={exportSelectedTemplates}
-                disabled={selectedTemplatesForExport.length === 0}
+                onPress={exportSelectedTemplate}
+                disabled={!selectedTemplateForExport}
               >
                 <Text style={[
                   styles.exportSelectionConfirmButtonText,
-                  selectedTemplatesForExport.length === 0 && styles.disabledButtonText
+                  !selectedTemplateForExport && styles.disabledButtonText
                 ]}>
-                  Export ({selectedTemplatesForExport.length})
+                  Export Template
                 </Text>
               </TouchableOpacity>
             </View>
@@ -511,22 +495,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
   },
-  selectAllButton: {
-    backgroundColor: '#f8fafc',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginHorizontal: 20,
-    marginTop: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    alignItems: 'center',
-  },
-  selectAllButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#4a5568',
-  },
+  
   templateSelectionList: {
     flex: 1,
     paddingHorizontal: 20,
