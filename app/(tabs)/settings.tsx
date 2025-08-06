@@ -46,6 +46,8 @@ export default function SettingsScreen() {
   const [errorMessage, setErrorMessage] = useState('');
   const [showExportSelectionModal, setShowExportSelectionModal] = useState(false);
   const [selectedTemplateForExport, setSelectedTemplateForExport] = useState<string>('');
+  const [showExportSuccessModal, setShowExportSuccessModal] = useState(false);
+  const [exportedTemplateName, setExportedTemplateName] = useState('');
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
 
@@ -125,14 +127,14 @@ export default function SettingsScreen() {
       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(exportData, null, 2));
       
       setShowExportSelectionModal(false);
+      setExportedTemplateName(selectedTemplate.name);
+      setShowExportSuccessModal(true);
       
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           dialogTitle: 'Export Template',
           mimeType: 'application/json'
         });
-      } else {
-        Alert.alert('Export Complete', `Template "${selectedTemplate.name}" exported to: ${fileName}`);
       }
     } catch (error) {
       showError('Failed to export template. Please try again.');
@@ -208,6 +210,11 @@ export default function SettingsScreen() {
   const closeErrorModal = () => {
     setShowErrorModal(false);
     setErrorMessage('');
+  };
+
+  const closeExportSuccessModal = () => {
+    setShowExportSuccessModal(false);
+    setExportedTemplateName('');
   };
 
   return (
@@ -309,9 +316,11 @@ export default function SettingsScreen() {
                         ]}>
                           {template.name}
                         </Text>
-                        <Text style={styles.templateSelectionDescription}>
-                          {template.description || 'No description'}
-                        </Text>
+                        {template.description && (
+                          <Text style={styles.templateSelectionDescription}>
+                            {template.description}
+                          </Text>
+                        )}
                         <Text style={styles.templateSelectionFields}>
                           {template.fields.length} field(s)
                         </Text>
@@ -345,6 +354,29 @@ export default function SettingsScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Export Success Modal */}
+      <Modal visible={showExportSuccessModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.exportSuccessModalContent}>
+            <Text style={styles.exportSuccessModalTitle}>✅ Export Successful</Text>
+            <View style={styles.exportSuccessModalInfo}>
+              <Text style={styles.exportSuccessModalMessage}>
+                Template has been successfully exported
+              </Text>
+              <Text style={styles.exportSuccessTemplateText}>
+                "{exportedTemplateName}"
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.exportSuccessModalButton}
+              onPress={closeExportSuccessModal}
+            >
+              <Text style={styles.exportSuccessModalButtonText}>OK</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -497,8 +529,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 16,
     width: '95%',
-    maxWidth: 500,
-    maxHeight: '80%',
+    maxWidth: 600,
+    maxHeight: '85%',
+    minHeight: '70%',
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: {
@@ -524,8 +557,9 @@ const styles = StyleSheet.create({
   templateSelectionList: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    minHeight: 200,
+    paddingVertical: 15,
+    minHeight: 300,
+    maxHeight: 400,
   },
   templateSelectionItem: {
     borderWidth: 1,
@@ -623,6 +657,70 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#a0aec0',
     textAlign: 'center',
+  },
+  exportSuccessModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: '#68d391',
+  },
+  exportSuccessModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  exportSuccessModalInfo: {
+    alignItems: 'center',
+    marginBottom: 25,
+    width: '100%',
+  },
+  exportSuccessModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 15,
+  },
+  exportSuccessTemplateText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f0fff4',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#68d391',
+    minWidth: '80%',
+    elevation: 3,
+  },
+  exportSuccessModalButton: {
+    backgroundColor: '#48bb78',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  exportSuccessModalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   
 });
