@@ -191,7 +191,6 @@ export default function FileDetailsScreen() {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
-        <ThemedText type="title" style={styles.title}>File Details</ThemedText>
       </View>
 
       <View style={styles.fileInfo}>
@@ -236,11 +235,7 @@ const styles = StyleSheet.create({
     color: '#4299e1',
     fontWeight: 'bold',
   },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-    color: '#2d3748',
-  },
+  
   fileInfo: {
     backgroundColor: '#e8f4f8',
     padding: 15,
