@@ -290,10 +290,9 @@ export default function TemplatesScreen() {
     // Show success message after closing modal
     setShowSuccessMessage(true);
 
-    // Reset form state
+    // Reset form state (except editingTemplateId which is reset when success modal closes)
     setNewTemplateName('');
     setTemplateFields([]);
-    setEditingTemplateId(null);
   };
 
   const viewTemplate = (template: Template) => {
