@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
@@ -55,6 +56,13 @@ export default function SettingsScreen() {
     loadTemplates();
   }, []);
 
+  // Reload templates when the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTemplates();
+    }, [])
+  );
+
   const loadTemplates = async (forceReload = false) => {
     try {
       const fileExists = await FileSystem.getInfoAsync(TEMPLATES_FILE);
@@ -66,7 +74,8 @@ export default function SettingsScreen() {
           createdAt: new Date(template.createdAt)
         }));
         setTemplates(templatesWithDates);
-        console.log('Loaded templates:', templatesWithDates.length);
+        console.log('Settings - Loaded templates:', templatesWithDates.length);
+        console.log('Settings - Template names:', templatesWithDates.map(t => t.name));
       } else {
         console.log('Templates file does not exist');
         setTemplates([]);
