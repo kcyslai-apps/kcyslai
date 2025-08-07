@@ -286,7 +286,7 @@ export default function TemplatesScreen() {
 
     // Close the modal first
     setShowTemplateModal(false);
-    
+
     // Show success message after closing modal
     setShowSuccessMessage(true);
 
@@ -1330,7 +1330,10 @@ export default function TemplatesScreen() {
             <View style={styles.templateSuccessModalButtons}>
               <TouchableOpacity
                 style={styles.templateSuccessModalOkButton}
-                onPress={() => setShowSuccessMessage(false)}
+                onPress={() => {
+                  setShowSuccessMessage(false);
+                  setEditingTemplateId(null);
+                }}
               >
                 <Text style={styles.templateSuccessModalOkButtonText}>OK</Text>
               </TouchableOpacity>
