@@ -1443,7 +1443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
     elevation: 2,
-    minWidth: 60,
+    flex: 1,
   },
   cloneButtonText: {
     color: 'white',
