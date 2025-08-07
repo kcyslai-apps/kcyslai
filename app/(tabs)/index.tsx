@@ -268,7 +268,8 @@ export default function TemplatesScreen() {
             }
           : template
       );
-      Alert.alert('Success', 'Template updated successfully!');
+      // Show success message using the new modal
+      setShowSuccessMessage(true);
     } else {
       // Create new template
       const newTemplate: Template = {
