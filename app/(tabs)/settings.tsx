@@ -269,7 +269,6 @@ export default function SettingsScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Settings</Text>
-          <Text style={styles.headerSubtitle}>App Configuration</Text>
         </View>
 
         {/* App Information Section */}
