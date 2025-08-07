@@ -532,8 +532,26 @@ export default function TemplatesScreen() {
   const renderTemplate = ({ item }: { item: Template }) => (
     <View style={styles.templateItem}>
       <View style={styles.templateInfo}>
-        <Text style={styles.templateName}>{item.name}</Text>
-        <Text style={styles.templateDescription}>{item.description}</Text>
+        <View style={styles.templateHeaderRow}>
+          <Text style={styles.templateName}>{item.name}</Text>
+        </View>
+        <View style={styles.templateDescriptionRow}>
+          <Text style={styles.templateDescription}>{item.description}</Text>
+          <View style={styles.templateSecondaryActions}>
+            <TouchableOpacity
+              style={styles.cloneButton}
+              onPress={() => cloneTemplate(item)}
+            >
+              <Text style={styles.cloneButtonText}>📋 Clone</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => deleteTemplate(item.id)}
+            >
+              <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
         <Text style={styles.templateFields}>Fields: {item.fields.length}</Text>
         <Text style={styles.templateDate}>
           Created: {item.createdAt.toLocaleDateString()}
@@ -557,18 +575,6 @@ export default function TemplatesScreen() {
           onPress={() => editTemplate(item)}
         >
           <Text style={styles.editButtonText}>✏️ Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.cloneButton}
-          onPress={() => cloneTemplate(item)}
-        >
-          <Text style={styles.cloneButtonText}>📋 Clone</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => deleteTemplate(item.id)}
-        >
-          <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -1349,9 +1355,10 @@ const styles = StyleSheet.create({
   },
   templateDescription: {
     fontSize: 12,
-    marginBottom: 4,
     color: '#4a5568',
     fontStyle: 'italic',
+    flex: 1,
+    marginRight: 8,
   },
   templateFields: {
     fontSize: 11,
@@ -1362,6 +1369,22 @@ const styles = StyleSheet.create({
   templateDate: {
     fontSize: 10,
     color: '#a0aec0',
+  },
+  templateHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  templateDescriptionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  templateSecondaryActions: {
+    flexDirection: 'column',
+    gap: 4,
+    marginLeft: 8,
   },
   templateActions: {
     flexDirection: 'row',
@@ -1413,33 +1436,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cloneButton: {
-    flex: 1,
     backgroundColor: '#9f7aea',
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 4,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
     elevation: 2,
+    minWidth: 60,
   },
   cloneButtonText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 'bold',
   },
   deleteButton: {
-    flex: 1,
     backgroundColor: '#fc8181',
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 4,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(252, 129, 129, 0.2)',
     elevation: 2,
+    minWidth: 60,
   },
   deleteButtonText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 'bold',
   },
   modalOverlay: {
