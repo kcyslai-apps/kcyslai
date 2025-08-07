@@ -76,37 +76,45 @@ export default function TemplatesScreen() {
   const loadTemplates = async () => {
     try {
       const fileExists = await FileSystem.getInfoAsync(TEMPLATES_FILE);
+      let loadedTemplates: Template[] = [];
+      
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
-        const parsedData = JSON.parse(content);
+        try {
+          const parsedData = JSON.parse(content);
 
-        // Ensure we have an array and handle legacy format
-        if (Array.isArray(parsedData)) {
-          const loadedTemplates = parsedData.map((template: any) => ({
-            id: template.id,
-            name: template.name,
-            description: template.description || '',
-            fields: template.fields || [],
-            csvExportSettings: template.csvExportSettings || {
-              includeHeader: false,
-              delimiter: 'comma',
-              customDelimiter: '',
-              fieldPositions: {},
-              fileExtension: 'csv',
-              includeQuotes: true
-            },
-            createdAt: new Date(template.createdAt),
-            isProtected: template.isProtected || false // Load protection status
-          }));
-          setTemplates(loadedTemplates);
-          console.log('Templates loaded successfully:', loadedTemplates.length);
-        } else {
-          console.log('Parsed data is not an array:', parsedData);
-          setTemplates([]);
+          // Ensure we have an array and handle legacy format
+          if (Array.isArray(parsedData)) {
+            loadedTemplates = parsedData.map((template: any) => ({
+              id: template.id,
+              name: template.name,
+              description: template.description || '',
+              fields: template.fields || [],
+              csvExportSettings: template.csvExportSettings || {
+                includeHeader: false,
+                delimiter: 'comma',
+                customDelimiter: '',
+                fieldPositions: {},
+                fileExtension: 'csv',
+                includeQuotes: true
+              },
+              createdAt: new Date(template.createdAt),
+              isProtected: template.isProtected || false // Load protection status
+            }));
+          }
+        } catch (parseError) {
+          console.log('Error parsing templates file:', parseError);
+          loadedTemplates = [];
         }
-      } else {
-        console.log('Templates file does not exist');
-        // If file doesn't exist, create a default protected template
+      }
+
+      // Check if the default Stock Count template exists
+      const hasDefaultTemplate = loadedTemplates.some(template => 
+        template.id === "1753791586091" && template.name === "Stock Count"
+      );
+
+      // If default template doesn't exist, add it
+      if (!hasDefaultTemplate) {
         const defaultStockCountTemplate: Template = {
           id: "1753791586091", // Provided ID
           name: "Stock Count",
@@ -173,10 +181,14 @@ export default function TemplatesScreen() {
           createdAt: new Date("2025-07-29T12:19:46.091Z"),
           isProtected: true // Mark as protected
         };
-        setTemplates([defaultStockCountTemplate]);
-        await saveTemplates([defaultStockCountTemplate]);
-        console.log('Default template created.');
+        
+        loadedTemplates.unshift(defaultStockCountTemplate); // Add at beginning
+        await saveTemplates(loadedTemplates);
+        console.log('Default template added.');
       }
+
+      setTemplates(loadedTemplates);
+      console.log('Templates loaded successfully:', loadedTemplates.length);
     } catch (error) {
       console.log('Error loading templates:', error);
       setTemplates([]);
