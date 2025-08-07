@@ -403,7 +403,8 @@ export default function TemplatesScreen() {
   const editTemplate = (template: Template) => {
     // Prevent editing protected templates
     if (template.isProtected) {
-      Alert.alert('Cannot Edit', 'This is a protected template and cannot be edited.');
+      setValidationError('This is a protected template and cannot be edited.');
+      setShowValidationModal(true);
       return;
     }
     setNewTemplateName(template.name);
@@ -463,7 +464,8 @@ export default function TemplatesScreen() {
 
   const deleteTemplate = (template: Template) => { // Changed to accept template object
     if (template.isProtected) { // Check protection status here
-      Alert.alert('Cannot Delete', 'This is a protected template and cannot be deleted.');
+      setValidationError('This is a protected template and cannot be deleted.');
+      setShowValidationModal(true);
       return;
     }
     setSelectedTemplateForDelete(template);
@@ -523,7 +525,8 @@ export default function TemplatesScreen() {
 
     // Check if template is protected
     if (selectedTemplateForDelete.isProtected) {
-      Alert.alert('Cannot Delete', 'This is a protected template and cannot be deleted.');
+      setValidationError('This is a protected template and cannot be deleted.');
+      setShowValidationModal(true);
       setShowDeleteTemplateModal(false);
       setSelectedTemplateForDelete(null);
       return;
