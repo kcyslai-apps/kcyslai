@@ -1316,7 +1316,10 @@ export default function TemplatesScreen() {
 
             <View style={styles.templateSuccessModalInfo}>
               <Text style={styles.templateSuccessModalMessage}>
-                Your template has been created successfully and is ready to use!
+                {editingTemplateId 
+                  ? "Your template has been updated successfully and is ready to use!"
+                  : "Your template has been created successfully and is ready to use!"
+                }
               </Text>
             </View>
 
