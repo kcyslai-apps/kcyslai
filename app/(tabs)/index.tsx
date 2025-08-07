@@ -1314,7 +1314,9 @@ export default function TemplatesScreen() {
       <Modal visible={showSuccessMessage} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.templateSuccessModalContent}>
-            <Text style={styles.templateSuccessModalTitle}>✅ Template Created</Text>
+            <Text style={styles.templateSuccessModalTitle}>
+              {editingTemplateId ? '✅ Template Updated' : '✅ Template Created'}
+            </Text>
 
             <View style={styles.templateSuccessModalInfo}>
               <Text style={styles.templateSuccessModalMessage}>
