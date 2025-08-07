@@ -268,8 +268,6 @@ export default function TemplatesScreen() {
             }
           : template
       );
-      // Show success message using the new modal
-      setShowSuccessMessage(true);
     } else {
       // Create new template
       const newTemplate: Template = {
@@ -281,17 +279,21 @@ export default function TemplatesScreen() {
         createdAt: new Date()
       };
       updatedTemplates = [...templates, newTemplate];
-      // Show success message using the new modal
-      setShowSuccessMessage(true);
     }
 
     setTemplates(updatedTemplates);
     saveTemplates(updatedTemplates);
 
+    // Close the modal first
+    setShowTemplateModal(false);
+    
+    // Show success message after closing modal
+    setShowSuccessMessage(true);
+
+    // Reset form state
     setNewTemplateName('');
     setTemplateFields([]);
     setEditingTemplateId(null);
-    setShowTemplateModal(false);
   };
 
   const viewTemplate = (template: Template) => {
