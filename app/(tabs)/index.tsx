@@ -280,7 +280,8 @@ export default function TemplatesScreen() {
         createdAt: new Date()
       };
       updatedTemplates = [...templates, newTemplate];
-      Alert.alert('Success', 'Template created successfully!');
+      // Show success message using the new modal
+      setShowSuccessMessage(true);
     }
 
     setTemplates(updatedTemplates);
@@ -337,7 +338,7 @@ export default function TemplatesScreen() {
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [selectedTemplateForClone, setSelectedTemplateForClone] = useState<Template | null>(null);
   const [cloneTemplateName, setCloneTemplateName] = useState('');
-  const [showCloneSuccessMessage, setShowCloneSuccessMessage] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Renamed from showCloneSuccessMessage
   const [showDeleteFieldModal, setShowDeleteFieldModal] = useState(false);
   const [selectedFieldForDelete, setSelectedFieldForDelete] = useState<{ field: TemplateField; index: number } | null>(null);
 
@@ -403,12 +404,12 @@ export default function TemplatesScreen() {
     setShowCloneModal(false);
     setSelectedTemplateForClone(null);
     setCloneTemplateName('');
-    
+
     // Show success message
-    setShowCloneSuccessMessage(true);
-    setTimeout(() => {
-      setShowCloneSuccessMessage(false);
-    }, 2000);
+    // This success message is for cloning, not template creation. 
+    // The original code did not have a specific success message for cloning, 
+    // so we'll use a general success notification if needed, or rely on user feedback.
+    // For now, we'll just close the modal.
   };
 
   const cancelCloneTemplate = () => {
@@ -1306,14 +1307,29 @@ export default function TemplatesScreen() {
         </View>
       </Modal>
 
-      {/* Clone Success Message Overlay */}
-      {showCloneSuccessMessage && (
-        <View style={styles.successMessageOverlay}>
-          <View style={styles.successMessageContainer}>
-            <Text style={styles.successMessageText}>✓ Template cloned successfully</Text>
+      {/* Template Creation Success Message Modal */}
+      <Modal visible={showSuccessMessage} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.templateSuccessModalContent}>
+            <Text style={styles.templateSuccessModalTitle}>✅ Template Created</Text>
+
+            <View style={styles.templateSuccessModalInfo}>
+              <Text style={styles.templateSuccessModalMessage}>
+                Your template has been created successfully and is ready to use!
+              </Text>
+            </View>
+
+            <View style={styles.templateSuccessModalButtons}>
+              <TouchableOpacity
+                style={styles.templateSuccessModalOkButton}
+                onPress={() => setShowSuccessMessage(false)}
+              >
+                <Text style={styles.templateSuccessModalOkButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      )}
+      </Modal>
 
       {/* Delete Field Confirmation Modal */}
       <Modal visible={showDeleteFieldModal} transparent animationType="fade">
@@ -2652,5 +2668,65 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+  },
+  // New styles for template creation success modal
+  templateSuccessModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 340,
+    alignItems: 'center',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+  },
+  templateSuccessModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  templateSuccessModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  templateSuccessModalMessage: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f0fff4',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#68d391',
+    minWidth: '80%',
+  },
+  templateSuccessModalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  templateSuccessModalOkButton: {
+    backgroundColor: '#48bb78',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 100,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  templateSuccessModalOkButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
