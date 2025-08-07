@@ -462,14 +462,16 @@ const styles = StyleSheet.create({
     paddingBottom: 100, // Account for tab bar
   },
   header: {
-    marginBottom: 30,
+    marginBottom: 20,
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#2d3748',
-    marginBottom: 8,
+    color: '#000000',
+    marginTop: 40,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 16,
