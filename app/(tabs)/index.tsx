@@ -544,12 +544,6 @@ export default function TemplatesScreen() {
             >
               <Text style={styles.cloneButtonText}>📋 Clone</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => deleteTemplate(item.id)}
-            >
-              <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
-            </TouchableOpacity>
           </View>
         </View>
         <Text style={styles.templateFields}>Fields: {item.fields.length}</Text>
@@ -575,6 +569,12 @@ export default function TemplatesScreen() {
           onPress={() => editTemplate(item)}
         >
           <Text style={styles.editButtonText}>✏️ Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => deleteTemplate(item.id)}
+        >
+          <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -1451,18 +1451,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
+    flex: 1,
     backgroundColor: '#fc8181',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderRadius: 6,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(252, 129, 129, 0.2)',
     elevation: 2,
-    minWidth: 60,
   },
   deleteButtonText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   modalOverlay: {
