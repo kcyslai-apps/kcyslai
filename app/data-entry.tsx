@@ -577,6 +577,22 @@ export default function DataEntryScreen() {
     }
   };
 
+  // Function to move to the next fixed field
+  const moveToNextFixedField = (currentFieldId: string) => {
+    const fixedFields = getFixedFields();
+    const currentIndex = fixedFields.findIndex(field => field.id === currentFieldId);
+    
+    if (currentIndex >= 0 && currentIndex < fixedFields.length - 1) {
+      const nextFieldId = fixedFields[currentIndex + 1].id;
+      const nextRef = inputRefs.current[nextFieldId];
+      if (nextRef?.current) {
+        setTimeout(() => {
+          nextRef.current?.focus();
+        }, 50);
+      }
+    }
+  };
+
     const scrollToField = (fieldId: string) => {
     // Wait for keyboard to appear before calculating scroll position
     const scrollDelay = Platform.OS === 'android' ? 350 : 250;
@@ -636,33 +652,24 @@ export default function DataEntryScreen() {
             onSubmitEditing={() => {
               if (!isFixedPage) {
                 moveToNextField(field.id);
-              }
-            }}
-            onKeyPress={(event) => {
-              // Handle TAB key for navigation
-              if (event.nativeEvent.key === 'Tab' && !isFixedPage) {
-                event.preventDefault();
-                moveToNextField(field.id);
+              } else {
+                moveToNextFixedField(field.id);
               }
             }}
             onPressIn={() => {
-              // Only apply scroll behavior on variable page
-              if (!isFixedPage) {
-                setTimeout(() => scrollToField(field.id), 50);
-              }
+              // Apply scroll behavior on both pages
+              setTimeout(() => scrollToField(field.id), 50);
             }}
             onFocus={() => {
-              // Only apply scroll and selection logic on variable page
-              if (!isFixedPage) {
-                setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus using the ref
-                if (value && inputRefs.current[field.id]?.current) {
-                  setTimeout(() => {
-                    inputRefs.current[field.id]?.current?.setNativeProps({
-                      selection: { start: 0, end: value.length }
-                    });
-                  }, 100);
-                }
+              // Apply scroll and selection logic on both pages
+              setTimeout(() => scrollToField(field.id), 50);
+              // Auto-select text on focus using the ref
+              if (value && inputRefs.current[field.id]?.current) {
+                setTimeout(() => {
+                  inputRefs.current[field.id]?.current?.setNativeProps({
+                    selection: { start: 0, end: value.length }
+                  });
+                }, 100);
               }
             }}
             blurOnSubmit={false}
@@ -683,26 +690,24 @@ export default function DataEntryScreen() {
             onSubmitEditing={() => {
               if (!isFixedPage) {
                 moveToNextField(field.id);
+              } else {
+                moveToNextFixedField(field.id);
               }
             }}
             onPressIn={() => {
-              // Only apply scroll behavior on variable page
-              if (!isFixedPage) {
-                setTimeout(() => scrollToField(field.id), 50);
-              }
+              // Apply scroll behavior on both pages
+              setTimeout(() => scrollToField(field.id), 50);
             }}
             onFocus={() => {
-              // Only apply scroll and selection logic on variable page
-              if (!isFixedPage) {
-                setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus using the ref
-                if (value && inputRefs.current[field.id]?.current) {
-                  setTimeout(() => {
-                    inputRefs.current[field.id]?.current?.setNativeProps({
-                      selection: { start: 0, end: value.length }
-                    });
-                  }, 100);
-                }
+              // Apply scroll and selection logic on both pages
+              setTimeout(() => scrollToField(field.id), 50);
+              // Auto-select text on focus using the ref
+              if (value && inputRefs.current[field.id]?.current) {
+                setTimeout(() => {
+                  inputRefs.current[field.id]?.current?.setNativeProps({
+                    selection: { start: 0, end: value.length }
+                  });
+                }, 100);
               }
             }}
             blurOnSubmit={false}
@@ -790,29 +795,24 @@ export default function DataEntryScreen() {
                 onSubmitEditing={() => {
                   if (!isFixedPage) {
                     moveToNextField(field.id);
+                  } else {
+                    moveToNextFixedField(field.id);
                   }
                 }}
                 onPressIn={() => {
-                  // Only apply scroll behavior on variable page
-                  if (!isFixedPage) {
-                    setTimeout(() => scrollToField(field.id), 50);
-                  }
+                  // Apply scroll behavior on both pages
+                  setTimeout(() => scrollToField(field.id), 50);
                 }}
                 onFocus={() => {
-                  // Only apply scroll and selection logic on variable page
-                  if (!isContinueInput) {
-                  // Only apply scroll and selection logic on variable page
-                    if (!isFixedPage) {
-                      setTimeout(() => scrollToField(field.id), 50);
-                      // Auto-select text on focus using the ref
-                      if (value && inputRefs.current[field.id]?.current) {
-                        setTimeout(() => {
-                          inputRefs.current[field.id]?.current?.setNativeProps({
-                            selection: { start: 0, end: value.length }
-                          });
-                        }, 100);
-                      }
-                    }
+                  // Apply scroll and selection logic on both pages
+                  setTimeout(() => scrollToField(field.id), 50);
+                  // Auto-select text on focus using the ref
+                  if (value && inputRefs.current[field.id]?.current) {
+                    setTimeout(() => {
+                      inputRefs.current[field.id]?.current?.setNativeProps({
+                        selection: { start: 0, end: value.length }
+                      });
+                    }, 100);
                   }
                 }}
                 blurOnSubmit={false}
@@ -873,26 +873,24 @@ export default function DataEntryScreen() {
               onSubmitEditing={() => {
                 if (!isFixedPage) {
                   moveToNextField(field.id);
+                } else {
+                  moveToNextFixedField(field.id);
                 }
               }}
               onPressIn={() => {
-                // Only apply scroll behavior on variable page
-                if (!isFixedPage) {
-                  setTimeout(() => scrollToField(field.id), 50);
-                }
+                // Apply scroll behavior on both pages
+                setTimeout(() => scrollToField(field.id), 50);
               }}
               onFocus={() => {
-              // Only apply scroll and selection logic on variable page
-                if (!isFixedPage) {
-                  setTimeout(() => scrollToField(field.id), 50);
-                  // Auto-select text on focus using the ref
-                  if (value && inputRefs.current[field.id]?.current) {
-                    setTimeout(() => {
-                      inputRefs.current[field.id]?.current?.setNativeProps({
-                        selection: { start: 0, end: value.length }
-                      });
-                    }, 100);
-                  }
+              // Apply scroll and selection logic on both pages
+                setTimeout(() => scrollToField(field.id), 50);
+                // Auto-select text on focus using the ref
+                if (value && inputRefs.current[field.id]?.current) {
+                  setTimeout(() => {
+                    inputRefs.current[field.id]?.current?.setNativeProps({
+                      selection: { start: 0, end: value.length }
+                    });
+                  }, 100);
                 }
               }}
               blurOnSubmit={false}
@@ -918,26 +916,24 @@ export default function DataEntryScreen() {
             onSubmitEditing={() => {
               if (!isFixedPage) {
                 moveToNextField(field.id);
+              } else {
+                moveToNextFixedField(field.id);
               }
             }}
             onPressIn={() => {
-              // Only apply scroll behavior on variable page
-              if (!isFixedPage) {
-                setTimeout(() => scrollToField(field.id), 50);
-              }
+              // Apply scroll behavior on both pages
+              setTimeout(() => scrollToField(field.id), 50);
             }}
             onFocus={() => {
-              // Only apply scroll and selection logic on variable page
-              if (!isFixedPage) {
-                setTimeout(() => scrollToField(field.id), 50);
-                // Auto-select text on focus using the ref
-                if (value && inputRefs.current[field.id]?.current) {
-                  setTimeout(() => {
-                    inputRefs.current[field.id]?.current?.setNativeProps({
-                      selection: { start: 0, end: value.length }
-                    });
-                  }, 100);
-                }
+              // Apply scroll and selection logic on both pages
+              setTimeout(() => scrollToField(field.id), 50);
+              // Auto-select text on focus using the ref
+              if (value && inputRefs.current[field.id]?.current) {
+                setTimeout(() => {
+                  inputRefs.current[field.id]?.current?.setNativeProps({
+                    selection: { start: 0, end: value.length }
+                  });
+                }, 100);
               }
             }}
             blurOnSubmit={false}
