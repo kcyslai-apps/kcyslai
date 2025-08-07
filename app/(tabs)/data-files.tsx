@@ -58,8 +58,7 @@ export default function DataFilesScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [fileToView, setFileToView] = useState<FileGroup | null>(null);
+  
 
   const DATA_RECORDS_FILE = FileSystem.documentDirectory + 'dataRecords.json';
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
@@ -373,13 +372,10 @@ export default function DataFilesScreen() {
   };
 
   const viewFileDetails = (fileGroup: FileGroup) => {
-    setFileToView(fileGroup);
-    setShowViewModal(true);
-  };
-
-  const closeViewModal = () => {
-    setShowViewModal(false);
-    setFileToView(null);
+    router.push({
+      pathname: '/file-details',
+      params: { fileName: fileGroup.fileName }
+    });
   };
 
   const renderFileGroup = ({ item }: { item: FileGroup }) => {
@@ -482,87 +478,7 @@ export default function DataFilesScreen() {
         </View>
       </Modal>
 
-      {/* View File Modal */}
-      <Modal visible={showViewModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.viewModalContent}>
-            <View style={styles.viewModalHeader}>
-              <Text style={styles.viewModalTitle}>📁 {fileToView?.fileName}</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={closeViewModal}
-              >
-                <Text style={styles.closeButtonText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.viewModalStats}>
-              <Text style={styles.viewModalStatsText}>
-                Total Records: {fileToView?.totalRecords || 0}
-              </Text>
-              {fileToView?.records.some(record => {
-                const template = templates.find(t => t.id === record.templateId);
-                return !template && record.preservedTemplateFields;
-              }) && (
-                <Text style={styles.deletedTemplateWarning}>⚠️ Template Deleted</Text>
-              )}
-            </View>
-
-            <FlatList
-              data={fileToView?.records || []}
-              keyExtractor={(item) => item.id}
-              style={styles.viewModalRecordsList}
-              renderItem={({ item }) => {
-                let template = templates.find(t => t.id === item.templateId);
-                let isTemplateDeleted = false;
-
-                if (!template && item.preservedTemplateFields) {
-                  template = {
-                    id: item.templateId,
-                    name: item.templateName,
-                    description: '',
-                    fields: item.preservedTemplateFields,
-                    createdAt: new Date()
-                  };
-                  isTemplateDeleted = true;
-                }
-
-                return (
-                  <View style={styles.viewModalRecord}>
-                    <View style={styles.viewModalRecordHeader}>
-                      <Text style={styles.viewModalRecordTemplate}>
-                        {isTemplateDeleted ? '⚠️ ' : '📋 '}{template?.name || 'Unknown Template'}
-                      </Text>
-                      <Text style={styles.viewModalRecordTime}>
-                        {item.timestamp.toLocaleString()}
-                      </Text>
-                    </View>
-                    
-                    <View style={styles.viewModalRecordData}>
-                      {template?.fields.map(field => (
-                        <View key={field.id} style={styles.viewModalDataField}>
-                          <Text style={styles.viewModalFieldName}>{field.name}:</Text>
-                          <Text style={styles.viewModalFieldValue}>
-                            {item.data[field.id] || '-'}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                );
-              }}
-              showsVerticalScrollIndicator={false}
-            />
-
-            <TouchableOpacity
-              style={styles.viewModalCloseButton}
-              onPress={closeViewModal}
-            >
-              <Text style={styles.viewModalCloseButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      
 
       {/* Success Message Overlay */}
       {showSuccessMessage && (
@@ -808,123 +724,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  viewModalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 16,
-    width: '95%',
-    maxWidth: 500,
-    height: '80%',
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: '#4299e1',
-  },
-  viewModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: '#e2e8f0',
-  },
-  viewModalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    flex: 1,
-  },
-  closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#e2e8f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4a5568',
-  },
-  viewModalStats: {
-    backgroundColor: '#e8f4f8',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  viewModalStatsText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2c5282',
-  },
-  deletedTemplateWarning: {
-    fontSize: 12,
-    color: '#e53e3e',
-    fontStyle: 'italic',
-    marginTop: 2,
-  },
-  viewModalRecordsList: {
-    flex: 1,
-    marginBottom: 15,
-  },
-  viewModalRecord: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  viewModalRecordHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-    paddingBottom: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cbd5e0',
-  },
-  viewModalRecordTemplate: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    flex: 1,
-  },
-  viewModalRecordTime: {
-    fontSize: 12,
-    color: '#718096',
-  },
-  viewModalRecordData: {
-    gap: 4,
-  },
-  viewModalDataField: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  viewModalFieldName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#4a5568',
-    flex: 1,
-  },
-  viewModalFieldValue: {
-    fontSize: 13,
-    color: '#2d3748',
-    flex: 2,
-    textAlign: 'right',
-  },
-  viewModalCloseButton: {
-    backgroundColor: '#4299e1',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  viewModalCloseButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  
 });
