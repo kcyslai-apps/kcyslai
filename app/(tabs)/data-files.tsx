@@ -370,17 +370,18 @@ export default function DataFilesScreen() {
     setFileToDelete(null);
   };
 
-  const viewFileDetails = (fileGroup: FileGroup) => {
-    router.push({
-      pathname: '/file-details',
-      params: { fileName: fileGroup.fileName }
-    });
-  };
+  // Removed the viewFileDetails function as the file-details page is removed.
+  // const viewFileDetails = (fileGroup: FileGroup) => {
+  //   router.push({
+  //     pathname: '/file-details',
+  //     params: { fileName: fileGroup.fileName }
+  //   });
+  // };
 
   const renderFileGroup = ({ item }: { item: FileGroup }) => {
     // Check if any records in this file have deleted templates
     const hasDeletedTemplate = item.records.some(record => record.templateDeleted);
-    
+
     return (
       <View style={styles.fileGroupContainer}>
         <View style={styles.fileGroupHeader}>
@@ -394,12 +395,15 @@ export default function DataFilesScreen() {
         </View>
 
         <View style={styles.actionButtonsRow}>
+          {/* Removed the "View" button as the file-details page is removed */}
+          {/*
           <TouchableOpacity
             style={styles.viewButton}
             onPress={() => viewFileDetails(item)}
           >
             <Text style={styles.viewButtonText}>👁️ View</Text>
           </TouchableOpacity>
+          */}
 
           <TouchableOpacity
             style={styles.deleteFileButton}
