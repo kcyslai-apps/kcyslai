@@ -318,6 +318,9 @@ export default function TemplatesScreen() {
   });
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [showCloneModal, setShowCloneModal] = useState(false);
+  const [selectedTemplateForClone, setSelectedTemplateForClone] = useState<Template | null>(null);
+  const [cloneTemplateName, setCloneTemplateName] = useState('');
 
 
   const useTemplate = (template: Template) => {
@@ -328,12 +331,66 @@ export default function TemplatesScreen() {
     setShowDataFileModal(true);
   };
 
+  const cloneTemplate = (template: Template) => {
+    setSelectedTemplateForClone(template);
+    setCloneTemplateName(`${template.name} - Copy`);
+    setShowCloneModal(true);
+  };
+
   const deleteTemplate = (templateId: string) => {
     const template = templates.find(t => t.id === templateId);
     if (template) {
       setSelectedTemplateForDelete(template);
       setShowDeleteTemplateModal(true);
     }
+  };
+
+  const confirmCloneTemplate = async () => {
+    if (!selectedTemplateForClone || !cloneTemplateName.trim()) {
+      setValidationError('Please enter a template name.');
+      setShowValidationModal(true);
+      return;
+    }
+
+    // Check for duplicate template names
+    const trimmedName = cloneTemplateName.trim();
+    const duplicateTemplate = templates.find(template => 
+      template.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (duplicateTemplate) {
+      setValidationError('Template name already exists. Please enter a unique name.');
+      setShowValidationModal(true);
+      return;
+    }
+
+    // Create cloned template
+    const clonedTemplate: Template = {
+      id: Date.now().toString(),
+      name: trimmedName,
+      description: selectedTemplateForClone.description,
+      fields: selectedTemplateForClone.fields.map(field => ({
+        ...field,
+        id: `${field.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      })),
+      csvExportSettings: { ...selectedTemplateForClone.csvExportSettings },
+      createdAt: new Date()
+    };
+
+    const updatedTemplates = [...templates, clonedTemplate];
+    setTemplates(updatedTemplates);
+    await saveTemplates(updatedTemplates);
+
+    Alert.alert('Success', 'Template cloned successfully!');
+    setShowCloneModal(false);
+    setSelectedTemplateForClone(null);
+    setCloneTemplateName('');
+  };
+
+  const cancelCloneTemplate = () => {
+    setShowCloneModal(false);
+    setSelectedTemplateForClone(null);
+    setCloneTemplateName('');
   };
 
   const confirmDeleteTemplate = async () => {
@@ -500,6 +557,12 @@ export default function TemplatesScreen() {
           onPress={() => editTemplate(item)}
         >
           <Text style={styles.editButtonText}>✏️ Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cloneButton}
+          onPress={() => cloneTemplate(item)}
+        >
+          <Text style={styles.cloneButtonText}>📋 Clone</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.deleteButton}
@@ -1140,6 +1203,50 @@ export default function TemplatesScreen() {
         </View>
       </Modal>
 
+      {/* Clone Template Modal */}
+      <Modal visible={showCloneModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.cloneTemplateModalContent}>
+            <Text style={styles.cloneTemplateModalTitle}>📋 Clone Template</Text>
+
+            <View style={styles.cloneTemplateInfo}>
+              <Text style={styles.cloneTemplateDescription}>
+                Create a copy of template:
+              </Text>
+              <Text style={styles.cloneTemplateOriginalText}>
+                "{selectedTemplateForClone?.name}"
+              </Text>
+            </View>
+
+            <View style={styles.cloneTemplateInputSection}>
+              <Text style={styles.cloneTemplateInputLabel}>New Template Name:</Text>
+              <TextInput
+                style={styles.cloneTemplateInput}
+                value={cloneTemplateName}
+                onChangeText={setCloneTemplateName}
+                placeholder="Enter new template name"
+                selectTextOnFocus={true}
+              />
+            </View>
+
+            <View style={styles.cloneTemplateButtons}>
+              <TouchableOpacity
+                style={styles.cloneTemplateCancelButton}
+                onPress={cancelCloneTemplate}
+              >
+                <Text style={styles.cloneTemplateCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cloneTemplateConfirmButton}
+                onPress={confirmCloneTemplate}
+              >
+                <Text style={styles.cloneTemplateConfirmButtonText}>Clone</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Validation Error Modal */}
       <Modal visible={showValidationModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -1301,6 +1408,21 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   editButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  cloneButton: {
+    flex: 1,
+    backgroundColor: '#9f7aea',
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    alignItems: 'center',
+    boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
+    elevation: 2,
+  },
+  cloneButtonText: {
     color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
@@ -2219,5 +2341,107 @@ const styles = StyleSheet.create({
   dateFormatPicker: {
     height: 60,
     width: '100%',
+  },
+  cloneTemplateModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+  },
+  cloneTemplateModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  cloneTemplateInfo: {
+    alignItems: 'center',
+    marginBottom: 25,
+    width: '100%',
+  },
+  cloneTemplateDescription: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  cloneTemplateOriginalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#9f7aea',
+    minWidth: '80%',
+    elevation: 3,
+  },
+  cloneTemplateInputSection: {
+    width: '100%',
+    marginBottom: 25,
+  },
+  cloneTemplateInputLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 8,
+  },
+  cloneTemplateInput: {
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#ffffff',
+    width: '100%',
+  },
+  cloneTemplateButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  cloneTemplateCancelButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    minWidth: 100,
+  },
+  cloneTemplateCancelButtonText: {
+    color: '#718096',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  cloneTemplateConfirmButton: {
+    backgroundColor: '#9f7aea',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    minWidth: 100,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  cloneTemplateConfirmButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
