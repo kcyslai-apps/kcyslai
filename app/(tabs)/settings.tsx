@@ -51,6 +51,8 @@ export default function SettingsScreen() {
   const [selectedTemplateForExport, setSelectedTemplateForExport] = useState<string>('');
   const [showExportSuccessModal, setShowExportSuccessModal] = useState(false);
   const [exportedTemplateName, setExportedTemplateName] = useState('');
+  const [showImportSuccessModal, setShowImportSuccessModal] = useState(false);
+  const [importedTemplateCount, setImportedTemplateCount] = useState<number>(0);
 
   const TEMPLATES_FILE = FileSystem.documentDirectory + 'templates.json';
 
@@ -223,7 +225,12 @@ export default function SettingsScreen() {
           // Reload templates from file system to ensure state consistency
           await loadTemplates();
 
-          Alert.alert('Success', `Successfully imported ${importedTemplates.length} template(s)`);
+          // Update state for the new import success modal
+          setImportedTemplateCount(importedTemplates.length);
+          setShowImportSuccessModal(true);
+
+          // The original Alert.alert is removed as per the new design pattern
+          // Alert.alert('Success', `Successfully imported ${importedTemplates.length} template(s)`);
         } catch (parseError) {
           showError('Invalid JSON file format');
         }
@@ -247,6 +254,12 @@ export default function SettingsScreen() {
   const closeExportSuccessModal = () => {
     setShowExportSuccessModal(false);
     setExportedTemplateName('');
+  };
+
+  // Handler for the new import success modal
+  const closeImportSuccessModal = () => {
+    setShowImportSuccessModal(false);
+    setImportedTemplateCount(0);
   };
 
   return (
@@ -406,6 +419,26 @@ export default function SettingsScreen() {
             <TouchableOpacity
               style={styles.exportSuccessModalButton}
               onPress={closeExportSuccessModal}
+            >
+              <Text style={styles.exportSuccessModalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Import Success Modal */}
+      <Modal visible={showImportSuccessModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.exportSuccessModalContent}> {/* Reusing export success modal styles for import success */}
+            <Text style={styles.exportSuccessModalTitle}>✅ Import Successful</Text> {/* Modified title */}
+            <View style={styles.exportSuccessModalInfo}>
+              <Text style={styles.exportSuccessModalMessage}>
+                Successfully imported {importedTemplateCount} template(s)
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.exportSuccessModalButton}
+              onPress={closeImportSuccessModal}
             >
               <Text style={styles.exportSuccessModalButtonText}>OK</Text>
             </TouchableOpacity>
