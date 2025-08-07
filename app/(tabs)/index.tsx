@@ -431,10 +431,10 @@ export default function TemplatesScreen() {
       const updatedTemplates = templates.filter(t => t.id !== selectedTemplateForDelete.id);
       setTemplates(updatedTemplates);
       await saveTemplates(updatedTemplates);
-      
+
       // Reload templates from file system to ensure state consistency
       await loadTemplates();
-      
+
       setShowDeleteTemplateModal(false);
       setSelectedTemplateForDelete(null);
     }
@@ -941,7 +941,7 @@ export default function TemplatesScreen() {
                 </Picker>
               </View>
 
-              
+
 
 
               {(currentField.type === 'free_text' || currentField.type === 'number') && (
@@ -1391,10 +1391,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   useButton: {
-    width: 80,
+    width: 70,
     backgroundColor: '#38a169',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
     borderRadius: 6,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(56, 161, 105, 0.2)',
@@ -1406,10 +1406,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   viewButton: {
-    width: 80,
+    width: 70,
     backgroundColor: '#63b3ed',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
     borderRadius: 6,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(99, 179, 237, 0.2)',
@@ -1421,10 +1421,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   editButton: {
-    width: 80,
+    width: 70,
     backgroundColor: '#f6ad55',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
     borderRadius: 6,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(246, 173, 85, 0.2)',
@@ -1443,7 +1443,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
     elevation: 2,
-    width: 80,
+    width: 70,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
   },
   cloneButtonText: {
     color: 'white',
@@ -1451,10 +1453,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
-    width: 80,
+    width: 70,
     backgroundColor: '#fc8181',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
     borderRadius: 6,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(252, 129, 129, 0.2)',
