@@ -97,9 +97,14 @@ export default function TemplatesScreen() {
             createdAt: new Date(template.createdAt)
           }));
           setTemplates(loadedTemplates);
+          console.log('Templates loaded successfully:', loadedTemplates.length);
         } else {
+          console.log('Parsed data is not an array:', parsedData);
           setTemplates([]);
         }
+      } else {
+        console.log('Templates file does not exist');
+        setTemplates([]);
       }
     } catch (error) {
       console.log('Error loading templates:', error);
@@ -563,7 +568,9 @@ export default function TemplatesScreen() {
 
 
 
-  const renderTemplate = ({ item }: { item: Template }) => (
+  const renderTemplate = ({ item }: { item: Template }) => {
+    console.log('Rendering template:', item.name);
+    return (
     <View style={styles.templateItem}>
       <View style={styles.templateInfo}>
         <View style={styles.templateHeaderRow}>
@@ -614,7 +621,8 @@ export default function TemplatesScreen() {
         </View>
       </View>
     </View>
-  );
+    );
+  };
 
   const renderField = ({ item, index }: { item: TemplateField; index: number }) => (
     <View style={styles.fieldItem}>
@@ -660,16 +668,23 @@ export default function TemplatesScreen() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={templates}
-        renderItem={renderTemplate}
-        keyExtractor={(item) => item.id}
-        style={styles.templatesList}
-        showsVerticalScrollIndicator={true}
-        scrollIndicatorInsets={{ right: 2 }}
-        persistentScrollbar={true}
-        indicatorStyle="black"
-      />
+      {templates.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No templates found</Text>
+          <Text style={styles.emptyStateSubtext}>Create your first template to get started</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={templates}
+          renderItem={renderTemplate}
+          keyExtractor={(item) => item.id}
+          style={styles.templatesList}
+          showsVerticalScrollIndicator={true}
+          scrollIndicatorInsets={{ right: 2 }}
+          persistentScrollbar={true}
+          indicatorStyle="black"
+        />
+      )}
 
       {/* Template Creation Modal */}
       <Modal visible={showTemplateModal} transparent animationType="fade">
@@ -1509,6 +1524,27 @@ const styles = StyleSheet.create({
   },
   cloneActionRow: {
     flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4a5568',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: '#718096',
+    textAlign: 'center',
+  },rection: 'row',
     justifyContent: 'flex-start',
   },
   useButton: {
