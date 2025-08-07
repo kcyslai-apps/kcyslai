@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
 import { useFocusEffect } from 'expo-router';
@@ -6,6 +5,7 @@ import { ThemedView } from '@/components/ThemedView';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
+import Constants from 'expo-constants';
 
 interface TemplateField {
   id: string;
@@ -41,7 +41,7 @@ interface Template {
 }
 
 export default function SettingsScreen() {
-  const appVersion = "1.0.0"; // This matches the version in app.json
+  const appVersion = Constants.expoConfig?.version || "1.0.16"; // This matches the version in app.json
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -97,7 +97,7 @@ export default function SettingsScreen() {
   const showExportSelection = async () => {
     // Reload templates to ensure we have the latest data
     await loadTemplates();
-    
+
     // Check again after loading
     if (templates.length === 0) {
       showError('No templates available to export');
@@ -123,7 +123,7 @@ export default function SettingsScreen() {
         showError('Template not found');
         return;
       }
-      
+
       const exportData = {
         templates: [selectedTemplate],
         exportDate: new Date().toISOString(),
@@ -132,13 +132,13 @@ export default function SettingsScreen() {
 
       const fileName = `barcode2file_template_${selectedTemplate.name.replace(/[^a-zA-Z0-9_-]/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
       const fileUri = FileSystem.documentDirectory + fileName;
-      
+
       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(exportData, null, 2));
-      
+
       setShowExportSelectionModal(false);
       setExportedTemplateName(selectedTemplate.name);
       setShowExportSuccessModal(true);
-      
+
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           dialogTitle: 'Export Template',
@@ -160,7 +160,7 @@ export default function SettingsScreen() {
     try {
       // Force reload templates to ensure we have the latest state
       await loadTemplates(true);
-      
+
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/json',
         copyToCacheDirectory: true
@@ -169,10 +169,10 @@ export default function SettingsScreen() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const fileUri = result.assets[0].uri;
         const content = await FileSystem.readAsStringAsync(fileUri);
-        
+
         try {
           const importData = JSON.parse(content);
-          
+
           if (!importData.templates || !Array.isArray(importData.templates)) {
             showError('Invalid template file format');
             return;
@@ -186,7 +186,7 @@ export default function SettingsScreen() {
           // Get the most current templates from file system for accurate duplicate checking
           const fileExists = await FileSystem.getInfoAsync(TEMPLATES_FILE);
           let currentTemplates: Template[] = [];
-          
+
           if (fileExists.exists) {
             const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
             const loadedTemplates = JSON.parse(content);
@@ -199,7 +199,7 @@ export default function SettingsScreen() {
           // Check for duplicate names against current file system data
           const duplicateNames: string[] = [];
           const existingNames = currentTemplates.map(t => t.name.toLowerCase());
-          
+
           importedTemplates.forEach((template: Template) => {
             if (existingNames.includes(template.name.toLowerCase())) {
               duplicateNames.push(template.name);
@@ -274,17 +274,17 @@ export default function SettingsScreen() {
             <Text style={styles.settingLabel}>Total Templates</Text>
             <Text style={styles.settingValue}>{templates.length}</Text>
           </View>
-          
+
           <TouchableOpacity style={styles.actionButton} onPress={showExportSelection}>
             <Text style={styles.actionButtonText}>📤 Export Templates</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.actionButton} onPress={importTemplates}>
             <Text style={styles.actionButtonText}>📥 Import Templates</Text>
           </TouchableOpacity>
         </View>
 
-        
+
       </ScrollView>
 
       {/* Error Modal */}
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
   },
-  
+
   templateSelectionList: {
     flex: 1,
     paddingHorizontal: 20,
@@ -750,5 +750,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+
 });
