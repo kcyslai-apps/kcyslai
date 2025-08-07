@@ -138,6 +138,7 @@ export default function TemplatesScreen() {
       required: true,
       defaultValue: '',
       options: [],
+      inputMode: 'editable',
       dateFormat: 'YYYY-MM-DD',
       customDateFormat: ''
     });
@@ -146,7 +147,13 @@ export default function TemplatesScreen() {
   };
 
   const editField = (index: number) => {
-    setCurrentField({ ...templateFields[index] });
+    const field = templateFields[index];
+    // Ensure fixed_data fields default to 'editable' if no inputMode is set
+    const fieldToEdit = {
+      ...field,
+      inputMode: field.type === 'fixed_data' && !field.inputMode ? 'editable' : field.inputMode
+    };
+    setCurrentField(fieldToEdit);
     setEditingFieldIndex(index);
     setShowFieldModal(true);
   };
@@ -165,7 +172,7 @@ export default function TemplatesScreen() {
       required: true,
       defaultValue: currentField.defaultValue || '',
       options: currentField.options || [],
-      inputMode: currentField.inputMode || 'select_only',
+      inputMode: currentField.type === 'fixed_data' ? (currentField.inputMode || 'editable') : (currentField.inputMode || 'select_only'),
       dateFormat: currentField.dateFormat || 'YYYY-MM-DD',
       customDateFormat: currentField.customDateFormat || ''
     };
@@ -961,7 +968,14 @@ export default function TemplatesScreen() {
               <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={currentField.type}
-                  onValueChange={(value) => setCurrentField({ ...currentField, type: value })}
+                  onValueChange={(value) => {
+                    const updatedField = { ...currentField, type: value };
+                    // Set default inputMode to 'editable' when changing to fixed_data
+                    if (value === 'fixed_data' && !currentField.inputMode) {
+                      updatedField.inputMode = 'editable';
+                    }
+                    setCurrentField(updatedField);
+                  }}
                   style={styles.picker}
                 >
                   {fieldTypes.map((type) => (
