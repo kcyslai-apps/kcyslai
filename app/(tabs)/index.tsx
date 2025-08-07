@@ -35,6 +35,7 @@ interface Template {
   fields: TemplateField[];
   csvExportSettings: CSVExportSettings;
   createdAt: Date;
+  isProtected?: boolean; // Added for protection status
 }
 
 export default function TemplatesScreen() {
@@ -94,7 +95,8 @@ export default function TemplatesScreen() {
               fileExtension: 'csv',
               includeQuotes: true
             },
-            createdAt: new Date(template.createdAt)
+            createdAt: new Date(template.createdAt),
+            isProtected: template.isProtected || false // Load protection status
           }));
           setTemplates(loadedTemplates);
           console.log('Templates loaded successfully:', loadedTemplates.length);
@@ -104,7 +106,76 @@ export default function TemplatesScreen() {
         }
       } else {
         console.log('Templates file does not exist');
-        setTemplates([]);
+        // If file doesn't exist, create a default protected template
+        const defaultStockCountTemplate: Template = {
+          id: "1753791586091", // Provided ID
+          name: "Stock Count",
+          description: "",
+          fields: [
+            {
+              id: "1753791519541",
+              name: "Location",
+              type: "fixed_data",
+              required: true,
+              defaultValue: "",
+              options: [],
+              inputMode: "editable",
+              dateFormat: "YYYY-MM-DD",
+              customDateFormat: ""
+            },
+            {
+              id: "1753791530032",
+              name: "Barcode",
+              type: "barcode",
+              required: true,
+              defaultValue: "",
+              options: [],
+              inputMode: "select_only",
+              dateFormat: "YYYY-MM-DD",
+              customDateFormat: ""
+            },
+            {
+              id: "1753791545448",
+              name: "Date",
+              type: "fixed_date",
+              required: true,
+              defaultValue: "",
+              options: [],
+              inputMode: "select_only",
+              dateFormat: "yyyyMMdd",
+              customDateFormat: ""
+            },
+            {
+              id: "1753791555840",
+              name: "Quantity",
+              type: "number",
+              required: true,
+              defaultValue: "",
+              options: [],
+              inputMode: "select_only",
+              dateFormat: "YYYY-MM-DD",
+              customDateFormat: ""
+            }
+          ],
+          csvExportSettings: {
+            includeHeader: false,
+            delimiter: "comma",
+            customDelimiter: "",
+            fieldPositions: {
+              "1753791519541": 1,
+              "1753791530032": 2,
+              "1753791545448": 4,
+              "1753791555840": 3
+            },
+            fileExtension: "csv",
+            includeQuotes: false
+          },
+          createdAt: new Date("2025-07-29T12:19:46.091Z"),
+          isProtected: true // Mark as protected
+        };
+        setTemplates([defaultStockCountTemplate]);
+        await saveTemplates([defaultStockCountTemplate]);
+        console.log('Default template created.');
       }
     } catch (error) {
       console.log('Error loading templates:', error);
@@ -318,6 +389,11 @@ export default function TemplatesScreen() {
   };
 
   const editTemplate = (template: Template) => {
+    // Prevent editing protected templates
+    if (template.isProtected) {
+      Alert.alert('Cannot Edit', 'This is a protected template and cannot be edited.');
+      return;
+    }
     setNewTemplateName(template.name);
     setTemplateFields([...template.fields]);
     setEditingTemplateId(template.id);
@@ -366,17 +442,20 @@ export default function TemplatesScreen() {
   };
 
   const cloneTemplate = (template: Template) => {
+    // Prevent cloning protected templates if desired, or allow it if it makes sense
+    // For now, we allow cloning of any template
     setSelectedTemplateForClone(template);
     setCloneTemplateName(`${template.name} - Copy`);
     setShowCloneModal(true);
   };
 
-  const deleteTemplate = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      setSelectedTemplateForDelete(template);
-      setShowDeleteTemplateModal(true);
+  const deleteTemplate = (template: Template) => { // Changed to accept template object
+    if (template.isProtected) { // Check protection status here
+      Alert.alert('Cannot Delete', 'This is a protected template and cannot be deleted.');
+      return;
     }
+    setSelectedTemplateForDelete(template);
+    setShowDeleteTemplateModal(true);
   };
 
   const confirmCloneTemplate = async () => {
@@ -408,7 +487,8 @@ export default function TemplatesScreen() {
         id: `${field.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       })),
       csvExportSettings: { ...selectedTemplateForClone.csvExportSettings },
-      createdAt: new Date()
+      createdAt: new Date(),
+      isProtected: false // Cloned templates are not protected by default
     };
 
     const updatedTemplates = [...templates, clonedTemplate];
@@ -418,12 +498,6 @@ export default function TemplatesScreen() {
     setShowCloneModal(false);
     setSelectedTemplateForClone(null);
     setCloneTemplateName('');
-
-    // Show success message
-    // This success message is for cloning, not template creation. 
-    // The original code did not have a specific success message for cloning, 
-    // so we'll use a general success notification if needed, or rely on user feedback.
-    // For now, we'll just close the modal.
   };
 
   const cancelCloneTemplate = () => {
@@ -433,13 +507,25 @@ export default function TemplatesScreen() {
   };
 
   const confirmDeleteTemplate = async () => {
-    if (selectedTemplateForDelete) {
-      try {
-        // Load existing data records to preserve template field information
-        const dataRecordsFile = FileSystem.documentDirectory + 'dataRecords.json';
-        const fileExists = await FileSystem.getInfoAsync(dataRecordsFile);
+    if (!selectedTemplateForDelete) return;
 
-        if (fileExists.exists) {
+    // Check if template is protected
+    if (selectedTemplateForDelete.isProtected) {
+      Alert.alert('Cannot Delete', 'This is a protected template and cannot be deleted.');
+      setShowDeleteTemplateModal(false);
+      setSelectedTemplateForDelete(null);
+      return;
+    }
+
+    setShowDeleteTemplateModal(false);
+
+    try {
+      // Before deleting template, preserve its field definitions in existing data records
+      const dataRecordsFile = FileSystem.documentDirectory + 'dataRecords.json';
+      const fileExists = await FileSystem.getInfoAsync(dataRecordsFile);
+
+      if (fileExists.exists) {
+        try {
           const content = await FileSystem.readAsStringAsync(dataRecordsFile);
           const dataRecords = JSON.parse(content);
 
@@ -461,9 +547,9 @@ export default function TemplatesScreen() {
 
           // Save updated records with preserved template info
           await FileSystem.writeAsStringAsync(dataRecordsFile, JSON.stringify(updatedRecords));
+        } catch (error) {
+          console.error('Error preserving template info in data records:', error);
         }
-      } catch (error) {
-        console.error('Error preserving template info in data records:', error);
       }
 
       // Remove the template
@@ -474,8 +560,10 @@ export default function TemplatesScreen() {
       // Reload templates from file system to ensure state consistency
       await loadTemplates();
 
-      setShowDeleteTemplateModal(false);
       setSelectedTemplateForDelete(null);
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      Alert.alert('Error', 'Failed to delete template');
     }
   };
 
@@ -605,7 +693,7 @@ export default function TemplatesScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.deleteButton}
-              onPress={() => deleteTemplate(item.id)}
+              onPress={() => deleteTemplate(item)}
             >
               <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
             </TouchableOpacity>
@@ -700,6 +788,7 @@ export default function TemplatesScreen() {
                 placeholder="Template name"
                 value={newTemplateName}
                 onChangeText={setNewTemplateName}
+                editable={!editingTemplateId || !templates.find(t => t.id === editingTemplateId)?.isProtected} // Make name not editable for protected templates
               />
 
               {/* Tab Navigation */}
@@ -2785,6 +2874,21 @@ const styles = StyleSheet.create({
   templateSuccessModalOkButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  // Added styles for protected badge
+  protectedBadge: {
+    backgroundColor: '#a0aec0',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  protectedText: {
+    color: 'white',
+    fontSize: 12,
     fontWeight: 'bold',
   },
 });

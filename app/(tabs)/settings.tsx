@@ -38,6 +38,8 @@ interface Template {
   fields: TemplateField[];
   csvExportSettings: CSVExportSettings;
   createdAt: Date;
+  isDefault?: boolean;
+  isProtected?: boolean;
 }
 
 export default function SettingsScreen() {
@@ -71,7 +73,9 @@ export default function SettingsScreen() {
         const loadedTemplates = JSON.parse(content);
         const templatesWithDates = loadedTemplates.map((template: any) => ({
           ...template,
-          createdAt: new Date(template.createdAt)
+          createdAt: new Date(template.createdAt),
+          isDefault: template.isDefault || false,
+          isProtected: template.isProtected || false
         }));
         setTemplates(templatesWithDates);
         console.log('Settings - Loaded templates:', templatesWithDates.length);
