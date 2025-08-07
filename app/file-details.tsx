@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -186,6 +186,8 @@ export default function FileDetailsScreen() {
   });
 
   return (
+    <>
+      <Stack.Screen options={{ title: '', headerShown: false }} />
       <ThemedView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -213,6 +215,7 @@ export default function FileDetailsScreen() {
         onRefresh={loadData}
       />
     </ThemedView>
+    </>
   );
 }
 
