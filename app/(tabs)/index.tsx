@@ -1391,7 +1391,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   useButton: {
-    width: 70,
+    width: 80,
     backgroundColor: '#38a169',
     paddingVertical: 6,
     paddingHorizontal: 6,
@@ -1406,7 +1406,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   viewButton: {
-    width: 70,
+    width: 80,
     backgroundColor: '#63b3ed',
     paddingVertical: 6,
     paddingHorizontal: 6,
@@ -1421,7 +1421,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   editButton: {
-    width: 70,
+    width: 80,
     backgroundColor: '#f6ad55',
     paddingVertical: 6,
     paddingHorizontal: 6,
@@ -1443,7 +1443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
     elevation: 2,
-    width: 70,
+    width: 80,
     paddingVertical: 6,
     paddingHorizontal: 6,
   },
@@ -1453,7 +1453,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
-    width: 70,
+    width: 80,
     backgroundColor: '#fc8181',
     paddingVertical: 6,
     paddingHorizontal: 6,
