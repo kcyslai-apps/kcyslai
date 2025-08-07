@@ -1544,8 +1544,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#718096',
     textAlign: 'center',
-  },rection: 'row',
-    justifyContent: 'flex-start',
   },
   useButton: {
     flex: 1,
