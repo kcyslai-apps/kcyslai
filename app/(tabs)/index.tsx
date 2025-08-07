@@ -1437,9 +1437,9 @@ const styles = StyleSheet.create({
   },
   cloneButton: {
     backgroundColor: '#9f7aea',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderRadius: 6,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
     elevation: 2,
@@ -1447,7 +1447,7 @@ const styles = StyleSheet.create({
   },
   cloneButtonText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   deleteButton: {
