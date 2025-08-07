@@ -25,13 +25,13 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: 'bold',
-          marginTop: 5,
-          marginBottom: 'auto',
+          marginTop: 0,
+          marginBottom: '0',
         },
         tabBarShowIcon: true,
         tabBarIconStyle: {
-          marginTop: 5,
-          marginBottom: 'auto',
+          marginTop: -10,
+          marginBottom: -4,
         },
       }}
     >
