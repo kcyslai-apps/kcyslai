@@ -1391,7 +1391,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   useButton: {
-    flex: 1,
+    width: 60,
     backgroundColor: '#38a169',
     paddingVertical: 4,
     paddingHorizontal: 6,
@@ -1406,7 +1406,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   viewButton: {
-    flex: 1,
+    width: 60,
     backgroundColor: '#63b3ed',
     paddingVertical: 4,
     paddingHorizontal: 6,
@@ -1421,7 +1421,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   editButton: {
-    flex: 1,
+    width: 60,
     backgroundColor: '#f6ad55',
     paddingVertical: 4,
     paddingHorizontal: 6,
@@ -1443,7 +1443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
     elevation: 2,
-    flex: 1,
+    width: 60,
   },
   cloneButtonText: {
     color: 'white',
@@ -1451,7 +1451,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
-    flex: 1,
+    width: 60,
     backgroundColor: '#fc8181',
     paddingVertical: 4,
     paddingHorizontal: 6,
