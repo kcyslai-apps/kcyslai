@@ -328,8 +328,11 @@ export default function DataEntryScreen() {
   const openDatePicker = (fieldId: string) => {
     // Prevent opening if already busy or open
     if (isDatePickerBusy || showDatePicker) {
+      console.log('Date picker already open or busy');
       return;
     }
+
+    console.log('Opening date picker for field:', fieldId);
 
     // Get current field value or use today's date
     const field = template?.fields.find(f => f.id === fieldId);
@@ -351,15 +354,20 @@ export default function DataEntryScreen() {
       }
     }
 
-    setIsDatePickerBusy(true);
+    // Set all states in proper sequence
+    setCurrentDateField(fieldId);
     setSelectedDate(initialDate);
     setTempDate(initialDate);
-    setCurrentDateField(fieldId);
-
-    // Small delay to ensure state is set before showing picker
+    setIsDatePickerBusy(true);
+    
+    // Show picker with minimal delay
     setTimeout(() => {
       setShowDatePicker(true);
-    }, 50);
+      // Clear busy state after showing
+      setTimeout(() => {
+        setIsDatePickerBusy(false);
+      }, 100);
+    }, 100);
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -396,6 +404,11 @@ export default function DataEntryScreen() {
   };
 
   const closeDatePicker = () => {
+    console.log('Closing date picker');
+    
+    // Set busy state to prevent multiple closes
+    setIsDatePickerBusy(true);
+    
     // Immediately hide the picker
     setShowDatePicker(false);
 
@@ -403,7 +416,7 @@ export default function DataEntryScreen() {
     setTimeout(() => {
       setCurrentDateField(null);
       setIsDatePickerBusy(false);
-    }, 100);
+    }, 200);
   };
 
   const openBarcodeScanner = (fieldId: string) => {
@@ -1089,18 +1102,23 @@ export default function DataEntryScreen() {
           visible={showDatePicker} 
           transparent 
           animationType="fade"
-          onRequestClose={closeDatePicker}
+          onRequestClose={() => {
+            if (!isDatePickerBusy) {
+              closeDatePicker();
+            }
+          }}
         >
-          <TouchableOpacity 
-            style={styles.datePickerModalOverlay}
-            activeOpacity={1}
-            onPress={closeDatePicker}
-          >
+          <View style={styles.datePickerModalOverlay}>
             <TouchableOpacity 
-              style={styles.datePickerModalContent}
+              style={styles.datePickerModalBackdrop}
               activeOpacity={1}
-              onPress={(e) => e.stopPropagation()}
-            >
+              onPress={() => {
+                if (!isDatePickerBusy) {
+                  closeDatePicker();
+                }
+              }}
+            />
+            <View style={styles.datePickerModalContent}>
               <Text style={styles.datePickerTitle}>Select Date</Text>
               <DateTimePicker
                 value={tempDate}
@@ -1113,23 +1131,31 @@ export default function DataEntryScreen() {
                 <View style={styles.datePickerButtons}>
                   <TouchableOpacity
                     style={styles.datePickerCancelButton}
-                    onPress={closeDatePicker}
+                    onPress={() => {
+                      if (!isDatePickerBusy) {
+                        closeDatePicker();
+                      }
+                    }}
+                    disabled={isDatePickerBusy}
                   >
                     <Text style={styles.datePickerCancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.datePickerConfirmButton}
                     onPress={() => {
-                      applyDateChange(tempDate);
-                      closeDatePicker();
+                      if (!isDatePickerBusy) {
+                        applyDateChange(tempDate);
+                        closeDatePicker();
+                      }
                     }}
+                    disabled={isDatePickerBusy}
                   >
                     <Text style={styles.datePickerConfirmButtonText}>Confirm</Text>
                   </TouchableOpacity>
                 </View>
               )}
-            </TouchableOpacity>
-          </TouchableOpacity>
+            </View>
+          </View>
         </Modal>
       )}
 
@@ -1509,9 +1535,16 @@ const styles = StyleSheet.create({
   },
   datePickerModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  datePickerModalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   datePickerModalContent: {
     backgroundColor: 'white',
@@ -1520,6 +1553,15 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 400,
     alignItems: 'center',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    zIndex: 1,
   },
   datePickerTitle: {
     fontSize: 18,
