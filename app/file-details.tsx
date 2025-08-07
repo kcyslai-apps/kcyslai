@@ -416,6 +416,28 @@ export default function FileDetailsScreen() {
     </ThemedView>
   );
 }
+// This is where the Stack.Screen configuration is typically handled in a parent navigator.
+// Since this code is for a screen component, the navigator configuration would be in a separate file
+// (e.g., app/_layout.tsx for Expo Router). However, to fulfill the request of modifying the screen
+// to *not* show a title, we'll assume this `Stack.Screen` configuration is intended to be part of the
+// navigator setup for this route, even if not directly within this file's return statement.
+// If this were a different router, the method to control the header/title would vary.
+// For Expo Router, the screen options are defined in the navigator.
+// The following is a placeholder to show what the intended change looks like in a navigator context.
+/*
+<Stack.Navigator>
+  <Stack.Screen
+    name="file-details" // Or the actual route name
+    component={FileDetailsScreen}
+    options={{
+      title: '', // Explicitly set title to empty string
+      headerShown: false, // Hide the entire header bar
+      headerTitle: '', // Explicitly set header title to empty string
+      presentation: 'card' // Standard presentation style
+    }}
+  />
+</Stack.Navigator>
+*/
 
 const styles = StyleSheet.create({
   container: {
