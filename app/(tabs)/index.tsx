@@ -198,17 +198,33 @@ export default function TemplatesScreen() {
 
   const removeField = (index: number) => {
     const fieldToRemove = templateFields[index];
-    const updatedFields = templateFields.filter((_, i) => i !== index);
-    setTemplateFields(updatedFields);
+    setSelectedFieldForDelete({ field: fieldToRemove, index });
+    setShowDeleteFieldModal(true);
+  };
 
-    // Remove CSV position for deleted field
-    setCsvExportSettings(prev => {
-      const { [fieldToRemove.id]: removed, ...remainingPositions } = prev.fieldPositions;
-      return {
-        ...prev,
-        fieldPositions: remainingPositions
-      };
-    });
+  const confirmDeleteField = () => {
+    if (selectedFieldForDelete) {
+      const { field: fieldToRemove, index } = selectedFieldForDelete;
+      const updatedFields = templateFields.filter((_, i) => i !== index);
+      setTemplateFields(updatedFields);
+
+      // Remove CSV position for deleted field
+      setCsvExportSettings(prev => {
+        const { [fieldToRemove.id]: removed, ...remainingPositions } = prev.fieldPositions;
+        return {
+          ...prev,
+          fieldPositions: remainingPositions
+        };
+      });
+
+      setShowDeleteFieldModal(false);
+      setSelectedFieldForDelete(null);
+    }
+  };
+
+  const cancelDeleteField = () => {
+    setShowDeleteFieldModal(false);
+    setSelectedFieldForDelete(null);
   };
 
   const saveTemplate = () => {
@@ -322,6 +338,8 @@ export default function TemplatesScreen() {
   const [selectedTemplateForClone, setSelectedTemplateForClone] = useState<Template | null>(null);
   const [cloneTemplateName, setCloneTemplateName] = useState('');
   const [showCloneSuccessMessage, setShowCloneSuccessMessage] = useState(false);
+  const [showDeleteFieldModal, setShowDeleteFieldModal] = useState(false);
+  const [selectedFieldForDelete, setSelectedFieldForDelete] = useState<{ field: TemplateField; index: number } | null>(null);
 
 
   const useTemplate = (template: Template) => {
@@ -1296,6 +1314,40 @@ export default function TemplatesScreen() {
           </View>
         </View>
       )}
+
+      {/* Delete Field Confirmation Modal */}
+      <Modal visible={showDeleteFieldModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteFieldModalContent}>
+            <Text style={styles.deleteFieldModalTitle}>🗑️ Delete Field</Text>
+
+            <View style={styles.deleteFieldModalInfo}>
+              <Text style={styles.deleteFieldNameText}>
+                "{selectedFieldForDelete?.field.name}"
+              </Text>
+
+              <Text style={styles.deleteFieldWarningText}>
+                Are you sure you want to delete this field? This action cannot be undone.
+              </Text>
+            </View>
+
+            <View style={styles.deleteFieldModalButtons}>
+              <TouchableOpacity
+                style={styles.deleteFieldCancelButton}
+                onPress={cancelDeleteField}
+              >
+                <Text style={styles.deleteFieldCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteFieldConfirmButton}
+                onPress={confirmDeleteField}
+              >
+                <Text style={styles.deleteFieldConfirmButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
     </ThemedView>
   );
@@ -2522,5 +2574,83 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  deleteFieldModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 340,
+    alignItems: 'center',
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#f0f8ff',
+  },
+  deleteFieldModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#2d3748',
+    textAlign: 'center',
+  },
+  deleteFieldModalInfo: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  deleteFieldNameText: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#fc8181',
+    minWidth: '80%',
+    elevation: 3,
+  },
+  deleteFieldWarningText: {
+    fontSize: 16,
+    color: '#4a5568',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  deleteFieldModalButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  deleteFieldCancelButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e0',
+    minWidth: 80,
+  },
+  deleteFieldCancelButtonText: {
+    color: '#718096',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  deleteFieldConfirmButton: {
+    backgroundColor: '#e53e3e',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  deleteFieldConfirmButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
