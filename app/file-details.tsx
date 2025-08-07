@@ -177,61 +177,6 @@ export default function FileDetailsScreen() {
     setShowMissingTemplateModal(false);
   };
 
-  const continueInput = () => {
-    if (fileRecords.length === 0) {
-      Alert.alert('No Records', 'Cannot continue input - no records found in this file');
-      return;
-    }
-
-    // Get the template ID from the first record (all records in a file should use the same template)
-    const firstRecord = fileRecords[0];
-    let templateExists = templates.find(t => t.id === firstRecord.templateId);
-
-    // If template not found but record has preserved template fields, we can still continue
-    if (!templateExists && !firstRecord.preservedTemplateFields) {
-      setShowMissingTemplateModal(true);
-      return;
-    }
-    
-     if (!templateExists && firstRecord.preservedTemplateFields) {
-          setShowMissingTemplateModal(true);
-          return;
-     }
-    
-    if(!templateExists){
-          setShowMissingTemplateModal(true);
-          return;
-    }
-
-    // Use preserved template fields if original template is deleted
-    const templateFields = templateExists?.fields || firstRecord.preservedTemplateFields || [];
-
-    // Extract fixed field values from the first record
-    const fixedFields = templateFields.filter(field => 
-      field.type === 'fixed_data' || field.type === 'fixed_date'
-    );
-
-    const fixedFieldValues: { [key: string]: string } = {};
-    fixedFields.forEach(field => {
-      if (firstRecord.data[field.id]) {
-        fixedFieldValues[field.id] = firstRecord.data[field.id];
-      }
-    });
-
-    // Navigate to data entry with the existing template, file name, and fixed field values
-    router.push({
-      pathname: '/data-entry',
-      params: {
-        templateId: firstRecord.templateId,
-        dataFileName: encodeURIComponent(fileName || 'Unnamed File'),
-        continueInput: 'true',
-        fixedFieldValues: encodeURIComponent(JSON.stringify(fixedFieldValues))
-      }
-    });
-  };
-
-
-
   const renderRecord = ({ item }: { item: DataRecord }) => {
     let template = templates.find(t => t.id === item.templateId);
     let isTemplateDeleted = false;
@@ -281,38 +226,13 @@ export default function FileDetailsScreen() {
     );
   };
 
-  // Check if any records have deleted templates
   const hasDeletedTemplate = fileRecords.length > 0 && fileRecords.some(record => {
     const template = templates.find(t => t.id === record.templateId);
     return !template && record.preservedTemplateFields;
   });
 
-  const fileInfo = (
-    <View style={styles.fileInfo}>
-      <Text style={styles.fileName}>📁 {fileName}</Text>
-      <Text style={styles.recordCount}>
-        Total Records: {fileRecords.length}
-      </Text>
-      {hasDeletedTemplate && (
-        <Text style={styles.deletedTemplateWarning}>⚠️ Template Deleted</Text>
-      )}
-      {fileRecords.length > 0 && (
-        <TouchableOpacity
-          style={styles.continueInputButton}
-          onPress={continueInput}
-        >
-          <Text style={styles.continueInputButtonText}>🔄 Continue Input</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
   return (
     <ThemedView style={styles.container}>
-      
-
-      {fileInfo}
-
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -417,7 +337,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  
+
   fileInfo: {
     backgroundColor: '#e8f4f8',
     padding: 10,
