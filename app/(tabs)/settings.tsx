@@ -429,20 +429,20 @@ export default function SettingsScreen() {
       {/* Import Success Modal */}
       <Modal visible={showImportSuccessModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.exportSuccessModalContent}> {/* Reusing export success modal styles for import success */}
-            <Text style={styles.exportSuccessModalTitle}>✅ Import Successful</Text> {/* Modified title */}
-            <View style={styles.exportSuccessModalInfo}>
-              <Text style={styles.exportSuccessModalMessage}>
+          <ThemedView style={styles.exportSuccessModalContent}>
+            <ThemedText style={styles.exportSuccessModalTitle}>✅ Import Successful</ThemedText>
+            <ThemedView style={styles.exportSuccessModalInfo}>
+              <ThemedText style={styles.exportSuccessModalMessage}>
                 Successfully imported {importedTemplateCount} template(s)
-              </Text>
-            </View>
+              </ThemedText>
+            </ThemedView>
             <TouchableOpacity
               style={styles.exportSuccessModalButton}
               onPress={closeImportSuccessModal}
             >
-              <Text style={styles.exportSuccessModalButtonText}>OK</Text>
+              <ThemedText style={styles.exportSuccessModalButtonText}>OK</ThemedText>
             </TouchableOpacity>
-          </View>
+          </ThemedView>
         </View>
       </Modal>
     </ThemedView>
