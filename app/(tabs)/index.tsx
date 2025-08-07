@@ -550,32 +550,42 @@ export default function TemplatesScreen() {
         <Text style={styles.templateDate}>
           Created: {item.createdAt.toLocaleDateString()}
         </Text>
-      </View>
-      <View style={styles.templateActions}>
-        <TouchableOpacity
-          style={styles.useButton}
-          onPress={() => useTemplate(item)}
-        >
-          <Text style={styles.useButtonText}>▶️ Use</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.viewButton}
-          onPress={() => viewTemplate(item)}
-        >
-          <Text style={styles.viewButtonText}>👁️ View</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => editTemplate(item)}
-        >
-          <Text style={styles.editButtonText}>✏️ Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => deleteTemplate(item.id)}
-        >
-          <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
-        </TouchableOpacity>
+        <View style={styles.templateActionsContainer}>
+          <View style={styles.primaryActions}>
+            <TouchableOpacity
+              style={styles.useButton}
+              onPress={() => useTemplate(item)}
+            >
+              <Text style={styles.useButtonText}>🚀 Use</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cloneButton}
+              onPress={() => cloneTemplate(item)}
+            >
+              <Text style={styles.cloneButtonText}>📋 Clone</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.secondaryActions}>
+            <TouchableOpacity
+              style={styles.viewButton}
+              onPress={() => viewTemplate(item)}
+            >
+              <Text style={styles.viewButtonText}>👁️ View</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => editTemplate(item)}
+            >
+              <Text style={styles.editButtonText}>✏️ Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => deleteTemplate(item.id)}
+            >
+              <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -1387,6 +1397,20 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   templateActions: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  templateActionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  primaryActions: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  secondaryActions: {
     flexDirection: 'row',
     gap: 6,
   },
