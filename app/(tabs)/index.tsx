@@ -1381,7 +1381,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 4,
   },
   templateSecondaryActions: {
     flexDirection: 'column',
