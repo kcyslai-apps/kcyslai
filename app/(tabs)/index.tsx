@@ -543,15 +543,13 @@ export default function TemplatesScreen() {
           Created: {item.createdAt.toLocaleDateString()}
         </Text>
         <View style={styles.templateActionsContainer}>
-          <View style={styles.primaryActions}>
+          <View style={styles.mainActionRow}>
             <TouchableOpacity
               style={styles.useButton}
               onPress={() => useTemplate(item)}
             >
               <Text style={styles.useButtonText}>🚀 Use</Text>
             </TouchableOpacity>
-          </View>
-          <View style={styles.secondaryActions}>
             <TouchableOpacity
               style={styles.viewButton}
               onPress={() => viewTemplate(item)}
@@ -569,6 +567,14 @@ export default function TemplatesScreen() {
               onPress={() => deleteTemplate(item.id)}
             >
               <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.cloneActionRow}>
+            <TouchableOpacity
+              style={styles.cloneButton}
+              onPress={() => cloneTemplate(item)}
+            >
+              <Text style={styles.cloneButtonText}>📋 Clone</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1387,21 +1393,21 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   templateActionsContainer: {
+    flexDirection: 'column',
+    marginTop: 8,
+    gap: 6,
+  },
+  mainActionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
+    gap: 4,
   },
-  primaryActions: {
+  cloneActionRow: {
     flexDirection: 'row',
-    gap: 6,
-  },
-  secondaryActions: {
-    flexDirection: 'row',
-    gap: 6,
+    justifyContent: 'flex-start',
   },
   useButton: {
-    width: 75,
+    flex: 1,
     backgroundColor: '#38a169',
     paddingVertical: 6,
     paddingHorizontal: 6,
@@ -1416,7 +1422,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   viewButton: {
-    width: 75,
+    flex: 1,
     backgroundColor: '#63b3ed',
     paddingVertical: 6,
     paddingHorizontal: 6,
@@ -1431,7 +1437,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   editButton: {
-    width: 75,
+    flex: 1,
     backgroundColor: '#f6ad55',
     paddingVertical: 6,
     paddingHorizontal: 6,
@@ -1447,15 +1453,13 @@ const styles = StyleSheet.create({
   },
   cloneButton: {
     backgroundColor: '#9f7aea',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
     borderRadius: 6,
     alignItems: 'center',
     boxShadow: '0px 1px 2px rgba(159, 122, 234, 0.2)',
     elevation: 2,
-    width: 75,
-    paddingVertical: 6,
-    paddingHorizontal: 6,
+    flex: 1,
   },
   cloneButtonText: {
     color: 'white',
@@ -1463,7 +1467,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
-    width: 75,
+    flex: 1,
     backgroundColor: '#fc8181',
     paddingVertical: 6,
     paddingHorizontal: 6,
