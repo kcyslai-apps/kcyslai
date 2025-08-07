@@ -309,12 +309,7 @@ export default function FileDetailsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-        <ThemedText type="title" style={styles.title}>File Details</ThemedText>
-      </View>
+      
 
       {fileInfo}
 
@@ -422,31 +417,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    paddingTop: 50,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-  },
-  backButton: {
-    marginRight: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#4299e1',
-    fontWeight: 'bold',
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-    color: '#2d3748',
-    marginRight: 60,
-  },
+  
   fileInfo: {
     backgroundColor: '#e8f4f8',
     padding: 10,
