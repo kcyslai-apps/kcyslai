@@ -537,14 +537,6 @@ export default function TemplatesScreen() {
         </View>
         <View style={styles.templateDescriptionRow}>
           <Text style={styles.templateDescription}>{item.description}</Text>
-          <View style={styles.templateSecondaryActions}>
-            <TouchableOpacity
-              style={styles.cloneButton}
-              onPress={() => cloneTemplate(item)}
-            >
-              <Text style={styles.cloneButtonText}>📋 Clone</Text>
-            </TouchableOpacity>
-          </View>
         </View>
         <Text style={styles.templateFields}>Fields: {item.fields.length}</Text>
         <Text style={styles.templateDate}>
@@ -557,12 +549,6 @@ export default function TemplatesScreen() {
               onPress={() => useTemplate(item)}
             >
               <Text style={styles.useButtonText}>🚀 Use</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cloneButton}
-              onPress={() => cloneTemplate(item)}
-            >
-              <Text style={styles.cloneButtonText}>📋 Clone</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.secondaryActions}>
