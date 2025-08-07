@@ -321,6 +321,7 @@ export default function TemplatesScreen() {
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [selectedTemplateForClone, setSelectedTemplateForClone] = useState<Template | null>(null);
   const [cloneTemplateName, setCloneTemplateName] = useState('');
+  const [showCloneSuccessMessage, setShowCloneSuccessMessage] = useState(false);
 
 
   const useTemplate = (template: Template) => {
@@ -381,10 +382,15 @@ export default function TemplatesScreen() {
     setTemplates(updatedTemplates);
     await saveTemplates(updatedTemplates);
 
-    Alert.alert('Success', 'Template cloned successfully!');
     setShowCloneModal(false);
     setSelectedTemplateForClone(null);
     setCloneTemplateName('');
+    
+    // Show success message
+    setShowCloneSuccessMessage(true);
+    setTimeout(() => {
+      setShowCloneSuccessMessage(false);
+    }, 2000);
   };
 
   const cancelCloneTemplate = () => {
@@ -1282,6 +1288,14 @@ export default function TemplatesScreen() {
         </View>
       </Modal>
 
+      {/* Clone Success Message Overlay */}
+      {showCloneSuccessMessage && (
+        <View style={styles.successMessageOverlay}>
+          <View style={styles.successMessageContainer}>
+            <Text style={styles.successMessageText}>✓ Template cloned successfully</Text>
+          </View>
+        </View>
+      )}
 
     </ThemedView>
   );
@@ -2481,5 +2495,32 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  successMessageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    zIndex: 1000,
+  },
+  successMessageContainer: {
+    backgroundColor: '#f0fff4',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#68d391',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.25)',
+    elevation: 6,
+  },
+  successMessageText: {
+    color: '#2f855a',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
