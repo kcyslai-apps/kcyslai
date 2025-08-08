@@ -15,7 +15,9 @@
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "workingDirectory": "./barcode2file/android"
     }
   },
   "submit": {
