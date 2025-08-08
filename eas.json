@@ -5,23 +5,16 @@
   },
   "build": {
     "production": {
-      "autoIncrement": true,
-      "android": {
-        "workingDirectory": "/home/runner/workspace"
-      }
+      "autoIncrement": true
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "android": {
-        "workingDirectory": "/home/runner/workspace"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk",
-        "workingDirectory": "/home/runner/workspace"
+        "buildType": "apk"
       }
     }
   },
