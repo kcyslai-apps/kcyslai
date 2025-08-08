@@ -87,7 +87,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.barcode2file"
+    namespace 'com.kcyslai.expoonreplit'
     defaultConfig {
         applicationId 'com.kcyslai.expoonreplit'
         minSdkVersion rootProject.ext.minSdkVersion
