@@ -4,6 +4,7 @@
     "slug": "expo-on-replit",
     "version": "1.0.18",
     "scheme": "barcode2file",
+    "platforms": ["android","ios"],
     "experiments": {
       "typedRoutes": true
     },
