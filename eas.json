@@ -1,19 +1,27 @@
 {
   "cli": {
-    "version": ">= 16.4.1"
+    "version": ">= 16.4.1",
+    "appVersionSource": "remote"
   },
   "build": {
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "workingDirectory": "/home/runner/workspace"
+      }
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "workingDirectory": "/home/runner/workspace"
+      }
     },
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "workingDirectory": "/home/runner/workspace"
       }
     }
   },
