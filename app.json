@@ -4,7 +4,6 @@
     "slug": "expo-on-replit",
     "version": "1.0.18",
     "scheme": "barcode2file",
-
     "experiments": {
       "typedRoutes": true
     },
@@ -16,6 +15,9 @@
     },
     "android": {
       "package": "com.kcyslai.expoonreplit"
+    },
+    "web": {
+      "bundler": "metro"
     }
   }
 }
