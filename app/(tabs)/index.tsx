@@ -77,7 +77,7 @@ export default function TemplatesScreen() {
     try {
       const fileExists = await FileSystem.getInfoAsync(TEMPLATES_FILE);
       let loadedTemplates: Template[] = [];
-      
+
       if (fileExists.exists) {
         const content = await FileSystem.readAsStringAsync(TEMPLATES_FILE);
         try {
@@ -181,7 +181,7 @@ export default function TemplatesScreen() {
           createdAt: new Date("2025-07-29T12:19:46.091Z"),
           isProtected: true // Mark as protected
         };
-        
+
         loadedTemplates.unshift(defaultStockCountTemplate); // Add at beginning
         await saveTemplates(loadedTemplates);
         console.log('Default template added.');
@@ -2295,30 +2295,49 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 12,
+    padding: 6,
     marginBottom: 20,
-    borderRadius: 8,
-    backgroundColor: '#f8fafc',
-    padding: 4,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     alignItems: 'center',
-    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   activeTab: {
     backgroundColor: '#4299e1',
-    boxShadow: '0px 2px 4px rgba(66, 153, 225, 0.2)',
-    elevation: 2,
+    borderColor: '#2b6cb0',
+    elevation: 6,
+    shadowColor: '#4299e1',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#718096',
+    color: '#4a5568',
   },
   activeTabText: {
     color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   csvSettingsSection: {
     marginBottom: 20,
