@@ -2,9 +2,12 @@
   "expo": {
     "name": "Barcode2File",
     "slug": "expo-on-replit",
-    "version": "1.0.17",
+    "version": "1.0.18",
     "scheme": "barcode2file",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "experiments": {
       "typedRoutes": true
     },
@@ -13,6 +16,12 @@
       "eas": {
         "projectId": "35a63ef5-ab12-4dd2-8447-a8dc29ffd8b8"
       }
+    },
+    "android": {
+      "package": "com.kcyslai.expoonreplit"
+    },
+    "ios": {
+      "bundleIdentifier": "com.kcyslai.expoonreplit"
     }
   }
 }
